@@ -1,0 +1,5 @@
+aiogram
+pydantic
+dotenv
+taskiq
+httpx
