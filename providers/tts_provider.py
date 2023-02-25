@@ -32,7 +32,7 @@ async def remote_tts(voice, text):
   async with httpx.AsyncClient() as client:
     try:
       tts_payload = {"voice": voice, "text": text}
-      response = await client.post(url=f'http://localhost:7077/', json=tts_payload, timeout=None)
+      response = await client.post(url=config.tts_host, json=tts_payload, timeout=None)
       r = response.json()
       if response.status_code == 200:
         response_data = response.json()

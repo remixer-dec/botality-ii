@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     tts_replacements: Dict
     tts_credits: str
     tts_ffmpeg_path: str
+    tts_host: str
     sd_host: str
     sd_max_steps: int
     sd_max_resolution: int
