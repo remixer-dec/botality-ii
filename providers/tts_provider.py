@@ -55,7 +55,12 @@ def save_audio(voice, wav_file):
 
 def tts_convert(wav_path):
   ogg_path = wav_path + '.ogg'
-  subprocess.run([config.tts_ffmpeg_path, '-i', wav_path, '-acodec', 'libopus', '-b:a', '128k', '-vbr', 'off', ogg_path, '-y'])
+  subprocess.run([
+    config.tts_ffmpeg_path, '-i', wav_path, 
+    '-acodec', 'libopus', '-b:a', '128k', '-vbr', 'off', ogg_path, '-y'],
+    stdout=subprocess.DEVNULL,
+    stderr=subprocess.STDOUT
+  )
   with open(ogg_path, 'rb') as f:
     data = f.read()  
   os.remove(wav_path)
