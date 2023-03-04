@@ -24,19 +24,25 @@ request_payload = {
 
 # hash: name
 models = defaultdict(lambda: 'Unknown model')
+embeddings = []
 
 sd_url = config.sd_host or "http://127.0.0.1:7860"
 
 async def refresh_model_list():
-  global models
+  global models, embeddings
   try:
     async with httpx.AsyncClient() as client:
-      response = await client.get(url=f'{sd_url}/sdapi/v1/sd-models',headers={'accept': 'application/json'}, timeout=None)
-      if response.status_code == 200:
-        response_data = response.json()
+      model_response = await client.get(url=f'{sd_url}/sdapi/v1/sd-models',headers={'accept': 'application/json'}, timeout=None)
+      embed_response = await client.get(url=f'{sd_url}/sdapi/v1/embeddings',headers={'accept': 'application/json'}, timeout=None)
+      if model_response.status_code == 200 and embed_response.status_code == 200: 
+        model_response_data = model_response.json()
+        embed_response_data = embed_response.json()
         models = defaultdict(lambda: 'Unknown model')
-        for m in response_data:
+        embeddings = []
+        for m in model_response_data:
           models[m['hash']] = m['model_name']
+        for e in embed_response_data['loaded']:
+          embeddings.append(e)
       else:
         raise Exception('Server error')
   except Exception as e:

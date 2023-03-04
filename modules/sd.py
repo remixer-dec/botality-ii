@@ -2,7 +2,7 @@
 from aiogram import html
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message, BufferedInputFile, InputMediaPhoto, URLInputFile
-from providers.sd_provider import tti, iti
+from providers.sd_provider import tti, iti, models, embeddings
 from utils import tg_image_to_data, parse_photo, CustomArgumentParser, JoinNargsAction
 from custom_queue import UserLimitedQueue
 from typing import Literal
@@ -72,6 +72,17 @@ class StableDiffusionModule:
                 f'Model: {details.get("model")}')
               ) for idx, i in enumerate(data)]
             await message.answer_media_group(media=images, reply_to_message_id=reply_to)
+    
+    @dp.message(Command(commands=["models", "loras", "embeddings"]))
+    async def list_sd_models(message: Message, command: CommandObject):
+      if command.command == "models":
+        return message.answer('<b>Available models:</b> \n' + "\n".join(models.values()))
+      if command.command == "embeddings":
+        return message.answer('<b>Available embeddings:</b> \n' + "\n".join(embeddings))
+      if command.command == "loras":
+        loras = [*config.sd_available_loras, *config.sd_lora_custom_activations.keys()]
+        return message.answer('<b>Available loras:</b> \n' + "\n".join(loras))
+
 
   def parse_input(self, user_input):
       user_input = str(user_input) + ' '
@@ -88,7 +99,7 @@ class StableDiffusionModule:
       try:
         if '-help' in user_input or '—help' in user_input or '-h ' in user_input:
           return (False, parser.format_help().replace(
-            'bot.py','/tti /iti /ttiraw /itiraw, /command@botname params text' 
+            'bot.py','/tti /iti /ttiraw /itiraw, /models /loras /embeddings /command@botname params text' 
           ))
         print(str(shlex.split(user_input)).encode('ascii', 'ignore'))
         args = parser.parse_args(shlex.split(user_input))
