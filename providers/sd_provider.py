@@ -72,7 +72,6 @@ async def tti(override=None):
   payload['cfg_scale'] = random.choice([3,4,5,6]) if default_scale == 0 else default_scale
   if override:
     payload = {**payload, **override}
-    print(payload)
   return await sd_get_images(payload, 'sdapi/v1/txt2img')
 
 
