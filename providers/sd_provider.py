@@ -50,13 +50,24 @@ async def refresh_model_list():
 
 def b642img(base64_image):
   return base64.b64decode(base64_image)
-  
+
+async def switch_model(name):
+  async with httpx.AsyncClient() as client:
+    try:
+      payload = {'sd_model_checkpoint': name}
+      response = await client.post(url=f'{sd_url}/sdapi/v1/options', json=payload, timeout=None)
+      if response.status_code == 200:
+        return True
+    except Exception:
+      return False
+  return False
+
+
 
 async def sd_get_images(payload, endpoint):
   async with httpx.AsyncClient() as client:
     try:
       response = await client.post(url=f'{sd_url}/{endpoint}', json=payload, timeout=None)
-      r = response.json()
       if response.status_code == 200:
         response_data = response.json()
         images = response_data.get("images")

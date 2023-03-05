@@ -2,7 +2,7 @@
 from aiogram import html
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message, BufferedInputFile, InputMediaPhoto, URLInputFile
-from providers.sd_provider import tti, iti, models, embeddings
+from providers.sd_provider import tti, iti, models, embeddings, switch_model
 from utils import tg_image_to_data, parse_photo, CustomArgumentParser, JoinNargsAction
 from custom_queue import UserLimitedQueue
 from typing import Literal
@@ -83,6 +83,21 @@ class StableDiffusionModule:
         loras = [*config.sd_available_loras, *config.sd_lora_custom_activations.keys()]
         return message.answer('<b>Available loras:</b> \n' + "\n".join(loras))
 
+    @dp.message(Command(commands=["model", "changemodel", "switchmodel"]), flags={"cooldown": 30})
+    async def switch_sd_model(message: Message, command: CommandObject):
+      async with self.semaphore:
+        if command.args in models.values():
+          success = await switch_model(command.args)
+          if success:
+            return message.answer(f'<b>Model changed to:</b> {command.args}')
+          else:
+            return message.answer(f'<b>Unable to change the model.</b>')
+        else:
+          if not command.args:
+            return message.answer('use this command with model name to change the model, try /models for all model names')
+          return message.answer(f'<b>Model not found</b>')
+
+
 
   def parse_input(self, user_input):
       user_input = str(user_input) + ' '
@@ -120,7 +135,6 @@ class StableDiffusionModule:
     if 'lora' in prompt:
       return prompt
     seamless_loras = config.sd_lora_custom_activations or {}
-    print(seamless_loras)
     for key in seamless_loras:
       if type(seamless_loras[key]) is list:
         prompt = prompt.replace(key, random.choice(seamless_loras[key]))\

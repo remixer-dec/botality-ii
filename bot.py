@@ -5,7 +5,7 @@ from aiogram import Bot, Dispatcher, types, html
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message
 from config_reader import config
-from middleware import ChatActionMiddleware, AccessMiddleware
+from middleware import ChatActionMiddleware, AccessMiddleware, CooldownMiddleware
 from taskiq import InMemoryBroker
 
 from modules.sd import StableDiffusionModule
@@ -19,6 +19,8 @@ broker = InMemoryBroker()
 dp = Dispatcher()
 dp.message.middleware(AccessMiddleware())
 dp.message.middleware(ChatActionMiddleware())
+dp.message.middleware(CooldownMiddleware())
+
 
 bot = None
                     
