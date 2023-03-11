@@ -1,6 +1,8 @@
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message
 from utils import parse_photo
+import logging
+logger = logging.getLogger(__name__)
 
 
 class AdminModule:

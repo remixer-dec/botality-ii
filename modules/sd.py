@@ -81,7 +81,14 @@ class StableDiffusionModule:
         loras = [*config.sd_available_loras, *config.sd_lora_custom_activations.keys()]
         return message.answer('<b>Available loras:</b> \n' + "\n".join(loras))
 
-    @dp.message(Command(commands=["model", "changemodel", "switchmodel"]), flags={"cooldown": 30})
+    @dp.message(
+      Command(commands=["model", "changemodel", "switchmodel"]), 
+      flags={
+        "cooldown": 30, 
+        "admins_only": config.sd_only_admins_can_change_models, 
+        "long_operation":"choose_sticker"
+      }
+    )
     async def switch_sd_model(message: Message, command: CommandObject):
       async with self.semaphore:
         if command.args in models.values():
