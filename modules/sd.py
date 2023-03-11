@@ -29,7 +29,7 @@ class SDArguments(pydantic.BaseModel):
 
 class StableDiffusionModule:
   def __init__(self, dp, bot, broker):
-    self.queue = UserLimitedQueue(5)
+    self.queue = UserLimitedQueue(config.sd_queue_size_per_user)
     self.semaphore = asyncio.Semaphore(1)
 
     @dp.message(Command(commands=["tti", "iti", "ttiraw", "itiraw"]), flags={"long_operation": "upload_photo"})

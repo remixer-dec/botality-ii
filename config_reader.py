@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     tts_replacements: Dict
     tts_credits: str
     tts_ffmpeg_path: str
+    tts_queue_size_per_user: int
     tts_host: str
     sd_host: str
     sd_max_steps: int
@@ -33,6 +34,7 @@ class Settings(BaseSettings):
     sd_available_loras: List[str]
     sd_lora_custom_activations: Dict
     sd_only_admins_can_change_models: bool
+    sd_queue_size_per_user: int
     
     @validator('sd_max_resolution', 'sd_default_width', 'sd_default_height')
     def resolution_in_correct_ranges(cls, v):

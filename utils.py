@@ -11,12 +11,13 @@ async def tg_image_to_data(photo, bot):
 
 # do not sysexit on error
 class CustomArgumentParser(argparse.ArgumentParser):
-    def error(self, message):
-       raise Exception(message)
+  def error(self, message):
+    raise Exception(message)
+
 # join the rest of the arguments, so they can be validated
 class JoinNargsAction(argparse.Action):
-    def __call__(self, parser, namespace, values, option_string=None):
-        setattr(namespace, self.dest, ' '.join(values))
+  def __call__(self, parser, namespace, values, option_string=None):
+    setattr(namespace, self.dest, ' '.join(values))
 
 
 def parse_photo(message):

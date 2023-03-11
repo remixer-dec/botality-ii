@@ -7,7 +7,7 @@ import asyncio
 
 class TextToSpeechModule:
   def __init__(self, dp, bot, broker):
-    self.queue = UserLimitedQueue(2)
+    self.queue = UserLimitedQueue(config.tts_queue_size_per_user)
     self.semaphore = asyncio.Semaphore(1)
     
     @dp.message(Command(commands=["tts", *config.tts_voices]), flags={"long_operation": "record_audio"})
