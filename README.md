@@ -1,4 +1,4 @@
-## Multibot  
+## Botality II  
   
 This project is an implementation of a modular **telegram bot** based on [aiogram](https://github.com/aiogram/aiogram), designed for remote and local ML Inference. Currently integrated with **Stable Diffusion** (using [stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) API), and **VITS** text-to-speech engine (using [TTS](https://github.com/coqui-ai/TTS)).  
 
