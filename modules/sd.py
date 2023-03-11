@@ -4,7 +4,7 @@ from aiogram.filters import Command, CommandObject
 from aiogram.types import Message, BufferedInputFile, InputMediaPhoto, URLInputFile
 from providers.sd_provider import tti, iti, models, embeddings, switch_model
 from utils import tg_image_to_data, parse_photo, CustomArgumentParser, JoinNargsAction
-from custom_queue import UserLimitedQueue
+from custom_queue import UserLimitedQueue, semaphore_wrapper
 from typing import Literal
 from config_reader import config
 import asyncio
@@ -36,42 +36,40 @@ class StableDiffusionModule:
     async def command_sd_handler(message: Message, command: CommandObject) -> None:
       with self.queue.for_user(message.from_user.id) as available:
         if available:
-          async with self.semaphore:
-            params_parsed, params = self.parse_input(command.args)
-            if not params_parsed:
-              return await message.answer(f"{html.quote(params)}")
-            prompt = params['prompt']
-            if not command.command.endswith('raw'):
-              params = self.apply_standard_prompt_modifiers(params)
-            processor = tti
-            photo = parse_photo(message)
+          params_parsed, params = self.parse_input(command.args)
+          if not params_parsed:
+            return await message.answer(f"{html.quote(params)}")
+          prompt = params['prompt']
+          if not command.command.endswith('raw'):
+            params = self.apply_standard_prompt_modifiers(params)
+          processor = tti
+          photo = parse_photo(message)
 
-            if command.command.startswith("iti") and photo:
-              image_data = await tg_image_to_data(photo, bot)
-              params['init_images'] = [image_data]
-              processor = iti
-            elif command.command.startswith("iti"):
-              return await message.answer(f"Error, <b>unable to find initial photo</b>")
-
-            task = await broker.task(processor).kiq(params)
-            result = await task.wait_result(timeout=240)
-            completed, data, details = result.return_value
-            reply_to = message.reply_to_message.message_id if message.reply_to_message is not None else None
-            
-            if not completed:
-              return await message.answer(f"Error, <b>{data}</b>")
-            else:
-              images = [InputMediaPhoto(
-                type='photo', 
-                media=BufferedInputFile(i, filename='image.png'), 
-                caption= None if idx != 0 else (f'<pre>{html.quote(prompt[0:768])}</pre>\n' + 
-                f'Seed: {details.get("seed")}\n' +
-                f'Sampler: {details.get("sampler_name")}\n' +
-                f'Cfg scale: {details.get("cfg_scale")}\n' + 
-                f'Steps: {details.get("steps")}\n' +
-                f'Model: {details.get("model")}')
-              ) for idx, i in enumerate(data)]
-            await message.answer_media_group(media=images, reply_to_message_id=reply_to)
+          if command.command.startswith("iti") and photo:
+            image_data = await tg_image_to_data(photo, bot)
+            params['init_images'] = [image_data]
+            processor = iti
+          elif command.command.startswith("iti"):
+            return await message.answer(f"Error, <b>unable to find initial photo</b>")
+          task = await broker.task(semaphore_wrapper(self.semaphore, processor)).kiq(params)
+          result = await task.wait_result(timeout=240)
+          completed, data, details = result.return_value
+          reply_to = message.reply_to_message.message_id if message.reply_to_message is not None else None
+          
+          if not completed:
+            return await message.answer(f"Error, <b>{data}</b>")
+          else:
+            images = [InputMediaPhoto(
+              type='photo', 
+              media=BufferedInputFile(i, filename='image.png'), 
+              caption= None if idx != 0 else (f'<pre>{html.quote(prompt[0:768])}</pre>\n' + 
+              f'Seed: {details.get("seed")}\n' +
+              f'Sampler: {details.get("sampler_name")}\n' +
+              f'Cfg scale: {details.get("cfg_scale")}\n' + 
+              f'Steps: {details.get("steps")}\n' +
+              f'Model: {details.get("model")}')
+            ) for idx, i in enumerate(data)]
+          await message.answer_media_group(media=images, reply_to_message_id=reply_to)
     
     @dp.message(Command(commands=["models", "loras", "embeddings"]))
     async def list_sd_models(message: Message, command: CommandObject):

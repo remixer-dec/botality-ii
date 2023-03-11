@@ -30,3 +30,10 @@ class CallCooldown:
         return False
     cls.calls[key] = time.time()
     return True
+
+def semaphore_wrapper(semaphore, callback):
+  async def wrapped(*args, **kwargs):
+    async with semaphore:
+      return await callback(*args, **kwargs)
+  return wrapped
+    
