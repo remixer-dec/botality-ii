@@ -1,5 +1,5 @@
 
-from aiogram import html
+from aiogram import html, F
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message, BufferedInputFile, InputMediaPhoto, URLInputFile
 from providers.sd_provider import tti, iti, models, embeddings, switch_model
@@ -24,7 +24,9 @@ class SDArguments(pydantic.BaseModel):
   height: Literal[tuple(sd_available_resolutions)] = pydantic.Field(None, alias="he", description='Height')
   negative_prompt: str = pydantic.Field(None, alias='np', description='Negative prompt')
   seed: int = pydantic.Field(None, ge=-1, alias='se', description='Seed')
-  prompt: str =  pydantic.Field(None)
+  prompt: str = pydantic.Field(None)
+  mask: Literal[1, -1] = pydantic.Field(None, alias='ma', description='Inpaint mask')
+  inpainting_fill: int = pydantic.Field(None, ge=0, le=3, alias='fi', description='Inpaint fill mode')
 
 
 class StableDiffusionModule:
@@ -33,7 +35,7 @@ class StableDiffusionModule:
     self.semaphore = asyncio.Semaphore(1)
 
     @dp.message(Command(commands=["tti", "iti", "ttiraw", "itiraw"]), flags={"long_operation": "upload_photo"})
-    async def command_sd_handler(message: Message, command: CommandObject) -> None:
+    async def command_sd_handler(message: Message, command: CommandObject, album=False) -> None:
       with self.queue.for_user(message.from_user.id) as available:
         if available:
           params_parsed, params = self.parse_input(command.args)
@@ -48,6 +50,10 @@ class StableDiffusionModule:
           if command.command.startswith("iti") and photo:
             image_data = await tg_image_to_data(photo, bot)
             params['init_images'] = [image_data]
+            if 'mask' in params and album and len(album) > 1:
+              if params['mask'] == -1:
+                params['inpainting_mask_invert'] = 1
+              params['mask'] = await tg_image_to_data(parse_photo(album[1]), bot)
             processor = iti
           elif command.command.startswith("iti"):
             return await message.answer(f"Error, <b>unable to find initial photo</b>")
@@ -70,7 +76,11 @@ class StableDiffusionModule:
               f'Model: {details.get("model")}')
             ) for idx, i in enumerate(data)]
           await message.answer_media_group(media=images, reply_to_message_id=reply_to)
-    
+
+    @dp.message(F.media_group_id)
+    async def handle_media_groups(*args, **kwargs):
+      return
+
     @dp.message(Command(commands=["models", "loras", "embeddings"]))
     async def list_sd_models(message: Message, command: CommandObject):
       if command.command == "models":
@@ -114,6 +124,8 @@ class StableDiffusionModule:
       parser.add_argument('-se', type=int, help='Seed')
       parser.add_argument('-wi', type=int, help='Image width')
       parser.add_argument('-he', type=int, help='Image height')
+      parser.add_argument('-ma', type=int, help='Use the 2nd image as inpaint regular/inverse mask (1 or -1)')
+      parser.add_argument('-fi', type=int, help='Inpaint mask fill mode [0 <= fi <= 3], fill/original/l.noise/l.nothing')
       parser.add_argument('-np', type=str, help='Negative prompt')
       parser.add_argument('prompt', type=str, help='prompt', nargs="*", action=JoinNargsAction)
       try:

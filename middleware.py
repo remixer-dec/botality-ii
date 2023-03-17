@@ -4,6 +4,8 @@ from aiogram import BaseMiddleware
 from aiogram.types import Message
 from config_reader import config
 from custom_queue import CallCooldown
+from collections import defaultdict
+import asyncio
 import logging
 logger = logging.getLogger(__name__)
 
@@ -43,4 +45,22 @@ class CooldownMiddleware(BaseMiddleware):
       else:
         return
     else:
+      return await handler(event, data)
+
+class MediaGroupMiddleware(BaseMiddleware):
+    albums = defaultdict(lambda: [])
+  
+    def __init__(self, delay =  1):
+      self.delay = delay
+
+    async def __call__(self, handler, event, data):
+      if not event.media_group_id:
+        return await handler(event, data)
+
+      try:
+        self.albums[event.media_group_id].append(event)
+        await asyncio.sleep(self.delay)
+        data["album"] = self.albums.pop(event.media_group_id)
+      except Exception as e:
+        logger.error(e)
       return await handler(event, data)
