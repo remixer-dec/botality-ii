@@ -42,6 +42,17 @@ class Settings(BaseSettings):
             raise ValueError('incorrect value')
         return v
     
+    @validator('sd_lora_custom_activations')
+    def no_lora_conflicts(cls, v, values):
+        for key in v:
+            try:
+                assert key not in values['sd_available_loras']
+            except AssertionError as e:
+                e.args += ('Custom activation loras should not be listed with the same name as regular loras',)
+                raise
+
+        return v
+    
     class Config:
         env_file = '.env'
         env_file_encoding = 'utf-8'

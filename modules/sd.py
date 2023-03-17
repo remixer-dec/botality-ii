@@ -111,7 +111,7 @@ class StableDiffusionModule:
       parser.add_argument('-c', type=float, help='Cfg scale (1 <= c <= 25)')
       parser.add_argument('-sa', choices=['Euler a', 'Euler', 'Heun', 'DPM++ 2M', 'DPM++ 2S a'], help='Sampler')
       parser.add_argument('-st', type=int, help=f'Number of steps (5 <= st <= {config.sd_max_steps})')
-      parser.add_argument('-sd', type=int, help='Seed')
+      parser.add_argument('-se', type=int, help='Seed')
       parser.add_argument('-wi', type=int, help='Image width')
       parser.add_argument('-he', type=int, help='Image height')
       parser.add_argument('-np', type=str, help='Negative prompt')
