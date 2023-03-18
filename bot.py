@@ -11,6 +11,7 @@ from taskiq import InMemoryBroker
 from modules.sd import StableDiffusionModule
 from modules.tts import TextToSpeechModule
 from modules.admin import AdminModule
+from modules.llm import LargeLanguageModel
 
 
 logger = logging.getLogger(__name__)
@@ -29,7 +30,8 @@ def initialize(dp, bot):
     available_modules = {
         "sd": StableDiffusionModule,
         "tts": TextToSpeechModule,
-        "admin": AdminModule
+        "admin": AdminModule,
+        "llm": LargeLanguageModel
     }
     for module in config.active_modules:
         if module in available_modules:

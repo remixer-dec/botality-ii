@@ -35,6 +35,13 @@ class Settings(BaseSettings):
     sd_lora_custom_activations: Dict
     sd_only_admins_can_change_models: bool
     sd_queue_size_per_user: int
+    llm_queue_size_per_user: int
+    llm_active_model_name: Literal["gpt2","gpt-j","llama_pt_provider"]
+    llm_path: str
+    llm_chronicler: str
+    llm_history_grouping: Literal["user", "chat"]
+    llm_max_history_items: int
+    llm_generation_cfg_override: Dict
     
     @validator('sd_max_resolution', 'sd_default_width', 'sd_default_height')
     def resolution_in_correct_ranges(cls, v):
