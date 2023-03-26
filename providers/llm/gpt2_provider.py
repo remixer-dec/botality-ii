@@ -1,5 +1,6 @@
-import numpy as np
 import torch
+from concurrent.futures import ThreadPoolExecutor
+import asyncio
 
 tokenizer = None
 model = None
@@ -21,12 +22,14 @@ def tokenize(prompt):
   return encoded_prompt[:, :1024]
 
 
-def generate(encoded_prompt, length=64, model_params={}):
-  output_sequences = model.generate(
+async def generate(prompt, length=64, model_params={}):
+  encoded_prompt = tokenize(prompt)
+  with ThreadPoolExecutor():
+    output_sequences = await asyncio.to_thread(model.generate, 
       input_ids=encoded_prompt,
       max_length=length + len(encoded_prompt[0]),
       do_sample=True,
       num_return_sequences=1,
       **model_params
-  )
+    )
   return tokenizer.decode(output_sequences[0])

@@ -16,16 +16,19 @@ class LargeLanguageModel:
     
     @dp.message((F.text[0] if F.text else '') != '/', flags={"long_operation": "typing"})
     async def handle_messages(message: Message):
-      chat_id = message.from_user.id if config.llm_history_grouping == 'user' else message.chat.id
-      text = chatter.prepare({
-        "message": message.text, 
-        "author": message.from_user.full_name.replace(' ', '') or 'User',
-        "chat_id": chat_id
-      })
-      tokenized = active_model.tokenize(text)
-      output = active_model.generate(tokenized, 64, chatter.cfg(config.llm_generation_cfg_override))
-      parsed_output = chatter.parse(output, chat_id, len(text))
-      await message.reply(text=html.quote(parsed_output))
+      with self.queue.for_user(message.from_user.id) as available:
+        if available:
+          chat_id = message.from_user.id if config.llm_history_grouping == 'user' else message.chat.id
+          text = chatter.prepare({
+            "message": message.text, 
+            "author": message.from_user.full_name.replace(' ', '') or 'User',
+            "chat_id": chat_id
+          })
+          task = await broker.task(semaphore_wrapper(self.semaphore, active_model.generate))\
+                             .kiq(text, 64, chatter.cfg(config.llm_generation_cfg_override))
+          result = await task.wait_result(timeout=900)
+          parsed_output = chatter.parse(result.return_value, chat_id, len(text))
+          await message.reply(text=html.quote(parsed_output))
 
     @dp.message(Command(commands=['reset']))
     async def clear_llm_history(message: Message, command: Command):
