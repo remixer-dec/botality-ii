@@ -8,11 +8,12 @@ model = None
 device = torch.device("cpu")
 
 
-def init(model_path):
+def init(model_paths):
   global tokenizer, model
   from transformers import AutoTokenizer, GPTJForCausalLM
-  tokenizer = AutoTokenizer.from_pretrained(model_path)
-  model = GPTJForCausalLM.from_pretrained(model_path, revision="float16", torch_dtype=torch.float32, low_cpu_mem_usage=True)
+  weights = model_paths['path_to_gptj_weights']
+  tokenizer = AutoTokenizer.from_pretrained(weights)
+  model = GPTJForCausalLM.from_pretrained(weights, revision="float16", torch_dtype=torch.float32, low_cpu_mem_usage=True)
   model = model.to(device)
 
 def tokenize(prompt):

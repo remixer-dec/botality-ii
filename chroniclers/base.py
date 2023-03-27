@@ -27,7 +27,7 @@ class ConversationChronicler(AbstractChronicler):
       self.history = []
     history = self.history[details['chat_id']]
     history.append({"message": details['message'], "author": details['author']})
-    if len(history) > self.max_length:
+    while len(history) >= self.max_length:
       history.pop(0)
     conversation = ''
     for item in history:
@@ -36,6 +36,7 @@ class ConversationChronicler(AbstractChronicler):
     dialog = '''{intro}
 {personality}
 
+{pre_dialog}
 {conversation}{name}:'''.format(conversation=conversation, **fresh_vars)
     return dialog
 

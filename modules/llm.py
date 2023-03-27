@@ -11,7 +11,7 @@ class LargeLanguageModel:
   def __init__(self, dp, bot, broker):
     self.queue = UserLimitedQueue(config.llm_queue_size_per_user)
     self.semaphore = asyncio.Semaphore(1)
-    active_model.init(config.llm_path)
+    active_model.init(config.llm_paths)
     chatter = ConversationChronicler(config.llm_chronicler, False, config.llm_max_history_items)
     
     @dp.message((F.text[0] if F.text else '') != '/', flags={"long_operation": "typing"})

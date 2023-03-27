@@ -6,13 +6,13 @@ tokenizer = None
 model = None
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-def init(model_path):
+def init(model_paths):
   global model, tokenizer
   from transformers import (GPT2LMHeadModel, GPT2Tokenizer)
-  model_type = 'gpt2'
+  weights = model_paths['path_to_gpt2_weights']
   model_class, tokenizer_class = GPT2LMHeadModel, GPT2Tokenizer
-  tokenizer = tokenizer_class.from_pretrained(model_path)
-  model = model_class.from_pretrained(model_path)
+  tokenizer = tokenizer_class.from_pretrained(weights)
+  model = model_class.from_pretrained(weights)
   model = model.to(device)
 
 

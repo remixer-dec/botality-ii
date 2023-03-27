@@ -5,7 +5,7 @@ def get_chat_variables(context=None):
     context['author'] if context else ''
   )
   name = 'Я'
-  return {"intro": intro, "personality": personality, 'name': name}
+  return {"intro": intro, "personality": personality, 'name': name, 'pre_dialog': ''}
 
 def get_generation_config(override={}):
   return {
