@@ -48,6 +48,8 @@ class LargeLanguageModel:
       if msg:
         with self.queue.for_user(message.from_user.id) as available:
           if available:
+            if not (hasattr(active_model, 'submodel') and active_model.submodel):
+              return await message.reply(text='Assistant model is not available')
             text = assistant.prepare({
               "message": msg, 
               "author": message.from_user.first_name.replace(' ', '') or 'User',

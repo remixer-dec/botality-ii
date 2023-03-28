@@ -1,4 +1,4 @@
-import numpy as np
+import os
 import torch
 from torch import mps
 import asyncio
@@ -28,7 +28,7 @@ def init(model_paths):
     torch_dtype=torch.float16 if device is not torch.device('cpu') else torch.float32,
     device_map={"": device}
   )
-  if 'path_to_alpaca_lora' in model_paths:
+  if 'path_to_alpaca_lora' in model_paths and os.path.exists(model_paths['path_to_alpaca_lora']):
     from peft import PeftModel
     submodel = PeftModel.from_pretrained(
       model,
