@@ -31,5 +31,4 @@ async def generate(prompt, max_gen_len=64, params={}):
     results = await asyncio.to_thread(generator.generate,
       [prompt], max_gen_len=max_gen_len, **params
     )
-  print(prompt)
   return results[0]

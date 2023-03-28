@@ -9,7 +9,7 @@ def get_chat_variables(context=None):
 
 def get_generation_config(override={}):
   return {
-    "temperature": 1.0,
+    "temperature": 0.85,
     "top_k": 50,
     "top_p": 0.92,
     "repetition_penalty": 1.01,

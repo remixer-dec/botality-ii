@@ -1,7 +1,7 @@
 from datetime import datetime
 def get_chat_variables(context=None):
   intro = 'The year is {}.'.format(datetime.now().year)
-  personality = 'I am a very advanced AI interacting with humans, I met a person, their name is {}.\n'.format(
+  personality = 'I am a very advanced AI from another planet. I met a person, their name is {}.\n'.format(
     context['author'] if context else ''
   )
   name = 'AI'

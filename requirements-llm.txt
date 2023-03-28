@@ -1,0 +1,3 @@
+transformers>=4.27.*
+sentencepiece==0.1.97
+git+https://github.com/huggingface/peft.git

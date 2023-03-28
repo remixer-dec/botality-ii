@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     blacklist: List[int]
     ignore_mode: Literal["blacklist", "whitelist", "both"]
     active_modules: List[str]
+    apply_mps_fixes: bool
     tts_path: str
     tts_voices: List[str]
     tts_mode: Literal["local", "localhttp", "remote"]
@@ -36,12 +37,14 @@ class Settings(BaseSettings):
     sd_only_admins_can_change_models: bool
     sd_queue_size_per_user: int
     llm_queue_size_per_user: int
-    llm_active_model_name: Literal["gpt2","gptj","llama_orig"]
+    llm_active_model_name: Literal["gpt2","gptj","llama_orig", "llama_hf"]
     llm_paths: Dict
-    llm_chronicler: str
+    llm_character: str
     llm_history_grouping: Literal["user", "chat"]
     llm_max_history_items: int
     llm_generation_cfg_override: Dict
+    llm_assistant_cfg_override: Dict
+    llm_assistant_use_in_chat_mode: bool
     
     @validator('sd_max_resolution', 'sd_default_width', 'sd_default_height')
     def resolution_in_correct_ranges(cls, v):
@@ -57,7 +60,6 @@ class Settings(BaseSettings):
             except AssertionError as e:
                 e.args += ('Custom activation loras should not be listed with the same name as regular loras',)
                 raise
-
         return v
     
     class Config:
