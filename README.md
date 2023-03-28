@@ -47,9 +47,9 @@ python3.10+ is recommended, due to aiogram compatibility
 
 ### LLM Setup
 - Download weights (and code if needed) for a specific large language model
-- in .env file set:  
+- in .env file, make sure that `"llm"` is in `active_modules`, then set:  
 `llm_paths` - change the path(s) of model(s) that you downloaded  
-`llm_active_model_name` = model type that you want to use, it can be `gpt2`,`gptj`,`llama_orig`  
+`llm_active_model_name` = model type that you want to use, it can be `gpt2`,`gptj`,`llama_orig`, `llama_hf`  
 `llm_character` = a character of your choice, from `characters` directory, for example `characters.gptj_6B_default`, character files also have model configuration options optimal to specific model, feel free to change the character files and use with other models.  
 `llm_history_grouping` = `user` to store history with each user separately or `chat` to store group chat history with all users in that chat  
 `llm_assistant_use_in_chat_mode` = `True`/`False` when False, use /ask command to use alpaca-lora in assistant mode, when True, all messages are treated as questions.
