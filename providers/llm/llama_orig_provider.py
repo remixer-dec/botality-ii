@@ -7,7 +7,7 @@ import asyncio
 generator = None
 #python3.10 -m torch.distributed.launch --use_env bot.py
 
-def init(model_paths):
+def init(model_paths, init_config={}):
   global generator
   llama_weights = model_paths['path_to_llama_weights']
   llama_tokenizer = model_paths['path_to_llama_tokenizer']
@@ -22,7 +22,7 @@ def init(model_paths):
 def tokenize(prompt):
   return prompt
 
-async def generate(prompt, max_gen_len=64, params={}):
+async def generate(prompt, max_gen_len=64, params={}, assist=False):
   if 'top_k' in params:
     del params['top_k']
   if 'repetition_penalty' in params:

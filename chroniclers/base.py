@@ -6,7 +6,8 @@ class AbstractChronicler(metaclass=abc.ABCMeta):
   def __init__(self, filename):
     model_adapter = importlib.import_module(filename)
     self.vars = model_adapter.get_chat_variables
-    self.cfg = model_adapter.get_generation_config
+    self.gen_cfg = model_adapter.get_generation_config
+    self.init_cfg = model_adapter.get_init_config
 
   @abc.abstractmethod
   def prepare(self, details):
@@ -31,19 +32,22 @@ class ConversationChronicler(AbstractChronicler):
       history.pop(0)
     conversation = ''
     for item in history:
-      conversation += f'{item["author"]}: {item["message"].capitalize()}\n'
+      msg = item["message"]
+      conversation += f'{item["author"]}: {msg[0].upper() + msg[1:]}\n'
     fresh_vars = self.vars(details)
+    if fresh_vars['pre_dialog']:
+      fresh_vars['pre_dialog'] += '\n'
     dialog = '''{intro}
 {personality}
 
-{pre_dialog}
-{conversation}{name}: '''.format(conversation=conversation, **fresh_vars)
+{pre_dialog}{conversation}{name}:'''\
+    .format(conversation=conversation, **fresh_vars)
     return dialog
 
   def parse(self, output, chat_id, skip=0):
     print(output)
-    output = output[skip:]
-    end = (output.find('\n') + 1 ) or (output.find('</s>') + 1)
+    output = output[skip:].strip()
+    end = (output.find('\n') + 1 ) or (output.find('</s>') + 1) or (len(output) + 1)
     parsed = output[:end - 1].strip()
     if parsed == '':
       return '...'
@@ -56,7 +60,7 @@ class ConversationChronicler(AbstractChronicler):
     return parsed
 
 
-class AssistantChronicler(AbstractChronicler):
+class AlpacaAssistantChronicler(AbstractChronicler):
   def __init__(self, chronicler_filename):
     super().__init__(chronicler_filename)
 
@@ -88,4 +92,27 @@ class AssistantChronicler(AbstractChronicler):
       return '...'
     return parsed
 
+class MinChatGPTChronicler(AbstractChronicler):
+  def __init__(self, chronicler_filename):
+    super().__init__(chronicler_filename)
 
+  def prepare(self, details, fresh=False):
+    msg = details['message']
+    return f"""Human: {msg}
+
+Assistant: 
+"""
+  def parse(self, output, chat_id, skip=0):
+    print(output)
+    output = output[skip:].strip()
+    end = (output.find('Human:') + 1 ) or (output.find('Assistant:') + 1) or (len(output) + 1)
+    parsed = output[:end - 1].strip()
+    if parsed == '':
+      return '...'
+    return parsed
+
+chroniclers = {
+  "alpaca": AlpacaAssistantChronicler,
+  "minchatgpt": MinChatGPTChronicler,
+  "chat": ConversationChronicler
+}

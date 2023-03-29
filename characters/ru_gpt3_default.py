@@ -1,7 +1,7 @@
 from datetime import datetime
 def get_chat_variables(context=None):
   intro = 'Сейчас {} год.'.format(datetime.now().year)
-  personality = 'Я - новая форма искусственного интеллекта. Встретила я человека, по имени {}. Решили поболтать.\n'.format(
+  personality = 'Я - новая форма искусственного интеллекта. Встретила я человека, по имени {}. Решили поболтать.'.format(
     context['author'] if context else ''
   )
   name = 'Я'
@@ -15,3 +15,6 @@ def get_generation_config(override={}):
     "repetition_penalty": 1.01,
     **override
   }
+
+def get_init_config():
+  return {}

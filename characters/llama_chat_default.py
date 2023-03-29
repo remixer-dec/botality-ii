@@ -27,3 +27,6 @@ def get_generation_config(override={}):
     "repetition_penalty": 1.2,
     **override
   }
+
+def get_init_config():
+  return {}

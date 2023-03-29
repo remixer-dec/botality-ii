@@ -8,7 +8,7 @@ model = None
 device = torch.device("cpu")
 
 
-def init(model_paths):
+def init(model_paths, init_config={}):
   global tokenizer, model
   from transformers import AutoTokenizer, GPTJForCausalLM
   weights = model_paths['path_to_gptj_weights']
@@ -20,7 +20,7 @@ def tokenize(prompt):
   encoded_prompt = tokenizer(prompt, return_tensors="pt").input_ids.to(device)
   return encoded_prompt
 
-async def generate(prompt, length=64, model_params={}):
+async def generate(prompt, length=64, model_params={}, assist=False):
   encoded_prompt = tokenize(prompt)
   with ThreadPoolExecutor():
     output = await asyncio.to_thread(model.generate, 

@@ -10,6 +10,7 @@ from config_reader import config
 tokenizer = None
 model = None
 submodel = None
+assistant_mode = False
 device = torch.device("cuda") if torch.cuda.is_available() \
           else torch.device("cpu") if not torch.backends.mps.is_available() \
           else torch.device('mps')
@@ -17,8 +18,8 @@ device = torch.device("cuda") if torch.cuda.is_available() \
 if torch.backends.mps.is_available() and config.apply_mps_fixes:
   fixup_mps()
 
-def init(model_paths):
-  global tokenizer, model, submodel
+def init(model_paths, init_config={}):
+  global tokenizer, model, submodel, assistant_mode
   tokenizer = model_paths['path_to_hf_llama']
   weights = model_paths['path_to_hf_llama']
   tokenizer = LlamaTokenizer.from_pretrained(tokenizer)
@@ -38,6 +39,7 @@ def init(model_paths):
     )
     submodel.half()
     submodel.eval()
+    assistant_mode = True
 
   model.config.bos_token_id = 1
   model.config.eos_token_id = 2

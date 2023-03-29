@@ -3,7 +3,7 @@
 This project is an implementation of a modular **telegram bot** based on [aiogram](https://github.com/aiogram/aiogram), designed for remote and local ML Inference. Currently integrated with:
 -  **Stable Diffusion** (using [stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) API),
 -  **VITS** text-to-speech engine (using [TTS](https://github.com/coqui-ai/TTS)).  
--  **LLMs** such as **[llama](https://github.com/facebookresearch/llama)**, **[gpt-j-6b](https://github.com/kingoflolz/mesh-transformer-jax#gpt-j-6b)**, **[gpt-2](https://huggingface.co/gpt2)** with support for assistant mode via [alpaca-lora](https://github.com/tloen/alpaca-lora)  
+-  **LLMs** such as **[llama](https://github.com/facebookresearch/llama)**, **[gpt-j-6b](https://github.com/kingoflolz/mesh-transformer-jax#gpt-j-6b)**, **[gpt-2](https://huggingface.co/gpt2)** with support for assistant mode via [alpaca-lora](https://github.com/tloen/alpaca-lora) and via [minChatGPT](https://github.com/ethanyanjiali/minChatGPT)
   
 evolved from predecessor [Botality I](https://github.com/remixer-dec/ru-gpt3-telegram-bot)  
 
@@ -41,7 +41,7 @@ python3.10+ is recommended, due to aiogram compatibility
 
 - [original llama](https://github.com/facebookresearch/llama/blob/main/example.py) (7b version was tested on [llama-mps fork](https://github.com/remixer-dec/llama-mps) for macs), requires running the bot with `python3.10 -m torch.distributed.launch --use_env bot.py`
 - [hf llama](https://huggingface.co/decapoda-research/llama-7b-hf/tree/main) by decapoda-research (outputs are way worse than original llama on mac) + [alpaca-lora](https://github.com/tloen/alpaca-lora) (outputs are ok)
-- [gpt-2](https://huggingface.co/gpt2) (tested on [ru-gpt3](https://github.com/ai-forever/ru-gpts))
+- [gpt-2](https://huggingface.co/gpt2) (tested on [ru-gpt3](https://github.com/ai-forever/ru-gpts)), nanoGPT (tested on [minChatGPT](https://github.com/ethanyanjiali/minChatGPT))
 
 - [gpt-j](https://github.com/kingoflolz/mesh-transformer-jax#gpt-j-6b) (tested on a custom model)
 
@@ -49,8 +49,9 @@ python3.10+ is recommended, due to aiogram compatibility
 - Download weights (and code if needed) for a specific large language model
 - in .env file, make sure that `"llm"` is in `active_modules`, then set:  
 `llm_paths` - change the path(s) of model(s) that you downloaded  
-`llm_active_model_name` = model type that you want to use, it can be `gpt2`,`gptj`,`llama_orig`, `llama_hf`  
+`llm_active_model_type` = model type that you want to use, it can be `gpt2`,`gptj`,`llama_orig`, `llama_hf`  
 `llm_character` = a character of your choice, from `characters` directory, for example `characters.gptj_6B_default`, character files also have model configuration options optimal to specific model, feel free to change the character files and use with other models.  
+`llm_assistant_chronicler` = a input/output formatter/parser for assistant task, can be `alpaca` or `minchatgpt`  
 `llm_history_grouping` = `user` to store history with each user separately or `chat` to store group chat history with all users in that chat  
 `llm_assistant_use_in_chat_mode` = `True`/`False` when False, use /ask command to use alpaca-lora in assistant mode, when True, all messages are treated as questions.
   

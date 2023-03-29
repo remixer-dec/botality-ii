@@ -7,14 +7,16 @@ def get_chat_variables(context=None):
   name = 'AI'
   return {"intro": intro, "personality": personality, 'name': name, 'pre_dialog': ''}
 
+
 def get_generation_config(override={}):
   return {
-    "temperature": 0.8,
-    "top_k": 40,
-    "top_p": 1,
-    "repetition_penalty": 1.01,
+    "temperature": 0.9,
+    "top_k": 200,
     **override
   }
 
 def get_init_config():
-  return {}
+  return {
+    "use_tiktoken": True,
+    "nanogpt": True
+  }
