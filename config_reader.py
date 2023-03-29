@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     sd_only_admins_can_change_models: bool
     sd_queue_size_per_user: int
     llm_queue_size_per_user: int
-    llm_active_model_type: Literal["gpt2","gptj","llama_orig", "llama_hf"]
+    llm_active_model_type: Literal["gpt2","gptj", "cerebras_gpt","llama_orig", "llama_hf"]
     llm_paths: Dict
     llm_character: str
     llm_history_grouping: Literal["user", "chat"]
@@ -46,6 +46,7 @@ class Settings(BaseSettings):
     llm_assistant_cfg_override: Dict
     llm_assistant_chronicler: Literal["minchatgpt", "alpaca"]
     llm_assistant_use_in_chat_mode: bool
+    llm_force_assistant_for_unsupported_models: bool
     
     @validator('sd_max_resolution', 'sd_default_width', 'sd_default_height')
     def resolution_in_correct_ranges(cls, v):

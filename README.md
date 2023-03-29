@@ -3,7 +3,7 @@
 This project is an implementation of a modular **telegram bot** based on [aiogram](https://github.com/aiogram/aiogram), designed for remote and local ML Inference. Currently integrated with:
 -  **Stable Diffusion** (using [stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) API),
 -  **VITS** text-to-speech engine (using [TTS](https://github.com/coqui-ai/TTS)).  
--  **LLMs** such as **[llama](https://github.com/facebookresearch/llama)**, **[gpt-j-6b](https://github.com/kingoflolz/mesh-transformer-jax#gpt-j-6b)**, **[gpt-2](https://huggingface.co/gpt2)** with support for assistant mode via [alpaca-lora](https://github.com/tloen/alpaca-lora) and via [minChatGPT](https://github.com/ethanyanjiali/minChatGPT)
+-  **LLMs** such as **[llama](https://github.com/facebookresearch/llama)**, **[gpt-j-6b](https://github.com/kingoflolz/mesh-transformer-jax#gpt-j-6b)**, [Cerebras-GPT](https://github.com/Cerebras/modelzoo), **[gpt-2](https://huggingface.co/gpt2)** with support for assistant mode via [alpaca-lora](https://github.com/tloen/alpaca-lora) and via [minChatGPT](https://github.com/ethanyanjiali/minChatGPT)
   
 evolved from predecessor [Botality I](https://github.com/remixer-dec/ru-gpt3-telegram-bot)  
 
@@ -44,9 +44,11 @@ python3.10+ is recommended, due to aiogram compatibility
 - [gpt-2](https://huggingface.co/gpt2) (tested on [ru-gpt3](https://github.com/ai-forever/ru-gpts)), nanoGPT (tested on [minChatGPT](https://github.com/ethanyanjiali/minChatGPT) [[weights](https://huggingface.co/ethanyanjiali/minChatGPT/blob/main/final_ppo_model_gpt2medium.pt)])
 
 - [gpt-j](https://github.com/kingoflolz/mesh-transformer-jax#gpt-j-6b) (tested on a custom model)
+- [Cerebras-GPT](https://github.com/Cerebras/modelzoo) (tested on 1.3B model)
 
 ### LLM Setup
-- Download weights (and code if needed) for a specific large language model
+- Make sure that you have enough RAM / vRAM to run models.
+- Download the weights (and the code if needed) for any large language model
 - in .env file, make sure that `"llm"` is in `active_modules`, then set:  
 `llm_paths` - change the path(s) of model(s) that you downloaded  
 `llm_active_model_type` = model type that you want to use, it can be `gpt2`,`gptj`,`llama_orig`, `llama_hf`  

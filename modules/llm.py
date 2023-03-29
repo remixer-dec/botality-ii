@@ -13,7 +13,8 @@ def get_chat_id(message):
   return message.from_user.id if config.llm_history_grouping == 'user' else message.chat.id
 
 def assistant_model_available(model):
-  return (hasattr(model, 'assistant_mode') and model.assistant_mode)
+  return (hasattr(model, 'assistant_mode') and model.assistant_mode) or \
+    config.llm_force_assistant_for_unsupported_models
 
 class LargeLanguageModel:
   def __init__(self, dp, bot, broker):
@@ -40,7 +41,7 @@ class LargeLanguageModel:
           parsed_output = chatter.parse(result.return_value, get_chat_id(message), len(text))
           await message.reply(text=html.quote(parsed_output))
 
-    @dp.message(Command(commands=['reset', 'clear']))
+    @dp.message(Command(commands=['reset', 'clear']), flags={"cooldown": 20})
     async def clear_llm_history(message: Message, command: Command):
       chatter.history[get_chat_id(message)] = []
     
@@ -66,7 +67,8 @@ class LargeLanguageModel:
             else:
               reply = f'<b>Q</b>: {msg}\n\n<b>A</b>: {html.quote(parsed_output)}'
             await message.reply(text=(reply), allow_sending_without_reply=True)
-    @dp.message(Command(commands=['llm']))
+
+    @dp.message(Command(commands=['llm']), flags={"cooldown": 20})
     async def runcode(message: Message, command: Command):
       text = f'''[LLM module].
       Commands: /ask
