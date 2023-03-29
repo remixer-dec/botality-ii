@@ -40,8 +40,8 @@ python3.10+ is recommended, due to aiogram compatibility
 ### Supported language models (tested): 
 
 - [original llama](https://github.com/facebookresearch/llama/blob/main/example.py) (7b version was tested on [llama-mps fork](https://github.com/remixer-dec/llama-mps) for macs), requires running the bot with `python3.10 -m torch.distributed.launch --use_env bot.py`
-- [hf llama](https://huggingface.co/decapoda-research/llama-7b-hf/tree/main) by decapoda-research (outputs are way worse than original llama on mac) + [alpaca-lora](https://github.com/tloen/alpaca-lora) (outputs are ok)
-- [gpt-2](https://huggingface.co/gpt2) (tested on [ru-gpt3](https://github.com/ai-forever/ru-gpts)), nanoGPT (tested on [minChatGPT](https://github.com/ethanyanjiali/minChatGPT))
+- [hf llama](https://huggingface.co/decapoda-research/llama-7b-hf/tree/main) by decapoda-research (outputs are way worse than original llama on mac) + [alpaca-lora](https://github.com/tloen/alpaca-lora) (outputs are ok) / [gpt4all-lora](https://github.com/nomic-ai/gpt4all#reproducibility) (outputs are ok)
+- [gpt-2](https://huggingface.co/gpt2) (tested on [ru-gpt3](https://github.com/ai-forever/ru-gpts)), nanoGPT (tested on [minChatGPT](https://github.com/ethanyanjiali/minChatGPT) [[weights](https://huggingface.co/ethanyanjiali/minChatGPT/blob/main/final_ppo_model_gpt2medium.pt)])
 
 - [gpt-j](https://github.com/kingoflolz/mesh-transformer-jax#gpt-j-6b) (tested on a custom model)
 
@@ -57,4 +57,4 @@ python3.10+ is recommended, due to aiogram compatibility
   
   
 ### Bot commands
-Send a message to your bot with the command **/tti -h** for more info on how to use stable diffusion in the bot, and **/tts -h** for tts module. The bot uses the same commands as voice names in configuration file for tts.
+Send a message to your bot with the command **/tti -h** for more info on how to use stable diffusion in the bot, and **/tts -h** for tts module. The bot uses the same commands as voice names in configuration file for tts. Try **/llm** command for llm module details.

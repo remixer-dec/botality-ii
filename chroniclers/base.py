@@ -45,9 +45,9 @@ class ConversationChronicler(AbstractChronicler):
     return dialog
 
   def parse(self, output, chat_id, skip=0):
+    output = output.strip()[skip:]
     print(output)
-    output = output[skip:].strip()
-    end = (output.find('\n') + 1 ) or (output.find('</s>') + 1) or (len(output) + 1)
+    end = ((output.find('</s>') + 1) or output.find('\n') + 1 ) or (len(output) + 1)
     parsed = output[:end - 1].strip()
     if parsed == '':
       return '...'
