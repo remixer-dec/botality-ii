@@ -2,8 +2,9 @@
   
 This project is an implementation of a modular **telegram bot** based on [aiogram](https://github.com/aiogram/aiogram), designed for remote and local ML Inference. Currently integrated with:
 -  **Stable Diffusion** (using [stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) API),
--  **VITS** text-to-speech engine (using [TTS](https://github.com/coqui-ai/TTS)).  
--  **LLMs** such as **[llama](https://github.com/facebookresearch/llama)**, **[gpt-j-6b](https://github.com/kingoflolz/mesh-transformer-jax#gpt-j-6b)**, [Cerebras-GPT](https://github.com/Cerebras/modelzoo), **[gpt-2](https://huggingface.co/gpt2)** with support for assistant mode via [alpaca-lora](https://github.com/tloen/alpaca-lora) and via [minChatGPT](https://github.com/ethanyanjiali/minChatGPT)
+-  **VITS** built-in text-to-speech engine (using [TTS](https://github.com/coqui-ai/TTS)).  
+-  **LLMs** such as **[llama](https://github.com/facebookresearch/llama)**, **[gpt-j-6b](https://github.com/kingoflolz/mesh-transformer-jax#gpt-j-6b)**, **[cerebras-gpt](https://github.com/Cerebras/modelzoo)**, **[gpt-2](https://huggingface.co/gpt2)** with support for assistant mode   
+via [alpaca-lora](https://github.com/tloen/alpaca-lora), via [gpt4all-lora](https://github.com/nomic-ai/gpt4all#reproducibility) and via [minChatGPT](https://github.com/ethanyanjiali/minChatGPT)
   
 evolved from predecessor [Botality I](https://github.com/remixer-dec/ru-gpt3-telegram-bot)  
 
@@ -11,6 +12,7 @@ evolved from predecessor [Botality I](https://github.com/remixer-dec/ru-gpt3-tel
 [Bot]
 - User-based queues and delayed task processing
 - Multiple modes to filter access scopes (WL/BL/Both/Admin-only)
+- Support of accelerated inference on M1 Macs
 
 [LLM]
 - Supports dialog mode casually playing a role described in a character file, keeping chat history with all users in group chats or with each user separately
@@ -51,12 +53,14 @@ python3.10+ is recommended, due to aiogram compatibility
 - Download the weights (and the code if needed) for any large language model
 - in .env file, make sure that `"llm"` is in `active_modules`, then set:  
 `llm_paths` - change the path(s) of model(s) that you downloaded  
-`llm_active_model_type` = model type that you want to use, it can be `gpt2`,`gptj`,`llama_orig`, `llama_hf`  
+`llm_active_model_type` = model type that you want to use, it can be `gpt2`,`gptj`,`llama_orig`, `llama_hf`, `cerebras_gpt`  
 `llm_character` = a character of your choice, from `characters` directory, for example `characters.gptj_6B_default`, character files also have model configuration options optimal to specific model, feel free to change the character files and use with other models.  
-`llm_assistant_chronicler` = a input/output formatter/parser for assistant task, can be `alpaca` or `minchatgpt`  
+`llm_assistant_chronicler` = a input/output formatter/parser for assistant task, can be `alpaca` or `minchatgpt` or `gpt4all` 
 `llm_history_grouping` = `user` to store history with each user separately or `chat` to store group chat history with all users in that chat  
 `llm_assistant_use_in_chat_mode` = `True`/`False` when False, use /ask command to use alpaca-lora in assistant mode, when True, all messages are treated as questions.
   
   
 ### Bot commands
 Send a message to your bot with the command **/tti -h** for more info on how to use stable diffusion in the bot, and **/tts -h** for tts module. The bot uses the same commands as voice names in configuration file for tts. Try **/llm** command for llm module details.
+  
+License: the code of this project is currently distributed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) license, third party libraries might have different licenses.

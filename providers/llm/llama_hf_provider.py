@@ -29,11 +29,11 @@ def init(model_paths, init_config={}):
     torch_dtype=torch.float16 if device is not torch.device('cpu') else torch.float32,
     device_map={"": device}
   )
-  if 'path_to_alpaca_lora' in model_paths and os.path.exists(model_paths['path_to_alpaca_lora']):
+  if 'path_to_llama_lora' in model_paths and os.path.exists(model_paths['path_to_llama_lora']):
     from peft import PeftModel
     submodel = PeftModel.from_pretrained(
       model,
-      model_paths['path_to_alpaca_lora'],
+      model_paths['path_to_llama_lora'],
       device_map={"": device},
       torch_dtype=torch.float16 if device is not torch.device('cpu') else torch.float32,
     )
@@ -66,9 +66,10 @@ async def generate(prompt, length=64, model_params={}, use_submodel=False):
         input_ids=encoded_prompt,
         max_new_tokens=length,
         generation_config=generation_config,
+        eos_token_id=used_model.config.eos_token_id,
         do_sample=True
       )
-      output = tokenizer.batch_decode(output)
+      output = tokenizer.batch_decode(output, skip_special_tokens=True)
   if torch.backends.mps.is_available():
     mps.empty_cache()
   elif torch.cuda.is_available():

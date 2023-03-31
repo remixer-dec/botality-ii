@@ -111,8 +111,23 @@ Assistant:
       return '...'
     return parsed
 
+class GPT4AllChronicler(AbstractChronicler):
+  def __init__(self, chronicler_filename):
+    super().__init__(chronicler_filename)
+
+  def prepare(self, details, fresh=False):
+    msg = details['message'].replace('\n', ' ')
+    return f"""{msg}
+"""
+
+  def parse(self, output, chat_id, skip=0):
+    print(output)
+    output = output[skip:].strip()
+    return output
+
 chroniclers = {
   "alpaca": AlpacaAssistantChronicler,
   "minchatgpt": MinChatGPTChronicler,
+  "gpt4all": GPT4AllChronicler,
   "chat": ConversationChronicler
 }

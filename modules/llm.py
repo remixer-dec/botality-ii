@@ -35,8 +35,9 @@ class LargeLanguageModel:
             "author": message.from_user.first_name.replace(' ', '') or 'User',
             "chat_id": get_chat_id(message)
           })
-          task = await broker.task(semaphore_wrapper(self.semaphore, active_model.generate))\
-                             .kiq(text, 64, chatter.gen_cfg(config.llm_generation_cfg_override))
+          task = await broker\
+            .task(semaphore_wrapper(self.semaphore, active_model.generate))\
+            .kiq(text, config.llm_max_tokens, chatter.gen_cfg(config.llm_generation_cfg_override))
           result = await task.wait_result(timeout=900)
           parsed_output = chatter.parse(result.return_value, get_chat_id(message), len(text))
           await message.reply(text=html.quote(parsed_output))
@@ -58,8 +59,9 @@ class LargeLanguageModel:
               "author": message.from_user.first_name.replace(' ', '') or 'User',
               "chat_id": get_chat_id(message)
             })
-            task = await broker.task(semaphore_wrapper(self.semaphore, active_model.generate))\
-                               .kiq(text, 128, chatter.gen_cfg(config.llm_assistant_cfg_override), True)
+            task = await broker\
+              .task(semaphore_wrapper(self.semaphore, active_model.generate))\
+              .kiq(text, config.llm_max_assistant_tokens, chatter.gen_cfg(config.llm_assistant_cfg_override), True)
             result = await task.wait_result(timeout=900)
             parsed_output = assistant.parse(result.return_value, get_chat_id(message), len(text))
             if config.llm_assistant_use_in_chat_mode:

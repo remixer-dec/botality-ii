@@ -44,9 +44,11 @@ class Settings(BaseSettings):
     llm_max_history_items: int
     llm_generation_cfg_override: Dict
     llm_assistant_cfg_override: Dict
-    llm_assistant_chronicler: Literal["minchatgpt", "alpaca"]
+    llm_assistant_chronicler: Literal["minchatgpt", "alpaca", "gpt4all"]
     llm_assistant_use_in_chat_mode: bool
     llm_force_assistant_for_unsupported_models: bool
+    llm_max_tokens: int
+    llm_max_assistant_tokens: int
     
     @validator('sd_max_resolution', 'sd_default_width', 'sd_default_height')
     def resolution_in_correct_ranges(cls, v):
