@@ -14,8 +14,10 @@ class UserLimitedQueue:
   def for_user(self, user_id):
     if self.task_count[user_id] < self.max_tasks_per_user:
       self.task_count[user_id] += 1
-      yield True
-      self.task_count[user_id] -= 1
+      try:
+        yield True
+      finally:
+        self.task_count[user_id] -= 1
     else:
       yield False
       
