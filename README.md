@@ -4,7 +4,7 @@ This project is an implementation of a modular **telegram bot** based on [aiogra
 -  **Stable Diffusion** (using [stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) API),
 -  **VITS** built-in text-to-speech engine (using [TTS](https://github.com/coqui-ai/TTS)).  
 -  **LLMs** such as **[llama](https://github.com/facebookresearch/llama)**, **[gpt-j-6b](https://github.com/kingoflolz/mesh-transformer-jax#gpt-j-6b)**, **[cerebras-gpt](https://github.com/Cerebras/modelzoo)**, **[gpt-2](https://huggingface.co/gpt2)** with support for assistant mode   
-via [alpaca-lora](https://github.com/tloen/alpaca-lora), via [gpt4all-lora](https://github.com/nomic-ai/gpt4all#reproducibility) and via [minChatGPT](https://github.com/ethanyanjiali/minChatGPT)
+via [alpaca-lora](https://github.com/tloen/alpaca-lora), via [gpt4all-lora](https://github.com/nomic-ai/gpt4all#reproducibility), via [adapter-model](https://github.com/ZrrSkywalker/LLaMA-Adapter) and via [minChatGPT](https://github.com/ethanyanjiali/minChatGPT)
   
 evolved from predecessor [Botality I](https://github.com/remixer-dec/ru-gpt3-telegram-bot)  
 
@@ -17,7 +17,7 @@ evolved from predecessor [Botality I](https://github.com/remixer-dec/ru-gpt3-tel
 [LLM]
 - Supports dialog mode casually playing a role described in a character file, keeping chat history with all users in group chats or with each user separately
 - Character files can be easily localized for any language for non-english models
-- Assistant mode
+- Assistant mode via /ask command or with direct replies (configurable)
 
 [SD]
 - CLI-like way to pass stable diffusion parameters
@@ -41,7 +41,8 @@ evolved from predecessor [Botality I](https://github.com/remixer-dec/ru-gpt3-tel
 python3.10+ is recommended, due to aiogram compatibility  
 ### Supported language models (tested): 
 
-- [original llama](https://github.com/facebookresearch/llama/blob/main/example.py) (7b version was tested on [llama-mps fork](https://github.com/remixer-dec/llama-mps) for macs), requires running the bot with `python3.10 -m torch.distributed.launch --use_env bot.py`
+- [original llama](https://github.com/facebookresearch/llama/blob/main/example.py) (7b version was tested on [llama-mps fork](https://github.com/remixer-dec/llama-mps/tree/adapter-model) for macs), requires running the bot with `python3.10 -m torch.distributed.launch --use_env bot.py`  
+assistant mode for original llama is available with [LLaMa-Adapter](https://github.com/ZrrSkywalker/LLaMA-Adapter), to use both chat and assistant mode, some [changes](https://github.com/remixer-dec/llama-mps/commit/a9b319a927461e4d9b5d74789b3b4a079cb90620) are necessary for non-mac users.
 - [hf llama](https://huggingface.co/decapoda-research/llama-7b-hf/tree/main) by decapoda-research (outputs are way worse than original llama on mac) + [alpaca-lora](https://github.com/tloen/alpaca-lora) (outputs are ok) / [gpt4all-lora](https://github.com/nomic-ai/gpt4all#reproducibility) (outputs are ok)
 - [gpt-2](https://huggingface.co/gpt2) (tested on [ru-gpt3](https://github.com/ai-forever/ru-gpts)), nanoGPT (tested on [minChatGPT](https://github.com/ethanyanjiali/minChatGPT) [[weights](https://huggingface.co/ethanyanjiali/minChatGPT/blob/main/final_ppo_model_gpt2medium.pt)])
 
@@ -54,8 +55,8 @@ python3.10+ is recommended, due to aiogram compatibility
 - in .env file, make sure that `"llm"` is in `active_modules`, then set:  
 `llm_paths` - change the path(s) of model(s) that you downloaded  
 `llm_active_model_type` = model type that you want to use, it can be `gpt2`,`gptj`,`llama_orig`, `llama_hf`, `cerebras_gpt`  
-`llm_character` = a character of your choice, from `characters` directory, for example `characters.gptj_6B_default`, character files also have model configuration options optimal to specific model, feel free to change the character files and use with other models.  
-`llm_assistant_chronicler` = a input/output formatter/parser for assistant task, can be `alpaca` or `minchatgpt` or `gpt4all` 
+`llm_character` = a character of your choice, from `characters` directory, for example `characters.gptj_6B_default`, character files also have model configuration options optimal to specific model, feel free to change the character files, edit their personality and use with other models.  
+`llm_assistant_chronicler` = a input/output formatter/parser for assistant task, can be `alpaca` or `minchatgpt` or `gpt4all`  
 `llm_history_grouping` = `user` to store history with each user separately or `chat` to store group chat history with all users in that chat  
 `llm_assistant_use_in_chat_mode` = `True`/`False` when False, use /ask command to use alpaca-lora in assistant mode, when True, all messages are treated as questions.
   
