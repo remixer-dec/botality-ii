@@ -1,6 +1,7 @@
 from io import BytesIO
 import base64
 import argparse
+import functools
 
 async def tg_image_to_data(photo, bot):
   file_bytes = BytesIO()
@@ -31,3 +32,15 @@ def parse_photo(message):
     if message.reply_to_message.document and message.reply_to_message.document.mime_type.startswith('image'):
       return [message.reply_to_message.document]
   return None
+
+def log_exceptions(logger):
+  def decorator(func):
+    @functools.wraps(func)
+    async def wrapper(*args, **kwargs):
+      try:
+        result = await func(*args, **kwargs)
+        return result
+      except Exception as e:
+        logger.error(f"Error in {func.__name__}: {str(e)}")
+    return wrapper
+  return decorator
