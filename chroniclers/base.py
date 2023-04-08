@@ -148,9 +148,21 @@ class GPT4AllChronicler(AbstractChronicler):
     output = output[skip:].strip()
     return output
 
+class RawChronicler(AbstractChronicler):
+  def __init__(self, chronicler_filename):
+    super().__init__(chronicler_filename)
+  
+  def prepare(self, details, fresh=False):
+    return details['message']
+
+  def parse(self, output, chat_id, skip=0):
+    print(output)
+    return output
+
 chroniclers = {
   "alpaca": AlpacaAssistantChronicler,
   "minchatgpt": MinChatGPTChronicler,
   "gpt4all": GPT4AllChronicler,
-  "chat": ConversationChronicler
+  "chat": ConversationChronicler,
+  "raw": RawChronicler
 }
