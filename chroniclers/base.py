@@ -62,7 +62,7 @@ class ConversationChronicler(AbstractChronicler):
 {personality}
 
 {pre_dialog}{conversation}{name}:'''\
-    .format(conversation=conversation, **fresh_vars)
+    .format(conversation=conversation, **char_vars)
     return dialog
 
   def parse(self, output, chat_id, skip=0):
@@ -89,7 +89,7 @@ class AlpacaAssistantChronicler(AbstractChronicler):
   def prepare(self, details, fresh=False):
     msg = details['message'].split('\n', 1)
     l = self.vars(details)
-    if len(msg) > 1:
+    if len(msg) > 1 and l['assistant_input']:
       return f"""{l['assistant_intro1']} 
 ### {l['assistant_instruction']}:
 {msg[0]}
