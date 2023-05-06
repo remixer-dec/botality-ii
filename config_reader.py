@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     sd_only_admins_can_change_models: bool
     sd_queue_size_per_user: int
     llm_queue_size_per_user: int
-    llm_active_model_type: Literal["gpt2","gptj", "cerebras_gpt","llama_orig", "llama_hf", "llama_cpp"]
+    llm_active_model_type: Literal["gpt2","gptj", "cerebras_gpt","llama_orig", "llama_hf", "llama_cpp", "mlc_pb"]
     llm_paths: Dict
     llm_character: str
     llm_history_grouping: Literal["user", "chat"]
