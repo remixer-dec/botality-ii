@@ -58,13 +58,13 @@ assistant mode for original llama is available with [LLaMa-Adapter](https://gith
 - Download the weights (and the code if needed) for any large language model
 - in .env file, make sure that `"llm"` is in `active_modules`, then set:  
 `llm_paths` - change the path(s) of model(s) that you downloaded  
-`llm_active_model_type` = model type that you want to use, it can be `gpt2`,`gptj`,`llama_orig`, `llama_hf`, `cerebras_gpt`  
+`llm_active_model_type` = model type that you want to use, it can be `gpt2`,`gptj`,`llama_orig`, `llama_hf`, `llama_cpp`, `mlc_pb`,  `cerebras_gpt`.  
 `llm_character` = a character of your choice, from `characters` directory, for example `characters.gptj_6B_default`, character files also have model configuration options optimal to specific model, feel free to change the character files, edit their personality and use with other models.  
-`llm_assistant_chronicler` = a input/output formatter/parser for assistant task, can be `alpaca` or `minchatgpt` or `gpt4all`  
+`llm_assistant_chronicler` = a input/output formatter/parser for assistant task, can be `alpaca` or `minchatgpt` or `gpt4all` or `raw`, for most cases use alpaca or gpt4all.  
 `llm_history_grouping` = `user` to store history with each user separately or `chat` to store group chat history with all users in that chat  
 `llm_assistant_use_in_chat_mode` = `True`/`False` when False, use /ask command to use alpaca-lora in assistant mode, when True, all messages are treated as questions.
 - For llama.cpp: make sure that you have a c++ compiler, then install `pip install llama-cpp-python`, download model weights and change the path in `llm_paths`.
-- For mlc-llm, follow the installation instructions from the docs, then clone [mlc-chatbot](https://github.com/XinyuSun/mlc-chatbot), and put 3 paths in `llm_paths`.
+- For mlc-llm, follow the installation instructions from the docs, then clone [mlc-chatbot](https://github.com/XinyuSun/mlc-chatbot), and put 3 paths in `llm_paths`. Use with `llm_assistant_use_in_chat_mode=True` and with `raw` chronicler.  
   
   
 ### Bot commands
