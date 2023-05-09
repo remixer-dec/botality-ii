@@ -46,7 +46,7 @@ python3.10+ is recommended, due to aiogram compatibility
 - [original llama](https://github.com/facebookresearch/llama/blob/main/example.py) (7b version was tested on [llama-mps fork](https://github.com/remixer-dec/llama-mps/tree/adapter-model) for macs), requires running the bot with `python3.10 -m torch.distributed.launch --use_env bot.py`  
 assistant mode for original llama is available with [LLaMa-Adapter](https://github.com/ZrrSkywalker/LLaMA-Adapter), to use both chat and assistant mode, some [changes](https://github.com/remixer-dec/llama-mps/commit/a9b319a927461e4d9b5d74789b3b4a079cb90620) are necessary for non-mac users.
 - [hf llama](https://huggingface.co/decapoda-research/llama-7b-hf/tree/main) by decapoda-research (outputs are way worse than original llama on mac) + [alpaca-lora](https://github.com/tloen/alpaca-lora) (outputs are ok) / [gpt4all-lora](https://github.com/nomic-ai/gpt4all#reproducibility) (outputs are ok) / [ru-turbo-alpaca-lora](https://huggingface.co/IlyaGusev/llama_7b_ru_turbo_alpaca_lora)
-- [llama.cpp](https://github.com/abetlen/llama-cpp-python) (tested on vicuna-7b-1.1-q4_2)[[models](https://github.com/nomic-ai/gpt4all-chat#manual-download-of-models)]
+- [llama.cpp](https://github.com/abetlen/llama-cpp-python) (tested on vicuna-7b-1.1-q4_2, WizardLM-7B-uncensored.ggml.q5_1, Pygmalion-7b-4bit-Q5_1-GGML-V2)[[models](https://github.com/nomic-ai/gpt4all-chat#manual-download-of-models)] [[more models](https://huggingface.co/models?sort=downloads&search=ggml)]
 - [mlc-llm-chat](https://mlc.ai/mlc-llm/#windows-linux-mac) (tested using prebuilt binaries on demo-vicuna-v1-7b-int3 model, M1 GPU acceleration confirmed, integrated via [mlc-chatbot](https://github.com/XinyuSun/mlc-chatbot))
 - [gpt-2](https://huggingface.co/gpt2) (tested on [ru-gpt3](https://github.com/ai-forever/ru-gpts)), nanoGPT (tested on [minChatGPT](https://github.com/ethanyanjiali/minChatGPT) [[weights](https://huggingface.co/ethanyanjiali/minChatGPT/blob/main/final_ppo_model_gpt2medium.pt)])
 
@@ -68,6 +68,6 @@ assistant mode for original llama is available with [LLaMa-Adapter](https://gith
   
   
 ### Bot commands
-Send a message to your bot with the command **/tti -h** for more info on how to use stable diffusion in the bot, and **/tts -h** for tts module. The bot uses the same commands as voice names in configuration file for tts. Try **/llm** command for llm module details.
+Send a message to your bot with the command **/tti -h** for more info on how to use stable diffusion in the bot, and **/tts -h** for tts module. The bot uses the same commands as voice names in configuration file for tts. Try **/llm** command for llm module details. LLM defaults to chat mode for models that support it, assistant can be called with /ask command
   
 License: the code of this project is currently distributed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) license, third party libraries might have different licenses.
