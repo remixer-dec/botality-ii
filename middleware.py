@@ -1,7 +1,6 @@
 from aiogram.dispatcher.flags import get_flag
 from aiogram.utils.chat_action import ChatActionSender
 from aiogram import BaseMiddleware
-from aiogram.types import Message
 from config_reader import config
 from custom_queue import CallCooldown
 from collections import defaultdict

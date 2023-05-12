@@ -1,8 +1,8 @@
-import abc
 import importlib
+from abc import ABCMeta, abstractmethod
 from collections import defaultdict
 
-class AbstractChronicler(metaclass=abc.ABCMeta):
+class AbstractChronicler(metaclass=ABCMeta):
   def __init__(self, filename):
     chronicler_script = importlib.import_module(filename)
     self.chronicler_script = chronicler_script
@@ -10,31 +10,27 @@ class AbstractChronicler(metaclass=abc.ABCMeta):
     self.gen_cfg = chronicler_script.get_generation_config
     self.init_cfg = chronicler_script.get_init_config
 
-  @abc.abstractmethod
+  @abstractmethod
   def prepare(self, details):
     pass
 
-  @abc.abstractmethod
+  @abstractmethod
   def parse(self):
     pass
-
+  
+  @staticmethod
   def prepare_hook(func):
     def wrapper(self, *args, **kwargs):
-      if hasattr(self.chronicler_script, 'custom_input_formatter'):
-        result = self.chronicler_script.custom_input_formatter(self, *args, **kwargs)
-      else:
-        result = func(self, *args, **kwargs)
-      return result
+      formatter = getattr(self.chronicler_script, 'custom_input_formatter', func)
+      return formatter(self, *args, **kwargs)
     return wrapper
 
+  @staticmethod
   def parse_hook(func):
     def wrapper(self, *args, **kwargs):
       print(args[0])
-      if hasattr(self.chronicler_script, 'custom_output_parser'):
-        result = self.chronicler_script.custom_output_parser(self, *args, **kwargs)
-      else:
-        result = func(self, *args, **kwargs)
-      return result
+      parser = getattr(self.chronicler_script, 'custom_output_parser', func)
+      return parser(self, *args, **kwargs)
     return wrapper
 
 
@@ -73,11 +69,7 @@ class ConversationChronicler(AbstractChronicler):
     if parsed == '':
       return '...'
     author = self.vars()['name']
-    repeated_string_index = next((i for i, d in enumerate(self.history[chat_id]) if (d['message'] == parsed and d["author"] == author)), None)
-    if repeated_string_index:
-      self.history[chat_id].append({"message": '???', "author": author})
-    else:
-      self.history[chat_id].append({"message": parsed.replace(':', ''), "author": author})
+    self.history[chat_id].append({"message": parsed.replace(':', ''), "author": author})
     return parsed
 
 
@@ -114,6 +106,7 @@ class AlpacaAssistantChronicler(AbstractChronicler):
       return '...'
     return parsed
 
+
 class MinChatGPTChronicler(AbstractChronicler):
   def __init__(self, chronicler_filename):
     super().__init__(chronicler_filename)
@@ -133,6 +126,7 @@ Assistant:
     if parsed == '':
       return '...'
     return parsed
+
 
 class GPT4AllChronicler(AbstractChronicler):
   def __init__(self, chronicler_filename):
@@ -158,6 +152,7 @@ class RawChronicler(AbstractChronicler):
   def parse(self, output, chat_id, skip=0):
     print(output)
     return output
+
 
 chroniclers = {
   "alpaca": AlpacaAssistantChronicler,

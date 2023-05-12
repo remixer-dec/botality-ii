@@ -48,8 +48,10 @@ async def refresh_model_list():
   except Exception as e:
     print('Failed to load model names:' + str(e))
 
+
 def b642img(base64_image):
   return base64.b64decode(base64_image)
+
 
 async def switch_model(name):
   async with httpx.AsyncClient() as client:
@@ -63,7 +65,6 @@ async def switch_model(name):
   return False
 
 
-
 async def sd_get_images(payload, endpoint):
   async with httpx.AsyncClient() as client:
     try:
@@ -74,13 +75,13 @@ async def sd_get_images(payload, endpoint):
         bstr_images = [b642img(i) for i in images]
         gen_info = json.loads(response_data.get('info'))
         gen_info['model'] = models[gen_info['sd_model_hash']]
-        return (True, bstr_images, gen_info)
+        return (False, bstr_images, gen_info)
       else:
-        return (False, r['detail'], None)
+        return ('Connection error', None, None)
     except (httpx.NetworkError, ConnectionError, httpx.RemoteProtocolError, json.decoder.JSONDecodeError) as error:
-      return (False, error, None)
+      return (error, None, None)
     except Exception:
-      return (False, 'unknown error', None)
+      return ('unknown error', None, None)
 
 
 async def tti(override=None):
@@ -100,7 +101,6 @@ async def iti(override=None):
   if override:
     payload = {**payload, **override}
   return await sd_get_images(payload, 'sdapi/v1/img2img')
-
 
 
 asyncio.run(refresh_model_list())

@@ -20,7 +20,8 @@ class UserLimitedQueue:
         self.task_count[user_id] -= 1
     else:
       yield False
-      
+
+
 class CallCooldown:
   calls = {}
 
@@ -32,6 +33,7 @@ class CallCooldown:
         return False
     cls.calls[key] = time.time()
     return True
+
 
 def semaphore_wrapper(semaphore, callback):
   async def wrapped(*args, **kwargs):

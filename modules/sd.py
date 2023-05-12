@@ -1,7 +1,7 @@
 
 from aiogram import html, F
 from aiogram.filters import Command, CommandObject
-from aiogram.types import Message, BufferedInputFile, InputMediaPhoto, URLInputFile
+from aiogram.types import Message, BufferedInputFile, InputMediaPhoto
 from providers.sd_provider import tti, iti, models, embeddings, switch_model
 from utils import tg_image_to_data, parse_photo, CustomArgumentParser, JoinNargsAction
 from custom_queue import UserLimitedQueue, semaphore_wrapper
@@ -17,7 +17,7 @@ sd_available_resolutions = list(range(256, config.sd_max_resolution + 1, 64))
 
 class SDArguments(pydantic.BaseModel):
   denoising_strength: float = pydantic.Field(None, ge=0, le=1, alias='d', description='Denoising strength')
-  cfg_scale: float = pydantic.Field(None, ge=1, le=25, alias='c')
+  cfg_scale: float = pydantic.Field(None, ge=1, le=25, alias='c', description='Cfg scale')
   steps: int = pydantic.Field(None, ge=5, le=config.sd_max_steps, alias='st')
   sampler_name: Literal[tuple(config.sd_available_samplers)] = pydantic.Field(None, alias="sa", description='Sampler')
   width: Literal[tuple(sd_available_resolutions)] = pydantic.Field(None, alias="wi", description='Width')
@@ -38,15 +38,15 @@ class StableDiffusionModule:
     async def command_sd_handler(message: Message, command: CommandObject, album=False) -> None:
       with self.queue.for_user(message.from_user.id) as available:
         if available:
-          params_parsed, params = self.parse_input(command.args)
-          if not params_parsed:
+          parse_error, params = self.parse_input(command.args)
+          if parse_error:
             return await message.answer(f"{html.quote(params)}")
           prompt = params['prompt']
           if not command.command.endswith('raw'):
             params = self.apply_standard_prompt_modifiers(params)
           processor = tti
-          photo = parse_photo(message)
 
+          photo = parse_photo(message)
           if command.command.startswith("iti") and photo:
             image_data = await tg_image_to_data(photo, bot)
             params['init_images'] = [image_data]
@@ -56,14 +56,15 @@ class StableDiffusionModule:
               params['mask'] = await tg_image_to_data(parse_photo(album[1]), bot)
             processor = iti
           elif command.command.startswith("iti"):
-            return await message.answer(f"Error, <b>unable to find initial photo</b>")
+            return await message.answer("Error, <b>unable to find initial photo</b>")
+
           task = await broker.task(semaphore_wrapper(self.semaphore, processor)).kiq(params)
           result = await task.wait_result(timeout=240)
-          completed, data, details = result.return_value
+          sd_error, data, details = result.return_value
           reply_to = message.reply_to_message.message_id if message.reply_to_message is not None else None
           
-          if not completed:
-            return await message.answer(f"Error, <b>{data}</b>")
+          if sd_error:
+            return await message.answer(f"<b>Error:</b> {sd_error}")
           else:
             images = [InputMediaPhoto(
               type='photo', 
@@ -106,11 +107,11 @@ class StableDiffusionModule:
           if success:
             return message.answer(f'<b>Model changed to:</b> {command.args}')
           else:
-            return message.answer(f'<b>Unable to change the model.</b>')
+            return message.answer('<b>Unable to change the model.</b>')
         else:
           if not command.args:
             return message.answer('use this command with model name to change the model, try /models for all model names')
-          return message.answer(f'<b>Model not found</b>')
+          return message.answer('<b>Model not found</b>')
 
 
 
@@ -129,20 +130,24 @@ class StableDiffusionModule:
       parser.add_argument('-np', type=str, help='Negative prompt')
       parser.add_argument('prompt', type=str, help='prompt', nargs="*", action=JoinNargsAction)
       try:
+        # override default -h behaviour
         if '-help' in user_input or '—help' in user_input or '-h ' in user_input:
-          return (False, parser.format_help().replace(
+          return (parser.format_help().replace(
             'bot.py','/tti /iti /ttiraw /itiraw, /models /loras /embeddings /command@botname params text' 
-          ))
-        print(str(shlex.split(user_input)).encode('ascii', 'ignore'))
+          ), None)
+        # parse arguments using custom arg parser
         args = parser.parse_args(shlex.split(user_input))
+        # apply pydantic checks
         sd_args = {k: v for k, v in SDArguments(**vars(args)) if v is not None}
-        return (True, sd_args)
+        return (False, sd_args)
       except (Exception, SystemExit) as e:
-        return (False, str(e))
+        return (str(e), None)
 
   def apply_standard_prompt_modifiers(self, params):
     params['prompt'] = config.sd_extra_prompt.format(prompt=self.parse_lora(params['prompt']))
-    params['negative_prompt'] = config.sd_extra_negative_prompt.format(negative_prompt='' if 'negative_prompt' not in params else params['negative_prompt']) 
+    params['negative_prompt'] = config.sd_extra_negative_prompt.format(
+      negative_prompt='' if 'negative_prompt' not in params else params['negative_prompt']
+    ) 
     if 'width' in params and 'height' in params:
       if params['width'] == params['height']:
         params['prompt'] += ', square image'

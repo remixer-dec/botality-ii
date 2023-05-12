@@ -1,5 +1,5 @@
 from aiogram.filters import Command, CommandObject
-from aiogram.types import Message, BufferedInputFile, InputMediaPhoto, URLInputFile
+from aiogram.types import Message, BufferedInputFile
 from providers.tts_provider import tts, remote_tts, tts_convert
 from custom_queue import UserLimitedQueue, semaphore_wrapper
 from config_reader import config
@@ -14,6 +14,7 @@ class TextToSpeechModule:
     async def command_tts_handler(message: Message, command: CommandObject) -> None:
       with self.queue.for_user(message.from_user.id) as available:
         if available:
+          #show helper message if no voice is selected
           if command.command == "tts" or not command.args or str(command.args).strip() == "" or ('-help' in str(command.args)):
             return await message.answer(f"usage: {' '.join(['/' + x for x in config.tts_voices])} text,\nUse the commands like /command@botname \n{config.tts_credits}")
           voice = command.command
@@ -27,7 +28,7 @@ class TextToSpeechModule:
           else:
             audio = BufferedInputFile(tts_convert(data), 'tts.ogg')
             return await message.answer_voice(voice=audio)
-
+    bot.reply_tts = command_tts_handler
 
 
 

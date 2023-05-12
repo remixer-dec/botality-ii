@@ -4,7 +4,6 @@ except ImportError:
   Synthesizer = None
 from config_reader import config
 from pathlib import Path
-import base64
 import httpx
 import json
 import tempfile
