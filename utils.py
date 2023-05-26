@@ -4,11 +4,18 @@ import argparse
 import functools
 
 async def tg_image_to_data(photo, bot):
+  if not photo:
+    return None
   file_bytes = BytesIO()
   file_path = (await bot.get_file(file_id=photo[-1].file_id)).file_path
-  file = await bot.download_file(file_path, file_bytes)
+  await bot.download_file(file_path, file_bytes)
   image = 'data:image/png;base64,' + str(base64.b64encode(file_bytes.getvalue()), 'utf-8')
   return image
+
+def b64_to_img(imgstr):
+  from PIL import Image
+  decoded = base64.b64decode(imgstr.split(',')[1])
+  return Image.open(BytesIO(decoded))
 
 # do not sysexit on error
 class CustomArgumentParser(argparse.ArgumentParser):
