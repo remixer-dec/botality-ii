@@ -40,7 +40,7 @@ class StableDiffusionModule:
         if available:
           parse_error, params = self.parse_input(command.args)
           if parse_error:
-            return await message.answer(f"{html.quote(params)}")
+            return await message.answer(f"{html.quote(parse_error)}")
           prompt = params['prompt']
           if not command.command.endswith('raw'):
             params = self.apply_standard_prompt_modifiers(params)
@@ -130,7 +130,7 @@ class StableDiffusionModule:
       parser.add_argument('-np', type=str, help='Negative prompt')
       parser.add_argument('prompt', type=str, help='prompt', nargs="*", action=JoinNargsAction)
       try:
-        # override default -h behaviour
+        # override default -h behavior
         if '-help' in user_input or '—help' in user_input or '-h ' in user_input:
           return (parser.format_help().replace(
             'bot.py','/tti /iti /ttiraw /itiraw, /models /loras /embeddings /command@botname params text' 
