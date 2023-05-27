@@ -40,6 +40,10 @@ class ConversationChronicler(AbstractChronicler):
     self.history = defaultdict(lambda: [])
     self.max_length = max_length
 
+  def get_author(self, vars, item):
+    r_username = vars.get('replace_username', False)
+    return r_username if r_username and item['author'] != vars['name'] else item['author']
+
   def prepare(self, details, fresh=False):
     if fresh:
       self.history[details['chat_id']] = []
@@ -48,10 +52,11 @@ class ConversationChronicler(AbstractChronicler):
     while len(history) >= self.max_length:
       history.pop(0)
     conversation = ''
+    char_vars = self.vars(details)
     for item in history:
       msg = item["message"]
-      conversation += f'{item["author"]}: {msg[0].upper() + msg[1:]}\n'
-    char_vars = self.vars(details)
+      author = self.get_author(char_vars, item)
+      conversation += f'{author}: {msg[0].upper() + msg[1:]}\n'
     if char_vars['pre_dialog']:
       char_vars['pre_dialog'] += '\n'
     dialog = '''{intro}

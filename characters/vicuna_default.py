@@ -37,5 +37,5 @@ def get_generation_config(override={}):
     **override
   }
 
-def get_init_config():
-  return {}
+def get_init_config(): 
+  return {'context_size': 2048}
