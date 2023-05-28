@@ -1,5 +1,6 @@
 from pydantic import BaseSettings, SecretStr, validator
-from typing import List, Literal, Dict
+from typing import List, Dict
+from typing_extensions import Literal
 
 class Settings(BaseSettings):
     bot_token: SecretStr

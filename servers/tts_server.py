@@ -7,7 +7,7 @@ from providers.tts_provider import tts, save_audio
 from pydantic import BaseModel, Field
 from fastapi.responses import StreamingResponse
 from io import BytesIO
-from typing import Literal
+from typing_extensions import Literal
 
 app = FastAPI()
 
