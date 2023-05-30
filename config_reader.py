@@ -16,6 +16,10 @@ class Settings(BaseSettings):
     tts_replacements: Dict
     tts_credits: str
     tts_ffmpeg_path: str
+    tts_enable_so_vits_svc: bool
+    tts_so_vits_svc_code_path: str
+    tts_so_vits_svc_base_tts_provider: Literal["say_macos", "built_in"]
+    tts_so_vits_svc_voices: List[Dict]
     tts_queue_size_per_user: int
     tts_host: str
     sd_host: str
@@ -65,6 +69,17 @@ class Settings(BaseSettings):
             except AssertionError as e:
                 e.args += ('Custom activation loras should not be listed with the same name as regular loras',)
                 raise
+        return v
+    
+    @validator('tts_so_vits_svc_voices')
+    def base_voices_exist(cls, v, values):
+        if not values['tts_enable_so_vits_svc']:
+          return v
+        for item in v:
+            provider = item.get('provider', values['tts_so_vits_svc_base_tts_provider'])
+            if provider == 'built_in':
+                if item['base_voice'] not in values['tts_voices']:
+                  raise ValueError(f'base tts voice ({item["base_voice"]}) does not exist')
         return v
     
     class Config:

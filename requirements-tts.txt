@@ -1,3 +1,8 @@
 fastapi
 uvicorn
 TTS
+praat-parselmouth
+fairseq==0.12.2 
+soundfile
+# macos soundfile fix:
+# conda install libsndfile -c conda-forge

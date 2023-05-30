@@ -9,13 +9,55 @@ import json
 import tempfile
 import subprocess
 import os
+import time
+from config_reader import config
 
 synthesizers = {}
+so_vits_svc_voices = dict({m['voice'].lower().replace('-',''): m for m in config.tts_so_vits_svc_voices})
+
+async def so_vits_svc(voice, text, original_audio=False):
+  so_vits_svc_code = config.tts_so_vits_svc_code_path
+  name = 'temp_tts' + str(time.time_ns())
+  temp_file = f'{so_vits_svc_code}/raw/{name}.aif'
+  temp_file_wav = temp_file.replace('.aif', '.wav')
+  v = so_vits_svc_voices[voice]
+  so_vits_model = Path(v['path']) / v['weights']
+  so_vits_config = Path(v['path']) / 'config.json'
+  so_vits_voice = v['voice']
+  base_voice = v['base_voice']
+  if not original_audio:
+    # generate any text-to-speech output
+    base_tts_provider = v.get('provider', config.tts_so_vits_svc_base_tts_provider)
+    if base_tts_provider == 'say_macos':
+      subprocess.run(
+        ['say','-v', base_voice,  '-o', temp_file, text],
+      )
+    elif base_tts_provider == 'built_in':
+      success, temp_file = await tts(base_voice, text)
+  else:
+    temp_file = original_audio
+
+  subprocess.run([
+    config.tts_ffmpeg_path, '-y', '-i', temp_file, temp_file_wav],
+    stdout=subprocess.DEVNULL,
+    stderr=subprocess.STDOUT
+  )
+  subprocess.run(
+    ["python", f"inference_main.py", "-m", str(so_vits_model), "-c", str(so_vits_config), 
+    "-n", f'{name}.wav', "-t", "0", "-s", so_vits_voice]
+    ,
+    cwd=so_vits_svc_code
+  )
+  os.remove(temp_file)
+  os.remove(temp_file_wav)
+  return (True, f'{so_vits_svc_code}/results/{name}.wav_0key_{so_vits_voice}.flac')
 
 async def tts(voice, text):
   try:
     for r in config.tts_replacements:
       text = text.replace(r, config.tts_replacements[r])
+    if voice in so_vits_svc_voices:
+      return await so_vits_svc(voice, text)
     if voice not in synthesizers:
       synthesizers[voice] = Synthesizer(
         tts_config_path=Path(config.tts_path) / "config.json",
