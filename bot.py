@@ -1,4 +1,5 @@
 import logging
+import automigration
 
 from aiogram import Bot, Dispatcher
 from config_reader import config
