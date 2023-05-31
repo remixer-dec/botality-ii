@@ -23,23 +23,23 @@ dp.message.middleware(MediaGroupMiddleware())
 
 
 def initialize(dp, bot):
-    available_modules = {
-        "sd": StableDiffusionModule,
-        "tts": TextToSpeechModule,
-        "admin": AdminModule,
-        "llm": LargeLanguageModel
-    }
-    for module in config.active_modules:
-        if module in available_modules:
-            available_modules[module](dp, bot, broker)
+  available_modules = {
+    "sd": StableDiffusionModule,
+    "tts": TextToSpeechModule,
+    "admin": AdminModule,
+    "llm": LargeLanguageModel
+  }
+  for module in config.active_modules:
+    if module in available_modules:
+      available_modules[module](dp, bot, broker)
 
 def main():
-    bot = Bot(token=config.bot_token.get_secret_value(), parse_mode="HTML")
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s',)
-    initialize(dp, bot)
-    print('running')
-    dp.run_polling(bot)
+  bot = Bot(token=config.bot_token.get_secret_value(), parse_mode="HTML")
+  logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s',)
+  initialize(dp, bot)
+  print('running')
+  dp.run_polling(bot)
 
 
 if __name__ == "__main__":
-    main()
+  main()
