@@ -25,9 +25,9 @@ class TextToSpeechModule:
           task_function = remote_tts if config.tts_mode != 'local' else tts
           task = await broker.task(semaphore_wrapper(self.semaphore, task_function)).kiq(voice, text)
           result = await task.wait_result(timeout=240)
-          completed, data = result.return_value
-          if not completed:
-            return await message.answer(f"Error, <b>{data}</b>")
+          error, data = result.return_value
+          if error:
+            return await message.answer(f"Error, <b>{error}</b>")
           else:
             audio = BufferedInputFile(tts_convert(data), 'tts.ogg')
             return await message.answer_voice(voice=audio)
@@ -36,19 +36,23 @@ class TextToSpeechModule:
       @dp.message(Command(commands=["revoice", "sts"]), flags={"long_operation": "record_audio"})
       async def revoice(message: Message, command: CommandObject) -> None:
         voice = str(command.args).split(' ')[0] if command.args else so_vits_svc_voices[0]
-        voice = voice if voice in so_vits_svc_voices else so_vits_svc_voices[0]
+        voice = voice if voice in so_vits_svc_voices else None
+        if not voice:
+          return await message.answer("<b>Voice not found</b>, available speech-to-speech voices: " +
+           ", ".join(so_vits_svc_voices))
         if message.reply_to_message:
           if message.reply_to_message.voice:
             with tempfile.NamedTemporaryFile(suffix='.ogg', delete=False) as temp_file:
               await download_audio(message.reply_to_message.voice.file_id, temp_file.name)
               task = await broker.task(semaphore_wrapper(self.semaphore, so_vits_svc)).kiq(voice, None, temp_file.name)
               result = await task.wait_result(timeout=240)
-              completed, data = result.return_value
-              if not completed:
-                return await message.answer(f"Error, <b>{data}</b>")
+              error, data = result.return_value
+              if error:
+                return await message.answer(f"Error, <b>{error}</b>")
               else:
                 audio = BufferedInputFile(tts_convert(data), 'tts.ogg')
                 return await message.answer_voice(voice=audio)
+        return await message.answer("No audio found. Use this command replying to voice messages")
 
     async def download_audio(file_id, dl_path):
       file_path = (await bot.get_file(file_id=file_id)).file_path

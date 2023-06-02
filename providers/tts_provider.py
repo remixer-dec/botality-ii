@@ -1,4 +1,5 @@
 try:
+  import torch
   from TTS.utils.synthesizer import Synthesizer
 except ImportError:
   Synthesizer = None
@@ -33,7 +34,7 @@ async def so_vits_svc(voice, text, original_audio=False):
         ['say','-v', base_voice,  '-o', temp_file, text],
       )
     elif base_tts_provider == 'built_in':
-      success, temp_file = await tts(base_voice, text)
+      error, temp_file = await tts(base_voice, text)
   else:
     temp_file = original_audio
 
@@ -50,10 +51,11 @@ async def so_vits_svc(voice, text, original_audio=False):
   )
   os.remove(temp_file)
   os.remove(temp_file_wav)
-  return (True, f'{so_vits_svc_code}/results/{name}.wav_0key_{so_vits_voice}.flac')
+  return (False, f'{so_vits_svc_code}/results/{name}.wav_0key_{so_vits_voice}.flac')
 
 async def tts(voice, text):
   try:
+    assert os.path.exists(config.tts_ffmpeg_path)
     for r in config.tts_replacements:
       text = text.replace(r, config.tts_replacements[r])
     if voice in so_vits_svc_voices:
@@ -62,12 +64,12 @@ async def tts(voice, text):
       synthesizers[voice] = Synthesizer(
         tts_config_path=Path(config.tts_path) / "config.json",
         tts_checkpoint=Path(config.tts_path) / (voice + ".pth"),
-        use_cuda=False,
+        use_cuda=torch.cuda.is_available(),
       )
     data = synthesizers[voice].tts(text[:4096] + '.')
-    return (True, save_audio(voice, data))
+    return (False, save_audio(voice, data))
   except Exception as e:
-    return (False, str(e))
+    return (str(e), None)
 
 async def remote_tts(voice, text):
   async with httpx.AsyncClient() as client:
@@ -79,20 +81,20 @@ async def remote_tts(voice, text):
           path = tempfile.TemporaryDirectory().name + str(hash(text)) + '.wav'
           with open(path, 'wb') as f:
             f.write(response.content)
-          return (True, path)
+          return (False, path)
         else:
           response_data = response.json()
         error = response_data.get('error')
         if error:
-          return (False, error)
-        wpath =response_data.get("data")
-        return (True, wpath)
+          return (error, None)
+        wpath = response_data.get("data")
+        return (False, wpath)
       else:
-        return (False, 'unknown error')
+        return ('Server error', None)
     except (httpx.NetworkError, ConnectionError, httpx.RemoteProtocolError, json.decoder.JSONDecodeError) as error:
-      return (False, error)
+      return (error, None)
     except Exception as e:
-      return (False, str(e))
+      return (str(e), None)
 
 def save_audio(voice, wav_file):
   tmp_path = tempfile.TemporaryDirectory().name + 'record.wav'

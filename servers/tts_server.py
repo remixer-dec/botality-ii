@@ -19,8 +19,8 @@ class Data(BaseModel):
 
 @app.post("/")
 async def read_root(rqdata: Data):
-  status, data = await tts(rqdata.voice, rqdata.text)
-  if status:
+  error, data = await tts(rqdata.voice, rqdata.text)
+  if not error:
     if rqdata.response == 'file':
       bytes = BytesIO(open(data, mode='rb').read())
       os.remove(data)
@@ -29,7 +29,7 @@ async def read_root(rqdata: Data):
       return response
     return {"data": data}
   else:
-    return {"error": data}
+    return {"error": error}
 
 if __name__ == "__main__":
   import uvicorn
