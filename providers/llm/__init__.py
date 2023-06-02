@@ -6,6 +6,8 @@ llama_orig_provider = lambda: importlib.import_module('providers.llm.llama_orig_
 llama_hf_provider = lambda: importlib.import_module('providers.llm.llama_hf_provider')
 mlc_chat_prebuilt_provider = lambda: importlib.import_module('providers.llm.mlc_chat_prebuilt_provider')
 llama_cpp_provider = lambda: importlib.import_module('providers.llm.llama_cpp_provider')
+remote_ob_provider = lambda: importlib.import_module('providers.llm.remote_ob')
+
 ll_models = {
   'gpt2': gpt2_provider, 
   'gptj': gptj_provider, 
@@ -13,5 +15,6 @@ ll_models = {
   'llama_orig': llama_orig_provider,
   'llama_hf': llama_hf_provider,
   'llama_cpp': llama_cpp_provider,
-  'mlc_pb': mlc_chat_prebuilt_provider
+  'mlc_pb': mlc_chat_prebuilt_provider,
+  'remote_ob': remote_ob_provider
 }

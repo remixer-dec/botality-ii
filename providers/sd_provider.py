@@ -3,9 +3,12 @@ import httpx
 import json
 import random
 import asyncio
+import logging
 from collections import defaultdict
 from config_reader import config
 
+
+logger = logging.getLogger(__name__)
 request_payload = {
   "denoising_strength": 1,
   "prompt": "",
@@ -46,7 +49,7 @@ async def refresh_model_list():
       else:
         raise Exception('Server error')
   except Exception as e:
-    print('Failed to load model names:' + str(e))
+    logger.warn('Failed to load stable diffusion model names: ' + str(e))
 
 
 def b642img(base64_image):
