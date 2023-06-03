@@ -44,17 +44,22 @@ evolved from predecessor [Botality I](https://github.com/remixer-dec/ru-gpt3-tel
 - run the bot with `python bot.py`  
   
 python3.10+ is recommended, due to aiogram compatibility  
-### Supported language models (tested): 
-
+### Supported language models (tested):  
+#### Python/Pytorch backend  
 - [original llama](https://github.com/facebookresearch/llama/blob/main/example.py) (7b version was tested on [llama-mps fork](https://github.com/remixer-dec/llama-mps/tree/multimodal-adapter) for macs), requires running the bot with `python3.10 -m torch.distributed.launch --use_env bot.py`  
 assistant mode for original llama is available with [LLaMa-Adapter](https://github.com/ZrrSkywalker/LLaMA-Adapter), to use both chat and assistant mode, some changes[[1]](https://github.com/remixer-dec/llama-mps/commit/a9b319a927461e4d9b5d74789b3b4a079cb90620)[[2]](https://github.com/remixer-dec/llama-mps/commit/74e9734eefaba721d03974924d0a43175237f32c) are necessary for non-mac users.
 - [hf llama](https://huggingface.co/decapoda-research/llama-7b-hf/tree/main) by decapoda-research (outputs are way worse than original llama on mac) + [alpaca-lora](https://github.com/tloen/alpaca-lora) (outputs are ok) / [gpt4all-lora](https://github.com/nomic-ai/gpt4all#reproducibility) (outputs are ok) / [ru-turbo-alpaca-lora](https://huggingface.co/IlyaGusev/llama_7b_ru_turbo_alpaca_lora)
-- [llama.cpp](https://github.com/abetlen/llama-cpp-python) (tested on vicuna-7b-1.1-q4_2, WizardLM-7B-uncensored.ggml.q5_1, Pygmalion-7b-4bit-Q5_1-GGML-V2, saiga13b-q4_1, Wizard-Vicuna-30B-Uncensored-GGML, Samantha-7B.ggmlv3.q5_0, airoboros-13b-ggml-q4_0, guanaco-13B.ggmlv3.q5_1)[[models](https://github.com/nomic-ai/gpt4all-chat#manual-download-of-models)] [[more models](https://huggingface.co/models?sort=downloads&search=ggml)]
-- [mlc-llm-chat](https://mlc.ai/mlc-llm/#windows-linux-mac) (tested using prebuilt binaries on demo-vicuna-v1-7b-int3 model, M1 GPU acceleration confirmed, integrated via [mlc-chatbot](https://github.com/XinyuSun/mlc-chatbot))
 - [gpt-2](https://huggingface.co/gpt2) (tested on [ru-gpt3](https://github.com/ai-forever/ru-gpts)), nanoGPT (tested on [minChatGPT](https://github.com/ethanyanjiali/minChatGPT) [[weights](https://huggingface.co/ethanyanjiali/minChatGPT/blob/main/final_ppo_model_gpt2medium.pt)])
-
 - [gpt-j](https://github.com/kingoflolz/mesh-transformer-jax#gpt-j-6b) (tested on a custom model)
 - [Cerebras-GPT](https://github.com/Cerebras/modelzoo) (tested on 1.3B model)
+  
+#### C++ / TVM backend  
+- [llama.cpp](https://github.com/abetlen/llama-cpp-python) (tested on vicuna-7b-1.1-q4_2, WizardLM-7B-uncensored.ggml.q5_1, Pygmalion-7b-4bit-Q5_1-GGML-V2, saiga13b-q4_1, Wizard-Vicuna-30B-Uncensored-GGML, Samantha-7B.ggmlv3.q5_0, airoboros-13b-ggml-q4_0, guanaco-13B.ggmlv3.q5_1)[[models](https://github.com/nomic-ai/gpt4all-chat#manual-download-of-models)] [[more models](https://huggingface.co/models?sort=downloads&search=ggml)]
+- [mlc-llm-chat](https://mlc.ai/mlc-llm/#windows-linux-mac) (tested using prebuilt binaries on demo-vicuna-v1-7b-int3 model, M1 GPU acceleration confirmed, integrated via [mlc-chatbot](https://github.com/XinyuSun/mlc-chatbot))
+  
+#### Remote api backend  
+- [oobabooga webui](https://github.com/oobabooga/text-generation-webui/) 
+
 
 ### LLM Setup
 - Make sure that you have enough RAM / vRAM to run models.
