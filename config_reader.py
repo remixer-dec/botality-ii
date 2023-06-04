@@ -55,6 +55,8 @@ class Settings(BaseSettings):
   llm_force_assistant_for_unsupported_models: bool
   llm_max_tokens: int
   llm_max_assistant_tokens: int
+  llm_lcpp_gpu_layers: int
+  llm_lcpp_max_context_size: int
   
   @validator('sd_max_resolution', 'sd_default_width', 'sd_default_height')
   def resolution_in_correct_ranges(cls, v):
