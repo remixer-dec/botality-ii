@@ -21,7 +21,7 @@ def visual_mode_available(model):
   return (hasattr(model, 'visual_mode') and model.assistant_mode)
 
 class LargeLanguageModel:
-  def __init__(self, dp, bot, broker):
+  def __init__(self, dp, bot):
     self.queue = UserLimitedQueue(config.llm_queue_size_per_user)
     self.semaphore = asyncio.Semaphore(1)
     chatter = chroniclers['chat'](config.llm_character, False, config.llm_max_history_items)
@@ -41,11 +41,9 @@ class LargeLanguageModel:
             "author": message.from_user.first_name.replace(' ', '') or 'User',
             "chat_id": get_chat_id(message)
           })
-          task = await broker\
-            .task(semaphore_wrapper(self.semaphore, active_model.generate))\
-            .kiq(text, config.llm_max_tokens, chatter.gen_cfg(cfg_override))
-          result = await task.wait_result(timeout=900)
-          parsed_output = chatter.parse(result.return_value, get_chat_id(message), len(text))
+          wrapped_runner = semaphore_wrapper(self.semaphore, active_model.generate)
+          result = await wrapped_runner(text, config.llm_max_tokens, chatter.gen_cfg(cfg_override))
+          parsed_output = chatter.parse(result, get_chat_id(message), len(text))
           await message.reply(text=html.quote(parsed_output))
 
     @dp.message(Command(commands=['reset', 'clear']), flags={"cooldown": 20})
@@ -69,10 +67,8 @@ class LargeLanguageModel:
               "chat_id": get_chat_id(message),
               "model": initialized_model
             })
-            task = await broker\
-              .task(semaphore_wrapper(self.semaphore, active_model.generate))\
-              .kiq(text, config.llm_max_assistant_tokens, {**chatter.gen_cfg(cfg_override), **img_input}, True)
-            result = await task.wait_result(timeout=900)
+            wrapped_runner = semaphore_wrapper(self.semaphore, active_model.generate)
+            result = await wrapped_runner(text, config.llm_max_tokens, chatter.gen_cfg(cfg_override), **img_input)
             parsed_output = assistant.parse(result.return_value, get_chat_id(message), len(text))
             if config.llm_assistant_use_in_chat_mode and not hasattr(command, 'command'):
               reply = html.quote(parsed_output)

@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 
 class AdminModule:
-  def __init__(self, dp, bot, broker):
+  def __init__(self, dp, bot):
     @dp.message(Command(commands=["sendpic"]), flags={"admins_only": True})
     @log_exceptions(logger)
     async def send_pic(message: Message, command: CommandObject) -> None:

@@ -7,7 +7,7 @@ import asyncio
 import tempfile
 
 class TextToSpeechModule:
-  def __init__(self, dp, bot, broker):
+  def __init__(self, dp, bot):
     self.queue = UserLimitedQueue(config.tts_queue_size_per_user)
     self.semaphore = asyncio.Semaphore(1)
     
@@ -23,9 +23,8 @@ class TextToSpeechModule:
           voice = command.command
           text = str(command.args)
           task_function = remote_tts if config.tts_mode != 'local' else tts
-          task = await broker.task(semaphore_wrapper(self.semaphore, task_function)).kiq(voice, text)
-          result = await task.wait_result(timeout=240)
-          error, data = result.return_value
+          wrapped_runner = semaphore_wrapper(self.semaphore, task_function)
+          error, data = await wrapped_runner(voice, text)
           if error:
             return await message.answer(f"Error, <b>{error}</b>")
           else:
@@ -44,9 +43,8 @@ class TextToSpeechModule:
           if message.reply_to_message.voice:
             with tempfile.NamedTemporaryFile(suffix='.ogg', delete=False) as temp_file:
               await download_audio(message.reply_to_message.voice.file_id, temp_file.name)
-              task = await broker.task(semaphore_wrapper(self.semaphore, so_vits_svc)).kiq(voice, None, temp_file.name)
-              result = await task.wait_result(timeout=240)
-              error, data = result.return_value
+              wrapped_runner = semaphore_wrapper(self.semaphore, so_vits_svc)
+              error, data = await wrapped_runner(voice, None, temp_file.name)
               if error:
                 return await message.answer(f"Error, <b>{error}</b>")
               else:

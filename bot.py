@@ -4,7 +4,6 @@ import automigration
 from aiogram import Bot, Dispatcher
 from config_reader import config
 from middleware import ChatActionMiddleware, AccessMiddleware, CooldownMiddleware, MediaGroupMiddleware
-from taskiq import InMemoryBroker
 
 from modules.sd import StableDiffusionModule
 from modules.tts import TextToSpeechModule
@@ -13,7 +12,6 @@ from modules.llm import LargeLanguageModel
 
 
 logger = logging.getLogger(__name__)
-broker = InMemoryBroker()
 
 dp = Dispatcher()
 dp.message.middleware(AccessMiddleware())
@@ -31,7 +29,7 @@ def initialize(dp, bot):
   }
   for module in config.active_modules:
     if module in available_modules:
-      available_modules[module](dp, bot, broker)
+      available_modules[module](dp, bot)
 
 def main():
   bot = Bot(token=config.bot_token.get_secret_value(), parse_mode="HTML")

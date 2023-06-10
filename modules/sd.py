@@ -30,7 +30,7 @@ class SDArguments(pydantic.BaseModel):
 
 
 class StableDiffusionModule:
-  def __init__(self, dp, bot, broker):
+  def __init__(self, dp, bot):
     self.queue = UserLimitedQueue(config.sd_queue_size_per_user)
     self.semaphore = asyncio.Semaphore(1)
 
@@ -58,9 +58,8 @@ class StableDiffusionModule:
           elif command.command.startswith("iti"):
             return await message.answer("Error, <b>unable to find initial photo</b>")
 
-          task = await broker.task(semaphore_wrapper(self.semaphore, processor)).kiq(params)
-          result = await task.wait_result(timeout=240)
-          sd_error, data, details = result.return_value
+          wrapped_runner = semaphore_wrapper(self.semaphore, processor)
+          sd_error, data, details = await wrapped_runner(params)
           reply_to = message.reply_to_message.message_id if message.reply_to_message is not None else None
           
           if sd_error:
