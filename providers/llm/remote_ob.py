@@ -5,16 +5,16 @@ import asyncio
 from config_reader import config
 
 logger = logging.getLogger(__name__)
-tts_host = config.llm_ob_host
+llm_host = config.llm_ob_host
 assistant_mode = True
 
 async def remote_llm_api(method, endpoint, payload):
   async with httpx.AsyncClient() as client:
     try:
       if method == 'GET':
-        response = await client.get(url=f'{tts_host}/{endpoint}', params=payload, timeout=None)
+        response = await client.get(url=f'{llm_host}/{endpoint}', params=payload, timeout=None)
       else:
-        response = await client.post(url=f'{tts_host}/{endpoint}', json=payload, timeout=None)
+        response = await client.post(url=f'{llm_host}/{endpoint}', json=payload, timeout=None)
       if response.status_code == 200:
         response_data = response.json()
         return (False, response_data)

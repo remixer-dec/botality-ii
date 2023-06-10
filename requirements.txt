@@ -1,6 +1,5 @@
 aiogram==3.0.*
 pydantic
 dotenv
-taskiq
 httpx
 typing-extensions==4.5.0
