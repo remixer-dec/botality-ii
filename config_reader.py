@@ -41,16 +41,17 @@ class Settings(BaseSettings):
   sd_lora_custom_activations: Dict
   sd_only_admins_can_change_models: bool
   sd_queue_size_per_user: int
-  llm_ob_host: str
+  llm_host: str
   llm_queue_size_per_user: int
-  llm_active_model_type: Literal["gpt2","gptj", "cerebras_gpt","llama_orig", "llama_hf", "llama_cpp", "mlc_pb", "remote_ob"]
+  llm_backend: Literal ['pytorch', 'llama_cpp', 'mlc_pb', 'remote_ob', 'remote_lcpp']
+  llm_python_model_type: Literal["gpt2","gptj", "cerebras_gpt","llama_orig", "llama_hf"]
   llm_paths: Dict
   llm_character: str
   llm_history_grouping: Literal["user", "chat"]
   llm_max_history_items: int
   llm_generation_cfg_override: Dict
   llm_assistant_cfg_override: Dict
-  llm_assistant_chronicler: Literal["minchatgpt", "alpaca", "gpt4all", "raw"]
+  llm_assistant_chronicler: Literal["alpaca", "instruct", "raw"]
   llm_assistant_use_in_chat_mode: bool
   llm_force_assistant_for_unsupported_models: bool
   llm_max_tokens: int

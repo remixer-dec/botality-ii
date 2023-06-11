@@ -111,42 +111,6 @@ class AlpacaAssistantChronicler(AbstractChronicler):
       return '...'
     return parsed
 
-
-class MinChatGPTChronicler(AbstractChronicler):
-  def __init__(self, chronicler_filename):
-    super().__init__(chronicler_filename)
-
-  @AbstractChronicler.prepare_hook
-  def prepare(self, details, fresh=False):
-    msg = details['message']
-    return f"""Human: {msg}
-
-Assistant: 
-"""
-  @AbstractChronicler.parse_hook
-  def parse(self, output, chat_id, skip=0):
-    output = output[skip:].strip()
-    end = (output.find('Human:') + 1 ) or (output.find('Assistant:') + 1) or (len(output) + 1)
-    parsed = output[:end - 1].strip()
-    if parsed == '':
-      return '...'
-    return parsed
-
-
-class GPT4AllChronicler(AbstractChronicler):
-  def __init__(self, chronicler_filename):
-    super().__init__(chronicler_filename)
-
-  @AbstractChronicler.prepare_hook
-  def prepare(self, details, fresh=False):
-    msg = details['message'].replace('\n', ' ')
-    return f"""{msg}
-"""
-  @AbstractChronicler.parse_hook
-  def parse(self, output, chat_id, skip=0):
-    output = output[skip:].strip()
-    return output
-
 class RawChronicler(AbstractChronicler):
   def __init__(self, chronicler_filename):
     super().__init__(chronicler_filename)
@@ -161,8 +125,7 @@ class RawChronicler(AbstractChronicler):
 
 chroniclers = {
   "alpaca": AlpacaAssistantChronicler,
-  "minchatgpt": MinChatGPTChronicler,
-  "gpt4all": GPT4AllChronicler,
+  "instruct": AlpacaAssistantChronicler,
   "chat": ConversationChronicler,
   "raw": RawChronicler
 }

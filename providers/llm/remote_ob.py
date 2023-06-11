@@ -5,7 +5,7 @@ import asyncio
 from config_reader import config
 
 logger = logging.getLogger(__name__)
-llm_host = config.llm_ob_host
+llm_host = config.llm_host
 assistant_mode = True
 
 async def remote_llm_api(method, endpoint, payload):
@@ -38,6 +38,7 @@ async def generate(prompt, length=64, model_params={}, assist=True):
     'max_length': length,
     **model_params,
   }
+  print(data)
   error, response = await remote_llm_api('POST', 'api/v1/generate', data)
   if not error:
     return prompt + response.get('results')[0].get('text')

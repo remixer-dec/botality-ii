@@ -2,6 +2,7 @@ from io import BytesIO
 import base64
 import argparse
 import functools
+import sys
 
 async def tg_image_to_data(photo, bot):
   if not photo:
@@ -51,3 +52,7 @@ def log_exceptions(logger):
         logger.error(f"Error in {func.__name__}: {str(e)}")
     return wrapper
   return decorator
+
+def cprint(*args, color='default'):
+  keys = ['default', 'red', 'green', 'yellow', 'blue']
+  sys.stdout.write(f'\x1b[1;3{keys.index(color)}m' + ' '.join(args) + '\x1b[0m\n')
