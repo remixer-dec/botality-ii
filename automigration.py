@@ -20,7 +20,10 @@ def check_new_keys_in_example_env():
       file.write(towrite)
 
 DEPRECATED_KEYS = ['llm_active_model_type']
-DEPRECATED_KVS = {'llm_assistant_chronicler': ['gpt4all', 'minchatgpt', 'alpaca']}
+DEPRECATED_KVS = {
+  'llm_assistant_chronicler': ['gpt4all', 'minchatgpt', 'alpaca'],
+  'llm_python_model_type': 'cerebras_gpt'
+}
 
 def check_deprecated_keys_in_dotenv():
   for key in system_env:

@@ -44,7 +44,7 @@ class Settings(BaseSettings):
   llm_host: str
   llm_queue_size_per_user: int
   llm_backend: Literal ['pytorch', 'llama_cpp', 'mlc_pb', 'remote_ob', 'remote_lcpp']
-  llm_python_model_type: Literal["gpt2","gptj", "cerebras_gpt","llama_orig", "llama_hf"]
+  llm_python_model_type: Literal["gpt2","gptj", "auto_hf","llama_orig", "llama_hf"]
   llm_paths: Dict
   llm_character: str
   llm_history_grouping: Literal["user", "chat"]

@@ -26,25 +26,25 @@ class LargeLanguageModel:
     self.semaphore = asyncio.Semaphore(1)
     chatter = chroniclers['chat'](config.llm_character, False, config.llm_max_history_items)
     assistant = chroniclers[config.llm_assistant_chronicler](config.llm_character)
-    initialized_model = active_model.init(config.llm_paths, chatter.init_cfg())
+    model = active_model.init(config.llm_paths, chatter.init_cfg())
     cfg_override = config.llm_generation_cfg_override
     
     @dp.message((F.text[0] if F.text else '') != '/', flags={"long_operation": "typing"})
     async def handle_messages(message: Message):
       with self.queue.for_user(message.from_user.id) as available:
         if available:
-          if (config.llm_assistant_use_in_chat_mode and assistant_model_available(active_model))\
-            or (visual_mode_available(active_model) and parse_photo(message)):
+          if (config.llm_assistant_use_in_chat_mode and assistant_model_available(model))\
+            or (visual_mode_available(model) and parse_photo(message)):
             return await assist(message=message, command=SimpleNamespace(args=message.text))
           text = chatter.prepare({
             "message": message.text, 
             "author": message.from_user.first_name.replace(' ', '') or 'User',
             "chat_id": get_chat_id(message)
           })
-          wrapped_runner = semaphore_wrapper(self.semaphore, active_model.generate)
-          result = await wrapped_runner(text, config.llm_max_tokens, chatter.gen_cfg(cfg_override))
-          parsed_output = chatter.parse(result, get_chat_id(message), len(text))
-          await message.reply(text=html.quote(parsed_output))
+          wrapped_runner = semaphore_wrapper(self.semaphore, model.generate)
+          error, result = await wrapped_runner(text, config.llm_max_tokens, chatter.gen_cfg(cfg_override))
+          output = chatter.parse(result, get_chat_id(message), len(text)) if not error else str(result)
+          await message.reply(text=html.quote(output))
 
     @dp.message(Command(commands=['reset', 'clear']), flags={"cooldown": 20})
     async def clear_llm_history(message: Message, command: Command):
@@ -56,35 +56,36 @@ class LargeLanguageModel:
       if msg and command.args:
         with self.queue.for_user(message.from_user.id) as available:
           if available:
-            if not assistant_model_available(active_model):
+            if not assistant_model_available(model):
               return await message.reply(text='Assistant model is not available')
             img_input = {"visual_input": await tg_image_to_data(parse_photo(message), bot)}\
-                        if visual_mode_available(active_model) \
+                        if visual_mode_available(model) \
                         else {}
             text = assistant.prepare({
               "message": msg, 
               "author": message.from_user.first_name.replace(' ', '') or 'User',
               "chat_id": get_chat_id(message),
-              "model": initialized_model
+              "model": model.model
             })
-            wrapped_runner = semaphore_wrapper(self.semaphore, active_model.generate)
-            result = await wrapped_runner(text, config.llm_max_tokens, chatter.gen_cfg(cfg_override), **img_input)
-            parsed_output = assistant.parse(result.return_value, get_chat_id(message), len(text))
+            wrapped_runner = semaphore_wrapper(self.semaphore, model.generate)
+            params = {**chatter.gen_cfg(cfg_override), **img_input}
+            error, result = await wrapped_runner(text, config.llm_max_assistant_tokens, params)
+            output = assistant.parse(result, get_chat_id(message), len(text)) if not error else str(result)
             if config.llm_assistant_use_in_chat_mode and not hasattr(command, 'command'):
-              reply = html.quote(parsed_output)
+              reply = html.quote(output)
             else:
-              reply = f'<b>Q</b>: {msg}\n\n<b>A</b>: {html.quote(parsed_output)}'
+              reply = f'<b>Q</b>: {msg}\n\n<b>A</b>: {html.quote(output)}'
             await message.reply(text=(reply), allow_sending_without_reply=True)
 
     @dp.message(Command(commands=['llm']), flags={"cooldown": 20})
     async def helpfunction(message: Message, command: Command):
       text = f'''[LLM module].
       Commands: /ask
-      Active model type: {config.llm_active_model_type}
-      Assistant mode: {str(assistant_model_available(active_model))} ({config.llm_assistant_chronicler})
+      Active model type: {config.llm_backend}
+      Assistant mode: {str(assistant_model_available(model))} ({config.llm_assistant_chronicler})
       Character: {config.llm_character}
       Context visibility: {config.llm_history_grouping}
-      Model: {initialized_model.get('filename') if initialized_model else 'unknown'}
+      Model: {model.model_name if model.model else 'unknown'}
       Config: 
 {json.dumps(chatter.gen_cfg(config.llm_assistant_cfg_override), sort_keys=True, indent=4)}'''
       return await message.reply(text=text)
