@@ -21,61 +21,85 @@ def visual_mode_available(model):
   return (hasattr(model, 'visual_mode') and model.assistant_mode)
 
 class LargeLanguageModel:
+  async def assist(self, text, context):
+    prompt = self.assistant.prepare({
+      "message": text, 
+      "model": self.model,
+      **context
+    })
+    wrapped_runner = semaphore_wrapper(self.semaphore, self.model.generate)
+    params = {**self.assistant.gen_cfg(self.assistant_cfg_override), **context.get('img_input',{})}
+    error, result = await wrapped_runner(prompt, config.llm_max_assistant_tokens, params)
+    output = self.assistant.parse(result, context.get('chat_id', 0), len(prompt)) if not error else str(result)
+    return output
+
+  async def chat(self, text, context):
+    prompt = self.chatter.prepare({
+      "message": text, 
+      **context
+    })
+    wrapped_runner = semaphore_wrapper(self.semaphore, self.model.generate)
+    cfg = self.chatter.gen_cfg(self.chat_cfg_override)
+    error, result = await wrapped_runner(prompt, config.llm_max_tokens, cfg)
+    return self.chatter.parse(result, context['chat_id'], len(prompt)) if not error else str(result)
+
+  def raw_llm(self, text, content):
+    pass
+
+  def get_common_chat_attributes(self, message, additional={}):
+    return {
+      'author': message.from_user.first_name.replace(' ', '') or 'User',
+      'chat_id': get_chat_id(message),
+      'user_id': message.from_user.id,
+      **additional
+    }
+
   def __init__(self, dp, bot):
     self.queue = UserLimitedQueue(config.llm_queue_size_per_user)
     self.semaphore = asyncio.Semaphore(1)
-    chatter = chroniclers['chat'](config.llm_character, False, config.llm_max_history_items)
-    assistant = chroniclers[config.llm_assistant_chronicler](config.llm_character)
-    model = active_model.init(config.llm_paths, chatter.init_cfg())
-    cfg_override = config.llm_generation_cfg_override
+    self.chatter = chroniclers['chat'](config.llm_character, False, config.llm_max_history_items)
+    self.assistant = chroniclers[config.llm_assistant_chronicler](config.llm_character)
+    model = active_model.init(config.llm_paths, self.chatter.init_cfg())
+    self.model = model
+    self.chat_cfg_override = config.llm_generation_cfg_override
+    self.assistant_cfg_override = config.llm_assistant_cfg_override
     
     @dp.message((F.text[0] if F.text else '') != '/', flags={"long_operation": "typing"})
     async def handle_messages(message: Message):
+      # if should be handled in assistant mode
+      if (config.llm_assistant_use_in_chat_mode and assistant_model_available(model))\
+      or (visual_mode_available(model) and parse_photo(message)):
+        return await assist_message(message=message, command=SimpleNamespace(args=message.text))
       with self.queue.for_user(message.from_user.id) as available:
         if available:
-          if (config.llm_assistant_use_in_chat_mode and assistant_model_available(model))\
-            or (visual_mode_available(model) and parse_photo(message)):
-            return await assist(message=message, command=SimpleNamespace(args=message.text))
-          text = chatter.prepare({
-            "message": message.text, 
-            "author": message.from_user.first_name.replace(' ', '') or 'User',
-            "chat_id": get_chat_id(message)
-          })
-          wrapped_runner = semaphore_wrapper(self.semaphore, model.generate)
-          error, result = await wrapped_runner(text, config.llm_max_tokens, chatter.gen_cfg(cfg_override))
-          output = chatter.parse(result, get_chat_id(message), len(text)) if not error else str(result)
+          output = await self.chat(message.text, self.get_common_chat_attributes(message))
           await message.reply(text=html.quote(output))
 
     @dp.message(Command(commands=['reset', 'clear']), flags={"cooldown": 20})
     async def clear_llm_history(message: Message, command: Command):
-      chatter.history[get_chat_id(message)] = []
+      self.chatter.history[get_chat_id(message)] = []
     
     @dp.message(Command(commands=['ask', 'assist']), flags={"long_operation": "typing"})
-    async def assist(message: Message, command: Command):
+    async def assist_message(message: Message, command: Command):
       msg = str(command.args).strip()
-      if msg and command.args:
-        with self.queue.for_user(message.from_user.id) as available:
-          if available:
-            if not assistant_model_available(model):
-              return await message.reply(text='Assistant model is not available')
-            img_input = {"visual_input": await tg_image_to_data(parse_photo(message), bot)}\
-                        if visual_mode_available(model) \
-                        else {}
-            text = assistant.prepare({
-              "message": msg, 
-              "author": message.from_user.first_name.replace(' ', '') or 'User',
-              "chat_id": get_chat_id(message),
-              "model": model.model
-            })
-            wrapped_runner = semaphore_wrapper(self.semaphore, model.generate)
-            params = {**chatter.gen_cfg(cfg_override), **img_input}
-            error, result = await wrapped_runner(text, config.llm_max_assistant_tokens, params)
-            output = assistant.parse(result, get_chat_id(message), len(text)) if not error else str(result)
-            if config.llm_assistant_use_in_chat_mode and not hasattr(command, 'command'):
-              reply = html.quote(output)
-            else:
-              reply = f'<b>Q</b>: {msg}\n\n<b>A</b>: {html.quote(output)}'
-            await message.reply(text=(reply), allow_sending_without_reply=True)
+      if not (msg and command.args):
+        return
+      if not assistant_model_available(model):
+        return await message.reply(text='Assistant model is not available')
+      img_input = {"visual_input": await tg_image_to_data(parse_photo(message), bot)}\
+                  if visual_mode_available(model) \
+                  else {}
+      with self.queue.for_user(message.from_user.id) as available:
+        if not available:
+          return
+        output = await self.assist(msg, 
+          self.get_common_chat_attributes(message, {'img_imput': img_input})
+        )
+      if config.llm_assistant_use_in_chat_mode and not hasattr(command, 'command'):
+        reply = html.quote(output)
+      else:
+        reply = f'<b>Q</b>: {msg}\n\n<b>A</b>: {html.quote(output)}'
+      await message.reply(text=(reply), allow_sending_without_reply=True)
 
     @dp.message(Command(commands=['llm']), flags={"cooldown": 20})
     async def helpfunction(message: Message, command: Command):
@@ -85,7 +109,7 @@ class LargeLanguageModel:
       Assistant mode: {str(assistant_model_available(model))} ({config.llm_assistant_chronicler})
       Character: {config.llm_character}
       Context visibility: {config.llm_history_grouping}
-      Model: {model.model_name if model.model else 'unknown'}
+      Model: {model.filename if model.model else 'unknown'}
       Config: 
-{json.dumps(chatter.gen_cfg(config.llm_assistant_cfg_override), sort_keys=True, indent=4)}'''
+{json.dumps(self.chatter.gen_cfg(self.assistant_cfg_override), sort_keys=True, indent=4)}'''
       return await message.reply(text=text)
