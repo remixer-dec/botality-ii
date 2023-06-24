@@ -33,6 +33,27 @@ class AbstractChronicler(metaclass=ABCMeta):
       return parser(self, *args, **kwargs)
     return wrapper
 
+class AssistantReplyChronicler(AbstractChronicler):
+  def __init__(self, chronicler_filename):
+    super().__init__(chronicler_filename)
+
+  def prepare(self, details, fresh=False):
+    text = details['message']
+    reply_text = details['reply_text']
+    memory = self.parse_qa(reply_text) + '\n' + text
+    details['message'] = memory
+    return chroniclers['instruct'].prepare(self, details)
+  
+  def parse_qa(self, text):
+    if text.startswith('Q:'):
+      splits = text.split('\n\n')
+      return f'>{splits[0][2:]}\n>{splits[1][2:]}'
+    else:
+      return '>' + text.replace('\n', ' ')
+
+  def parse(self, output, chat_id, skip=0):
+    return chroniclers['instruct'].parse(self, output, chat_id, skip)
+
 
 class ConversationChronicler(AbstractChronicler):
   def __init__(self, chronicler_filename, continous=False, max_length=10):
@@ -127,5 +148,6 @@ chroniclers = {
   "alpaca": AlpacaAssistantChronicler,
   "instruct": AlpacaAssistantChronicler,
   "chat": ConversationChronicler,
+  "reply": AssistantReplyChronicler,
   "raw": RawChronicler
 }

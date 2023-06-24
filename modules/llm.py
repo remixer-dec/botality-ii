@@ -22,29 +22,39 @@ def visual_mode_available(model):
 
 class LargeLanguageModel:
   async def assist(self, text, context):
-    prompt = self.assistant.prepare({
+    params = {**self.assistant.gen_cfg(self.assistant_cfg_override), **context.get('img_input',{})}
+    return await self.complete_with_chronicler(text, self.chatter, context, params, config.llm_max_assistant_tokens)
+
+  async def chat(self, text, context):
+    params = self.chatter.gen_cfg(self.chat_cfg_override)
+    return await self.complete_with_chronicler(text, self.chatter, context, params, config.llm_max_tokens)
+
+  async def reply(self, text, context, message):
+    params = self.assistant.gen_cfg(self.assistant_cfg_override)
+    context['reply_text'] = message.reply_to_message.text
+    return await self.complete_with_chronicler(text, self.replier, context, params, config.llm_max_assistant_tokens)
+
+  async def complete_with_chronicler(self, text, chronicler, context, params, length):
+    prompt = chronicler.prepare({
       "message": text, 
       "model": self.model,
       **context
     })
     wrapped_runner = semaphore_wrapper(self.semaphore, self.model.generate)
-    params = {**self.assistant.gen_cfg(self.assistant_cfg_override), **context.get('img_input',{})}
     error, result = await wrapped_runner(prompt, config.llm_max_assistant_tokens, params)
-    output = self.assistant.parse(result, context.get('chat_id', 0), len(prompt)) if not error else str(result)
-    return output
+    return chronicler.parse(result, context.get('chat_id', 0), len(prompt)) if not error else str(result)
 
-  async def chat(self, text, context):
-    prompt = self.chatter.prepare({
-      "message": text, 
-      **context
-    })
+  async def complete_raw(self, text, context):
     wrapped_runner = semaphore_wrapper(self.semaphore, self.model.generate)
-    cfg = self.chatter.gen_cfg(self.chat_cfg_override)
-    error, result = await wrapped_runner(prompt, config.llm_max_tokens, cfg)
-    return self.chatter.parse(result, context['chat_id'], len(prompt)) if not error else str(result)
+    error, result = await wrapped_runner(text, config.llm_max_assistant_tokens, self.assistant.gen_cfg({}))
+    return result
 
-  def raw_llm(self, text, content):
-    pass
+  def should_use_reply_chronicler(self, message, bot):
+    reply = message.reply_to_message
+    is_reply_from_bot = reply and reply.from_user.id == bot._me.id
+    is_qa_format = reply and reply.text.startswith('Q:')
+    always_assist = config.llm_assistant_use_in_chat_mode and assistant_model_available(self.model)
+    return is_reply_from_bot and (is_qa_format or always_assist)
 
   def get_common_chat_attributes(self, message, additional={}):
     return {
@@ -59,6 +69,7 @@ class LargeLanguageModel:
     self.semaphore = asyncio.Semaphore(1)
     self.chatter = chroniclers['chat'](config.llm_character, False, config.llm_max_history_items)
     self.assistant = chroniclers[config.llm_assistant_chronicler](config.llm_character)
+    self.replier = chroniclers['reply'](config.llm_character)
     model = active_model.init(config.llm_paths, self.chatter.init_cfg())
     self.model = model
     self.chat_cfg_override = config.llm_generation_cfg_override
@@ -66,10 +77,12 @@ class LargeLanguageModel:
     
     @dp.message((F.text[0] if F.text else '') != '/', flags={"long_operation": "typing"})
     async def handle_messages(message: Message):
+      parse_reply = self.should_use_reply_chronicler(message, bot)
       # if should be handled in assistant mode
       if (config.llm_assistant_use_in_chat_mode and assistant_model_available(model))\
-      or (visual_mode_available(model) and parse_photo(message)):
-        return await assist_message(message=message, command=SimpleNamespace(args=message.text))
+      or (visual_mode_available(model) and parse_photo(message)) or parse_reply:
+        command = SimpleNamespace(args=message.text, parse_reply=parse_reply)
+        return await assist_message(message=message, command=command)
       with self.queue.for_user(message.from_user.id) as available:
         if available:
           output = await self.chat(message.text, self.get_common_chat_attributes(message))
@@ -92,9 +105,15 @@ class LargeLanguageModel:
       with self.queue.for_user(message.from_user.id) as available:
         if not available:
           return
-        output = await self.assist(msg, 
-          self.get_common_chat_attributes(message, {'img_imput': img_input})
-        )
+        if hasattr(command, 'parse_reply') and not img_input:
+          output = await self.reply(msg,
+            self.get_common_chat_attributes(message),
+            message
+          )
+        else:
+          output = await self.assist(msg, 
+            self.get_common_chat_attributes(message, {'img_imput': img_input})
+          )
       if config.llm_assistant_use_in_chat_mode and not hasattr(command, 'command'):
         reply = html.quote(output)
       else:
