@@ -37,7 +37,7 @@ class Settings(BaseSettings):
   sd_default_iti_cfg_scale: int
   sd_default_iti_steps: int
   sd_default_iti_denoising_strength: float
-  sd_available_loras: List[str]
+  sd_default_iti_sampler: str
   sd_lora_custom_activations: Dict
   sd_only_admins_can_change_models: bool
   sd_queue_size_per_user: int
@@ -63,16 +63,6 @@ class Settings(BaseSettings):
   def resolution_in_correct_ranges(cls, v):
     if v % 64 != 0 or v < 256 or v > 2048:
       raise ValueError('incorrect value')
-    return v
-  
-  @validator('sd_lora_custom_activations')
-  def no_lora_conflicts(cls, v, values):
-    for key in v:
-      try:
-        assert key not in values['sd_available_loras']
-      except AssertionError as e:
-        e.args += ('Custom activation loras should not be listed with the same name as regular loras',)
-        raise
     return v
   
   @validator('tts_so_vits_svc_voices')

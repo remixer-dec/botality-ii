@@ -28,6 +28,7 @@ request_payload = {
 # hash: name
 models = defaultdict(lambda: 'Unknown model')
 embeddings = []
+loras = []
 
 sd_url = config.sd_host or "http://127.0.0.1:7860"
 
@@ -37,15 +38,19 @@ async def refresh_model_list():
     async with httpx.AsyncClient() as client:
       model_response = await client.get(url=f'{sd_url}/sdapi/v1/sd-models',headers={'accept': 'application/json'}, timeout=None)
       embed_response = await client.get(url=f'{sd_url}/sdapi/v1/embeddings',headers={'accept': 'application/json'}, timeout=None)
-      if model_response.status_code == 200 and embed_response.status_code == 200: 
+      lora_response  = await client.get(url=f'{sd_url}/sdapi/v1/loras',headers={'accept': 'application/json'}, timeout=None)
+      if model_response.status_code == 200 and embed_response.status_code == 200 and lora_response.status_code == 200: 
         model_response_data = model_response.json()
         embed_response_data = embed_response.json()
+        lora_response_data  = lora_response.json()
         models = defaultdict(lambda: 'Unknown model')
         embeddings = []
         for m in model_response_data:
           models[m['hash']] = m['model_name']
         for e in embed_response_data['loaded']:
           embeddings.append(e)
+        for lora in lora_response_data:
+          loras.append(lora['name'])
       else:
         raise Exception('Server error')
   except Exception as e:
@@ -101,6 +106,7 @@ async def iti(override=None):
   payload['denoising_strength'] = config.sd_default_iti_denoising_strength
   payload['cfg_scale'] = config.sd_default_iti_cfg_scale
   payload['steps'] = config.sd_default_iti_steps
+  payload['sampler'] = config.sd_default_iti_sampler
   if override:
     payload = {**payload, **override}
   return await sd_get_images(payload, 'sdapi/v1/img2img')

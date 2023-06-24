@@ -2,7 +2,7 @@
 from aiogram import html, F
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message, BufferedInputFile, InputMediaPhoto
-from providers.sd_provider import tti, iti, models, embeddings, switch_model
+from providers.sd_provider import tti, iti, models, embeddings, loras, switch_model
 from utils import tg_image_to_data, parse_photo, CustomArgumentParser, JoinNargsAction
 from custom_queue import UserLimitedQueue, semaphore_wrapper
 from typing import Literal
@@ -14,6 +14,7 @@ import shlex
 import random
 
 sd_available_resolutions = list(range(256, config.sd_max_resolution + 1, 64))
+loras = [key for key in loras if key not in config.sd_lora_custom_activations]
 
 class SDArguments(pydantic.BaseModel):
   denoising_strength: float = pydantic.Field(None, ge=0, le=1, alias='d', description='Denoising strength')
@@ -81,15 +82,15 @@ class StableDiffusionModule:
     async def handle_media_groups(*args, **kwargs):
       return
 
-    @dp.message(Command(commands=["models", "loras", "embeddings"]))
+    @dp.message(Command(commands=["models", "loras", "embeddings"]), flags={"cooldown": 5})
     async def list_sd_models(message: Message, command: CommandObject):
       if command.command == "models":
         return message.answer('<b>Available models:</b> \n' + "\n".join(models.values()))
       if command.command == "embeddings":
         return message.answer('<b>Available embeddings:</b> \n' + "\n".join(embeddings))
       if command.command == "loras":
-        loras = [*config.sd_available_loras, *config.sd_lora_custom_activations.keys()]
-        return message.answer('<b>Available loras:</b> \n' + "\n".join(loras))
+        loras_list = sorted([*loras, *config.sd_lora_custom_activations.keys()])
+        return message.answer('<b>Available loras:</b> \n' + "\n".join(loras_list))
 
     @dp.message(
       Command(commands=["model", "changemodel", "switchmodel"]), 
@@ -162,9 +163,16 @@ class StableDiffusionModule:
                        .replace('LORA_RANGES', str(random.choice([0.9, 0.95, 1.0, 1.1, 1.2])))
       else:
         prompt = prompt.replace(key, seamless_loras[key])
-    loras = config.sd_available_loras
     subst = "<lora:\\1:\\2.\\3\\4>"
     for lora in loras:
       regex = fr"({lora})([0-9])?([0-9])([0-9])"
       prompt = re.sub(regex, subst, prompt, 1, re.IGNORECASE)
     return prompt
+
+  async def tti(self, params):
+    wrapped_runner = semaphore_wrapper(self.semaphore, tti)
+    return await wrapped_runner(params)
+ 
+  async def iti(self, params):
+    wrapped_runner = semaphore_wrapper(self.semaphore, iti)
+    return await wrapped_runner(params)
