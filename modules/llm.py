@@ -23,7 +23,7 @@ def visual_mode_available(model):
 class LargeLanguageModel:
   async def assist(self, text, context):
     params = {**self.assistant.gen_cfg(self.assistant_cfg_override), **context.get('img_input',{})}
-    return await self.complete_with_chronicler(text, self.chatter, context, params, config.llm_max_assistant_tokens)
+    return await self.complete_with_chronicler(text, self.assistant, context, params, config.llm_max_assistant_tokens)
 
   async def chat(self, text, context):
     params = self.chatter.gen_cfg(self.chat_cfg_override)
