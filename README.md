@@ -1,15 +1,19 @@
 ## Botality II  
   
-This project is an implementation of a modular **telegram bot** based on [aiogram](https://github.com/aiogram/aiogram), designed for remote and local ML Inference. Currently integrated with:
+This project is an implementation of a modular **telegram bot** based on [aiogram](https://github.com/aiogram/aiogram), designed for local ML Inference with remote service support. Currently integrated with:
 -  **Stable Diffusion** (using [stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) API),
--  **VITS** built-in text-to-speech engine (using [TTS](https://github.com/coqui-ai/TTS) and [so-vits-SVC](https://github.com/svc-develop-team/so-vits-svc/tree/4.0)).  
--  **LLMs** such as **[llama](https://github.com/facebookresearch/llama)**, **[gpt-j-6b](https://github.com/kingoflolz/mesh-transformer-jax#gpt-j-6b)**, **[cerebras-gpt](https://github.com/Cerebras/modelzoo)**, **[gpt-2](https://huggingface.co/gpt2)** with support for assistant mode   
+-  **TTS** built-in text-to-speech engine (using [TTS (VITS)](https://github.com/coqui-ai/TTS) and [so-vits-SVC](https://github.com/svc-develop-team/so-vits-svc/tree/4.0)).  
+-  **LLMs** such as **[llama](https://github.com/facebookresearch/llama)**, **[gpt-j-6b](https://github.com/kingoflolz/mesh-transformer-jax#gpt-j-6b)**, **[gpt-2](https://huggingface.co/gpt2)** with support for assistant mode   
 via [alpaca-lora](https://github.com/tloen/alpaca-lora), via [gpt4all-lora](https://github.com/nomic-ai/gpt4all#reproducibility), via [adapter-model](https://github.com/ZrrSkywalker/LLaMA-Adapter) and via [minChatGPT](https://github.com/ethanyanjiali/minChatGPT)  
 
 Accelerated LLM inference support: [llama.cpp](https://github.com/ggerganov/llama.cpp), [mlc-llm](https://github.com/mlc-ai/mlc-llm) and [llama-mps](https://github.com/remixer-dec/llama-mps/)  
-Remote LLM inference support: [oobabooga/text-generation-webui](https://github.com/oobabooga/text-generation-webui/)  
+Remote LLM inference support: [oobabooga/text-generation-webui](https://github.com/oobabooga/text-generation-webui/), [LostRuins/koboldcpp](https://github.com/LostRuins/koboldcpp) and [llama.cpp server](https://github.com/ggerganov/llama.cpp/tree/master/examples/server)
   
 evolved from predecessor [Botality I](https://github.com/remixer-dec/ru-gpt3-telegram-bot)  
+
+### Changelog
+v0.2 has breaking changes, see [Changelog file](CHANGELOG.md) for more information
+  
 
 ### Features
 [Bot]
@@ -21,6 +25,7 @@ evolved from predecessor [Botality I](https://github.com/remixer-dec/ru-gpt3-tel
 - Supports dialog mode casually playing a role described in a character file, keeping chat history with all users in group chats or with each user separately
 - Character files can be easily localized for any language for non-english models
 - Assistant mode via /ask command or with direct replies (configurable)
+- Single-reply short-term memory for assistant feedback
 - Supports visual question answering, when multimodal-adapter is available
 
 [SD]
@@ -59,6 +64,8 @@ assistant mode for original llama is available with [LLaMa-Adapter](https://gith
   
 #### Remote api backend  
 - [oobabooga webui](https://github.com/oobabooga/text-generation-webui/) 
+- [kobold.cpp](https://github.com/LostRuins/koboldcpp/) with the same `remote_ob` backend
+- [llama.cpp server](https://github.com/ggerganov/llama.cpp/tree/master/examples/server) with `remote_lcpp` llm backend option  
 
 
 ### LLM Setup
@@ -66,15 +73,17 @@ assistant mode for original llama is available with [LLaMa-Adapter](https://gith
 - Download the weights (and the code if needed) for any large language model
 - in .env file, make sure that `"llm"` is in `active_modules`, then set:  
 `llm_paths` - change the path(s) of model(s) that you downloaded  
-`llm_active_model_type` = model type that you want to use, it can be `gpt2`,`gptj`,`llama_orig`, `llama_hf`, `llama_cpp`, `mlc_pb`, `remote_ob`, `cerebras_gpt`.  
-`llm_character` = a character of your choice, from `characters` directory, for example `characters.gptj_6B_default`, character files also have model configuration options optimal to specific model, feel free to change the character files, edit their personality and use with other models.  
-`llm_assistant_chronicler` = a input/output formatter/parser for assistant task, can be `alpaca` or `minchatgpt` or `gpt4all` or `raw`, for most cases use alpaca or gpt4all.  
+`llm_backend` - select from `pytorch`, `llama.cpp`, `mlc_pb`, `remote_ob`, `remote_lcpp`
+`llm_python_model_type` = if you set `pytorch` in the previous option, set the model type that you want to use, it can be `gpt2`,`gptj`,`llama_orig`, `llama_hf` and `auto_hf`.  
+`llm_character` = a character of your choice, from `characters` directory, for example `characters.gptj_6B_default`, character files also have prompt templates and model configuration options optimal to specific model, feel free to change the character files, edit their personality and use with other models.  
+`llm_assistant_chronicler` = a input/output formatter/parser for assistant task, can be `instruct` or `raw`, do not change if you do not use `mlc_pb`.  
 `llm_history_grouping` = `user` to store history with each user separately or `chat` to store group chat history with all users in that chat  
-`llm_assistant_use_in_chat_mode` = `True`/`False` when False, use /ask command to use alpaca-lora in assistant mode, when True, all messages are treated as questions.  
+`llm_assistant_use_in_chat_mode` = `True`/`False` when False, use /ask command to ask model questions without any memory, when True, all messages are treated as questions.  
   
-- For llama.cpp: make sure that you have a c++ compiler, then install `pip install llama-cpp-python`, download model weights and change the path in `llm_paths`.
+- For llama.cpp: make sure that you have a c++ compiler, then put all necessary flags to enable GPU support, and install it `pip install llama-cpp-python`, download model weights and change the path in `llm_paths`.
 - For mlc-llm, follow the installation instructions from the docs, then clone [mlc-chatbot](https://github.com/XinyuSun/mlc-chatbot), and put 3 paths in `llm_paths`. Use with `llm_assistant_use_in_chat_mode=True` and with `raw` chronicler.  
-- For oobabooga webui, instead of specifying `llm_paths`, set `llm_ob_host`, set `llm_active_model_type` to `remote_ob` and set the `llm_character` and `llm_assistant_chronicler` to ones that have the same prompt format / preset as your model. Run the server with --api flag.
+- For oobabooga webui and kobold.cpp, instead of specifying `llm_paths`, set `llm_host`, set `llm_active_model_type` to `remote_ob` and set the `llm_character` and `llm_assistant_chronicler` to ones that have the same prompt format / preset as your model. Run the server with --api flag.
+- For llama.cpp c-server, start the server, set its URL in `llm_host` and set `llm_active_model_type` to `remote_lcpp`
   
   
 ### Bot commands
