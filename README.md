@@ -7,9 +7,12 @@ This project is an implementation of a modular **telegram bot** based on [aiogra
 via [alpaca-lora](https://github.com/tloen/alpaca-lora), via [gpt4all-lora](https://github.com/nomic-ai/gpt4all#reproducibility), via [adapter-model](https://github.com/ZrrSkywalker/LLaMA-Adapter) and via [minChatGPT](https://github.com/ethanyanjiali/minChatGPT)  
 
 Accelerated LLM inference support: [llama.cpp](https://github.com/ggerganov/llama.cpp), [mlc-llm](https://github.com/mlc-ai/mlc-llm) and [llama-mps](https://github.com/remixer-dec/llama-mps/)  
-Remote LLM inference support: [oobabooga/text-generation-webui](https://github.com/oobabooga/text-generation-webui/), [LostRuins/koboldcpp](https://github.com/LostRuins/koboldcpp) and [llama.cpp server](https://github.com/ggerganov/llama.cpp/tree/master/examples/server)
+Remote LLM inference support: [oobabooga/text-generation-webui](https://github.com/oobabooga/text-generation-webui/), [LostRuins/koboldcpp](https://github.com/LostRuins/koboldcpp) and [llama.cpp server](https://github.com/ggerganov/llama.cpp/tree/master/examples/server)  
+Compatibility table is available [here](COMPATIBILITY.md)  
   
 evolved from predecessor [Botality I](https://github.com/remixer-dec/ru-gpt3-telegram-bot)  
+
+<img src="https://i.imgur.com/eCEcgCc.jpg" alt="preview" height="400">
 
 ### Changelog
 v0.2 has breaking changes, see [Changelog file](CHANGELOG.md) for more information
@@ -78,11 +81,11 @@ assistant mode for original llama is available with [LLaMa-Adapter](https://gith
 `llm_character` = a character of your choice, from `characters` directory, for example `characters.gptj_6B_default`, character files also have prompt templates and model configuration options optimal to specific model, feel free to change the character files, edit their personality and use with other models.  
 `llm_assistant_chronicler` = a input/output formatter/parser for assistant task, can be `instruct` or `raw`, do not change if you do not use `mlc_pb`.  
 `llm_history_grouping` = `user` to store history with each user separately or `chat` to store group chat history with all users in that chat  
-`llm_assistant_use_in_chat_mode` = `True`/`False` when False, use /ask command to ask model questions without any memory, when True, all messages are treated as questions.  
+`llm_assistant_use_in_chat_mode` = `True`/`False` when False, use /ask command to ask the model questions without any input history, when True, all messages are treated as questions.  
   
 - For llama.cpp: make sure that you have a c++ compiler, then put all necessary flags to enable GPU support, and install it `pip install llama-cpp-python`, download model weights and change the path in `llm_paths`.
 - For mlc-llm, follow the installation instructions from the docs, then clone [mlc-chatbot](https://github.com/XinyuSun/mlc-chatbot), and put 3 paths in `llm_paths`. Use with `llm_assistant_use_in_chat_mode=True` and with `raw` chronicler.  
-- For oobabooga webui and kobold.cpp, instead of specifying `llm_paths`, set `llm_host`, set `llm_active_model_type` to `remote_ob` and set the `llm_character` and `llm_assistant_chronicler` to ones that have the same prompt format / preset as your model. Run the server with --api flag.
+- For oobabooga webui and kobold.cpp, instead of specifying `llm_paths`, set `llm_host`, set `llm_active_model_type` to `remote_ob` and set the `llm_character` to one that has the same prompt format / preset as your model. Run the server with --api flag.
 - For llama.cpp c-server, start the server, set its URL in `llm_host` and set `llm_active_model_type` to `remote_lcpp`
   
   
