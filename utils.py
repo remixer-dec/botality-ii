@@ -3,6 +3,7 @@ import base64
 import argparse
 import functools
 import sys
+import json
 
 async def tg_image_to_data(photo, bot):
   if not photo:
@@ -56,3 +57,28 @@ def log_exceptions(logger):
 def cprint(*args, color='default'):
   keys = ['default', 'red', 'green', 'yellow', 'blue']
   sys.stdout.write(f'\x1b[1;3{keys.index(color)}m' + ' '.join(args) + '\x1b[0m\n')
+
+def update_env(path, key, value):
+  with open(path, "r") as file:
+    lines = file.readlines()
+  with open(path, "w+") as file:
+    to_write = []
+    multiline = False
+    try:
+      for line in lines:
+        if line.startswith(key + "="):
+          multiline = line.startswith(key + "='")
+          if not multiline:
+            to_write.append(f"{key}={value}\n")
+          else:
+            to_write.append(f"{key}='{json.dumps(json.loads(value), indent=2, sort_keys=True)}'\n")
+          continue
+        if multiline:
+          if line.endswith("'") or line.endswith("'\n") or line.endswith("'\r\n"):
+            multiline = False
+          continue
+        to_write.append(line)
+      file.writelines(to_write)
+    except Exception as e:
+      file.writelines(lines)
+      cprint("Unable to update .env file: " + str(e), color='red')

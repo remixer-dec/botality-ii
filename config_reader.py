@@ -1,6 +1,7 @@
 from pydantic import BaseSettings, SecretStr, validator
 from typing import List, Dict
 from typing_extensions import Literal
+from utils import update_env
 
 class Settings(BaseSettings):
   bot_token: SecretStr
@@ -80,4 +81,10 @@ class Settings(BaseSettings):
     env_file = '.env'
     env_file_encoding = 'utf-8'
 
-config = Settings()
+# mirror all config changes to .env file
+class SettingsWrapper(Settings):
+  def __setattr__(self, name, value):
+    update_env('.env', name, value)
+    super().__setattr__(name, value)
+
+config = SettingsWrapper()
