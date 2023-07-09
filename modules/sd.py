@@ -2,7 +2,7 @@
 from aiogram import html, F
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message, BufferedInputFile, InputMediaPhoto
-from providers.sd_provider import tti, iti, models, embeddings, loras, switch_model
+from providers.sd_provider import tti, iti, models, embeddings, loras, switch_model, refresh_model_list
 from utils import tg_image_to_data, parse_photo, CustomArgumentParser, JoinNargsAction
 from custom_queue import UserLimitedQueue, semaphore_wrapper
 from typing import Literal
@@ -14,7 +14,6 @@ import shlex
 import random
 
 sd_available_resolutions = list(range(256, config.sd_max_resolution + 1, 64))
-loras = [key for key in loras if key not in config.sd_lora_custom_activations]
 
 class SDArguments(pydantic.BaseModel):
   denoising_strength: float = pydantic.Field(None, ge=0, le=1, alias='d', description='Denoising strength')
@@ -34,6 +33,7 @@ class StableDiffusionModule:
   def __init__(self, dp, bot):
     self.queue = UserLimitedQueue(config.sd_queue_size_per_user)
     self.semaphore = asyncio.Semaphore(1)
+    asyncio.run(refresh_model_list())
 
     @dp.message(Command(commands=["tti", "iti", "ttiraw", "itiraw"]), flags={"long_operation": "upload_photo"})
     async def command_sd_handler(message: Message, command: CommandObject, album=False) -> None:

@@ -33,7 +33,7 @@ loras = []
 sd_url = config.sd_host or "http://127.0.0.1:7860"
 
 async def refresh_model_list():
-  global models, embeddings
+  global models, embeddings, loras
   try:
     async with httpx.AsyncClient() as client:
       model_response = await client.get(url=f'{sd_url}/sdapi/v1/sd-models',headers={'accept': 'application/json'}, timeout=None)
@@ -43,14 +43,16 @@ async def refresh_model_list():
         model_response_data = model_response.json()
         embed_response_data = embed_response.json()
         lora_response_data  = lora_response.json()
-        models = defaultdict(lambda: 'Unknown model')
-        embeddings = []
+        models.clear()
+        embeddings.clear()
+        loras.clear()
         for m in model_response_data:
           models[m['hash']] = m['model_name']
         for e in embed_response_data['loaded']:
           embeddings.append(e)
         for lora in lora_response_data:
           loras.append(lora['name'])
+        loras[:] = [key for key in loras if key not in config.sd_lora_custom_activations]
       else:
         raise Exception('Server error')
   except Exception as e:
@@ -110,6 +112,3 @@ async def iti(override=None):
   if override:
     payload = {**payload, **override}
   return await sd_get_images(payload, 'sdapi/v1/img2img')
-
-
-asyncio.run(refresh_model_list())
