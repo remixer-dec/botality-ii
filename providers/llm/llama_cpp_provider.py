@@ -22,6 +22,8 @@ class LlamaCPP(AbstractLLM):
     lora_path = model_paths.get('path_to_llama_cpp_lora', None)
     self.model = Llama(
       n_ctx=min(init_config.get('context_size', 512), config.llm_lcpp_max_context_size),
+      rope_freq_base=init_config.get('rope_freq_base', 10000),
+      rope_freq_scale=init_config.get('rope_freq_scale', 1.0),
       n_gpu_layers=config.llm_lcpp_gpu_layers,
       model_path=model_paths["path_to_llama_cpp_weights"],
       seed=0,
