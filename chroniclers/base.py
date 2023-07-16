@@ -1,4 +1,5 @@
 import importlib
+import re
 from abc import ABCMeta, abstractmethod
 from collections import defaultdict
 
@@ -40,8 +41,9 @@ class AssistantReplyChronicler(AbstractChronicler):
   def prepare(self, details, fresh=False):
     text = details['message']
     reply_text = details['reply_text']
-    memory = self.parse_qa(reply_text) + '\n' + text
-    details['message'] = memory
+    if text and reply_text:
+      memory = self.parse_qa(reply_text) + '\n' + text
+      details['message'] = memory
     return chroniclers['instruct'].prepare(self, details)
   
   def parse_qa(self, text):
@@ -60,6 +62,7 @@ class ConversationChronicler(AbstractChronicler):
     super().__init__(chronicler_filename)
     self.history = defaultdict(lambda: [])
     self.max_length = max_length
+    self.multiline_re = re.compile("[^\n:]+\:[^\n]+\n")
 
   def get_author(self, vars, item):
     r_username = vars.get('replace_username', False)
@@ -90,7 +93,8 @@ class ConversationChronicler(AbstractChronicler):
   def parse(self, output, chat_id, skip=0):
     output = output.strip()[skip:]
     print(output)
-    end = ((output.find('</s>') + 1) or output.find('\n') + 1 ) or (len(output) + 1)
+    re_end = re.search(self.multiline_re, output) or re.search('\n', output) 
+    end = (output.find('</s>') + 1) or (re_end.span()[0] if re_end else len(output) + 1)
     parsed = output[:end - 1].strip()
     if parsed == '':
       return '...'
