@@ -59,6 +59,9 @@ class Settings(BaseSettings):
   llm_max_assistant_tokens: int
   llm_lcpp_gpu_layers: int
   llm_lcpp_max_context_size: int
+  stt_backend: Literal['whisper', 'silero', 'wav2vec2']
+  stt_model_path_or_name: str
+  stt_queue_size_per_user: int
   
   @validator('sd_max_resolution', 'sd_default_width', 'sd_default_height')
   def resolution_in_correct_ranges(cls, v):

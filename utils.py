@@ -82,3 +82,7 @@ def update_env(path, key, value):
     except Exception as e:
       file.writelines(lines)
       cprint("Unable to update .env file: " + str(e), color='red')
+
+async def download_audio(bot, file_id, dl_path):
+  file_path = (await bot.get_file(file_id=file_id)).file_path
+  await bot.download_file(file_path, dl_path)

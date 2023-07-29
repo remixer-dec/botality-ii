@@ -1,8 +1,10 @@
+from utils import cprint
 try:
   import torch
   from TTS.utils.synthesizer import Synthesizer
 except ImportError:
   Synthesizer = None
+  cprint("TTS module not available, please reinstall it", color="red")
 from config_reader import config
 from pathlib import Path
 import httpx
@@ -101,7 +103,7 @@ def save_audio(voice, wav_file):
   synthesizers[voice].save_wav(wav_file, tmp_path)
   return tmp_path
 
-def tts_convert(wav_path):
+def convert_to_ogg(wav_path):
   ogg_path = wav_path + '.ogg'
   subprocess.run([
     config.tts_ffmpeg_path, '-i', wav_path, 

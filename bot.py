@@ -9,6 +9,7 @@ from modules.sd import StableDiffusionModule
 from modules.tts import TextToSpeechModule
 from modules.admin import AdminModule
 from modules.llm import LargeLanguageModel
+from modules.stt import SpeechToTextModule
 
 
 logger = logging.getLogger(__name__)
@@ -24,6 +25,7 @@ def initialize(dp, bot):
   available_modules = {
     "sd": StableDiffusionModule,
     "tts": TextToSpeechModule,
+    "stt": SpeechToTextModule,
     "admin": AdminModule,
     "llm": LargeLanguageModel
   }

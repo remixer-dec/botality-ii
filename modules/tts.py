@@ -1,8 +1,9 @@
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message, BufferedInputFile
-from providers.tts_provider import tts, remote_tts, tts_convert, so_vits_svc
+from providers.tts_provider import tts, remote_tts, convert_to_ogg, so_vits_svc
 from custom_queue import UserLimitedQueue, semaphore_wrapper
 from config_reader import config
+from utils import download_audio
 import asyncio
 import tempfile
 
@@ -28,7 +29,7 @@ class TextToSpeechModule:
           if error:
             return await message.answer(f"Error, <b>{error}</b>")
           else:
-            audio = BufferedInputFile(tts_convert(data), 'tts.ogg')
+            audio = BufferedInputFile(convert_to_ogg(data), 'tts.ogg')
             return await message.answer_voice(voice=audio)
     
     if config.tts_enable_so_vits_svc:
@@ -42,19 +43,16 @@ class TextToSpeechModule:
         if message.reply_to_message:
           if message.reply_to_message.voice:
             with tempfile.NamedTemporaryFile(suffix='.ogg', delete=False) as temp_file:
-              await download_audio(message.reply_to_message.voice.file_id, temp_file.name)
+              await download_audio(bot, message.reply_to_message.voice.file_id, temp_file.name)
               wrapped_runner = semaphore_wrapper(self.semaphore, so_vits_svc)
               error, data = await wrapped_runner(voice, None, temp_file.name)
               if error:
                 return await message.answer(f"Error, <b>{error}</b>")
               else:
-                audio = BufferedInputFile(tts_convert(data), 'tts.ogg')
+                audio = BufferedInputFile(convert_to_ogg(data), 'tts.ogg')
                 return await message.answer_voice(voice=audio)
         return await message.answer("No audio found. Use this command replying to voice messages")
 
-    async def download_audio(file_id, dl_path):
-      file_path = (await bot.get_file(file_id=file_id)).file_path
-      await bot.download_file(file_path, dl_path)
     bot.reply_tts = command_tts_handler
 
 
