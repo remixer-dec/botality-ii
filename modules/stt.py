@@ -16,6 +16,19 @@ class SpeechToTextModule:
     self.bot = bot
     self.model = active_model.init()
     
+    @dp.message((F.voice), flags={"long_operation": "record_audio"})
+    async def handle_voice_messages(message: Message):
+      error, text = await self.recognize_voice_message(message)
+      if text and 'llm' in config.active_modules:
+        llm = dp['modules']['llm']
+        reply = await llm.assist(text, llm.get_common_chat_attributes(message))
+        if 'tts' in config.active_modules:
+          voice = config.tts_voices[0]
+          await bot.reply_tts(message=message, command=SimpleNamespace(command=voice, args=[reply]))
+        else:
+          return await message.answer(reply)
+      if error:
+        return await message.answer(f"Error, <b>{error}</b>")
 
     @dp.message(Command(commands=["stt", "recognize", "transcribe"]), flags={"long_operation": "typing"})
     async def command_stt_handler(message: Message, command: CommandObject) -> None:

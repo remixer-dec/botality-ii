@@ -9,6 +9,7 @@ from modules.sd import StableDiffusionModule
 from modules.tts import TextToSpeechModule
 from modules.admin import AdminModule
 from modules.llm import LargeLanguageModel
+from modules.tta import TextToAudioModule
 from modules.stt import SpeechToTextModule
 
 
@@ -25,13 +26,15 @@ def initialize(dp, bot):
   available_modules = {
     "sd": StableDiffusionModule,
     "tts": TextToSpeechModule,
+    "tta": TextToAudioModule,
     "stt": SpeechToTextModule,
     "admin": AdminModule,
     "llm": LargeLanguageModel
   }
+  dp['modules'] = {}
   for module in config.active_modules:
     if module in available_modules:
-      available_modules[module](dp, bot)
+      dp['modules'][module] = available_modules[module](dp, bot)
 
 def main():
   bot = Bot(token=config.bot_token.get_secret_value(), parse_mode="HTML")
