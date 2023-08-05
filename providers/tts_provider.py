@@ -1,11 +1,12 @@
 from utils import cprint
+from config_reader import config
 try:
   import torch
   from TTS.utils.synthesizer import Synthesizer
 except ImportError:
   Synthesizer = None
-  cprint("TTS module not available, please reinstall it", color="red")
-from config_reader import config
+  if 'tts' in config.active_modules and config.tts_mode == 'local':
+    cprint("TTS module not available, please reinstall it", color="red")
 from pathlib import Path
 import httpx
 import json

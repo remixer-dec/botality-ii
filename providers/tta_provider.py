@@ -1,4 +1,5 @@
 from utils import cprint
+from config_reader import config
 try:
   import torch
   from audiocraft.models import MusicGen, AudioGen
@@ -8,12 +9,12 @@ except ImportError:
   AudioGen = None
   MusicGen = None
   tta_available = False
-  cprint("TTA (AudioCraft) module not available, please reinstall it", color="red")
+  if 'tta' in config.active_modules:
+    cprint("TTA (AudioCraft) module not available, please reinstall it", color="red")
 
 from concurrent.futures import ThreadPoolExecutor
 import asyncio
 import tempfile
-from config_reader import config
 
 models = {}
 
