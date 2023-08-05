@@ -62,6 +62,11 @@ class Settings(BaseSettings):
   stt_backend: Literal['whisper', 'silero', 'wav2vec2']
   stt_model_path_or_name: str
   stt_queue_size_per_user: int
+  tta_queue_size_per_user: int
+  tta_device: Literal["cpu", "cuda", "mps"]
+  tta_music_model: str
+  tta_sfx_model: str
+  tta_duration: int
   
   @validator('sd_max_resolution', 'sd_default_width', 'sd_default_height')
   def resolution_in_correct_ranges(cls, v):
