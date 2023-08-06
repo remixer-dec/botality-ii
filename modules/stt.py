@@ -6,6 +6,7 @@ from custom_queue import UserLimitedQueue, semaphore_wrapper
 from config_reader import config
 from utils import download_audio
 from types import SimpleNamespace
+import random
 import tempfile
 import asyncio
 
@@ -16,19 +17,22 @@ class SpeechToTextModule:
     self.bot = bot
     self.model = active_model.init()
     
-    @dp.message((F.voice), flags={"long_operation": "record_audio"})
-    async def handle_voice_messages(message: Message):
-      error, text = await self.recognize_voice_message(message)
-      if text and 'llm' in config.active_modules:
-        llm = dp['modules']['llm']
-        reply = await llm.assist(text, llm.get_common_chat_attributes(message))
-        if 'tts' in config.active_modules:
-          voice = config.tts_voices[0]
-          await bot.reply_tts(message=message, command=SimpleNamespace(command=voice, args=[reply]))
-        else:
-          return await message.answer(reply)
-      if error:
-        return await message.answer(f"Error, <b>{error}</b>")
+    if config.stt_autoreply_mode:
+      @dp.message((F.voice), flags={"long_operation": "record_audio"})
+      async def handle_voice_messages(message: Message):
+        error, text = await self.recognize_voice_message(message)
+        if text and 'llm' in config.active_modules:
+          llm = dp['modules']['llm']
+          llm_call_func = llm.assist if config.stt_autoreply_mode == 'assist' else llm.chat
+          reply = await llm_call_func(text, llm.get_common_chat_attributes(message))
+          if 'tts' in config.active_modules:
+            voice = config.stt_autoreply_voice or config.tts_voices[0]
+            voice = random.choice(config.tts_voices) if voice == 'random' else voice
+            await bot.reply_tts(message=message, command=SimpleNamespace(command=voice, args=[reply]))
+          else:
+            return await message.answer(reply)
+        if error:
+          return await message.answer(f"Error, <b>{error}</b>")
 
     @dp.message(Command(commands=["stt", "recognize", "transcribe"]), flags={"long_operation": "typing"})
     async def command_stt_handler(message: Message, command: CommandObject) -> None:

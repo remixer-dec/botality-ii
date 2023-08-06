@@ -61,6 +61,8 @@ class Settings(BaseSettings):
   llm_lcpp_max_context_size: int
   stt_backend: Literal['whisper', 'silero', 'wav2vec2']
   stt_model_path_or_name: str
+  stt_autoreply_mode: Literal['none', 'assistant', 'chat']
+  stt_autoreply_voice: str
   stt_queue_size_per_user: int
   tta_queue_size_per_user: int
   tta_device: Literal["cpu", "cuda", "mps"]
