@@ -3,8 +3,10 @@
 This project is an implementation of a modular **telegram bot** based on [aiogram](https://github.com/aiogram/aiogram), designed for local ML Inference with remote service support. Currently integrated with:
 -  **Stable Diffusion** (using [stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) API),
 -  **TTS** built-in text-to-speech engine (using [TTS (VITS)](https://github.com/coqui-ai/TTS) and [so-vits-SVC](https://github.com/svc-develop-team/so-vits-svc/tree/4.0)).  
--  **LLMs** such as **[llama](https://github.com/facebookresearch/llama)**, **[gpt-j-6b](https://github.com/kingoflolz/mesh-transformer-jax#gpt-j-6b)**, **[gpt-2](https://huggingface.co/gpt2)** with support for assistant mode   
+-  **STT** integrated with multiple speech recognition engines, including [whisper.cpp](https://github.com/ggerganov/whisper.cpp)[<lib>](https://github.com/stlukey/whispercpp.py), [silero](https://github.com/snakers4/silero-models), [wav2vec2](https://ai.meta.com/blog/wav2vec-20-learning-the-structure-of-speech-from-raw-audio/)  
+-  **LLMs** such as [llama](https://github.com/facebookresearch/llama), [gpt-j-6b](https://github.com/kingoflolz/mesh-transformer-jax#gpt-j-6b), [gpt-2](https://huggingface.co/gpt2) with support for assistant mode   
 via [alpaca-lora](https://github.com/tloen/alpaca-lora), via [gpt4all-lora](https://github.com/nomic-ai/gpt4all#reproducibility), via [adapter-model](https://github.com/ZrrSkywalker/LLaMA-Adapter) and via [minChatGPT](https://github.com/ethanyanjiali/minChatGPT)  
+- **TTA** experimental text-to-audio support via [audiocraft](https://github.com/facebookresearch/audiocraft)  
 
 Accelerated LLM inference support: [llama.cpp](https://github.com/ggerganov/llama.cpp), [mlc-llm](https://github.com/mlc-ai/mlc-llm) and [llama-mps](https://github.com/remixer-dec/llama-mps/)  
 Remote LLM inference support: [oobabooga/text-generation-webui](https://github.com/oobabooga/text-generation-webui/), [LostRuins/koboldcpp](https://github.com/LostRuins/koboldcpp) and [llama.cpp server](https://github.com/ggerganov/llama.cpp/tree/master/examples/server)  
@@ -40,12 +42,19 @@ v0.2 has breaking changes, see [Changelog file](CHANGELOG.md) for more informati
 - can be run remotely, or on the same machine
 - tts output is sent as voice messages
 - can be used on voice messages (speech and acapella songs) to dub them with a different voice 
+
+[STT]
+- can be activated as a speech recognition tool via /stt command replying to voice messages  
+- if `stt_autoreply_mode` parameter is not `none`, it recognizes voice messages and replies to them with LLM and TTS modules  
+
+[TTA]
+- can be used with /sfx and /music commands after adding `tta` to `active_modules`  
   
 ### Setup:
 - rename `.env.example` to `.env`, and do NOT add the .env file to your commits! 
 - set up your telegram bot token and other configuration options
 - install requirements `pip install -r requrements.txt`
-- install optional requirements if you want to use tts and tts_server `pip install -r requrements-tts.txt` and `pip install -r requrements-llm.txt` if you want to use llm, you'll probably also need a fresh version of [pytorch](https://pytorch.org/get-started/locally/).
+- install optional requirements if you want to use tts and tts_server `pip install -r requrements-tts.txt` and `pip install -r requrements-llm.txt` if you want to use llm, you'll probably also need a fresh version of [pytorch](https://pytorch.org/get-started/locally/). For speech-to-text run `pip install -r requrements-stt.txt`, for text-to-audio run `pip install -U git+https://git@github.com/facebookresearch/audiocraft#egg=audiocraft`
 - for stable diffusion module, make sure that you have webui installed and it is running with `--api` flag
 - for text-to-speech module download VITS models, put their names in `tts_voices` configuration option and path to their directory in `tts_path`
 - for llm module, see LLM Setup section bellow
