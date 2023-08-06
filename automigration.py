@@ -30,6 +30,8 @@ def check_deprecated_keys_in_dotenv():
     if key in DEPRECATED_KEYS:
       cprint(f'Warning! The key "{key}" has been deprecated! See CHANGELOG.md.', color='red')
     value = system_env[key]
+    if len(value) < 1:
+      continue
     if (value[0] != '[' and value[0] != '{'):
       value = f'"{value}"'
     value = json.loads(value)
