@@ -1,3 +1,19 @@
+## v0.4
+- so-vits-svc-4.1 support
+
+### Breaking changes
+- `tts_so_vits_svc_code_path` config option has been renamed to `tts_so_vits_svc_4_0_code_path`, and `tts_so_vits_svc_4_1_code_path` option was added to support so-vits-svc-4.1 models, to specify that the model is a 4.1 mode, use "v": 4.1 in `tts_so_vits_svc_voices`.
+
+
+## v0.3
+- Basic config state reactivity (runtime config changes in bot are reflected in .env)
+- Fixed SD model info retrieval and reinitialization
+- Global module accessibility milestone 2
+- Experimental multi-line dialog answer support
+- Speech-to-text via Whisper.cpp, Silero an Wav2Vec2
+- Seamless dialog mode voice->text->llm->voice
+- Text-to-audio via Audiocraft
+
 ## v0.2
 - LLM module / provider refactoring
 - Reply chronicler with single-item history

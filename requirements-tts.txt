@@ -3,6 +3,7 @@ uvicorn
 TTS
 praat-parselmouth
 fairseq==0.12.2 
+faiss-cpu
 soundfile
 # macos soundfile fix:
 # conda install libsndfile -c conda-forge

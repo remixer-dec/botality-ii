@@ -18,7 +18,8 @@ class Settings(BaseSettings):
   tts_credits: str
   tts_ffmpeg_path: str
   tts_enable_so_vits_svc: bool
-  tts_so_vits_svc_code_path: str
+  tts_so_vits_svc_4_0_code_path: str
+  tts_so_vits_svc_4_1_code_path: str
   tts_so_vits_svc_base_tts_provider: Literal["say_macos", "built_in"]
   tts_so_vits_svc_voices: List[Dict]
   tts_queue_size_per_user: int
@@ -69,6 +70,7 @@ class Settings(BaseSettings):
   tta_music_model: str
   tta_sfx_model: str
   tta_duration: int
+  python_command: str
   
   @validator('sd_max_resolution', 'sd_default_width', 'sd_default_height')
   def resolution_in_correct_ranges(cls, v):

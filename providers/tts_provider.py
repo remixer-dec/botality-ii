@@ -20,7 +20,10 @@ synthesizers = {}
 so_vits_svc_voices = dict({m['voice'].lower().replace('-',''): m for m in config.tts_so_vits_svc_voices})
 
 async def so_vits_svc(voice, text, original_audio=False):
-  so_vits_svc_code = config.tts_so_vits_svc_code_path
+  version = so_vits_svc_voices[voice].get('v', 4.0)
+  v4_0_code_path = config.tts_so_vits_svc_4_0_code_path
+  v4_1_code_path = config.tts_so_vits_svc_4_1_code_path
+  so_vits_svc_code = v4_0_code_path if version == 4.0 else v4_1_code_path
   name = 'temp_tts' + str(time.time_ns())
   temp_file = f'{so_vits_svc_code}/raw/{name}.aif'
   temp_file_wav = temp_file.replace('.aif', '.wav')
@@ -47,14 +50,19 @@ async def so_vits_svc(voice, text, original_audio=False):
     stderr=subprocess.STDOUT
   )
   subprocess.run(
-    ["python", f"inference_main.py", "-m", str(so_vits_model), "-c", str(so_vits_config), 
+    [config.python_command, f"inference_main.py", "-m", str(so_vits_model), "-c", str(so_vits_config), 
     "-n", f'{name}.wav', "-t", "0", "-s", so_vits_voice]
     ,
     cwd=so_vits_svc_code
   )
   os.remove(temp_file)
   os.remove(temp_file_wav)
-  return (False, f'{so_vits_svc_code}/results/{name}.wav_0key_{so_vits_voice}.flac')
+  filename = f'{so_vits_svc_code}/results/{name}.wav_0key_{so_vits_voice}.flac'
+  if not os.path.isfile(filename):
+    filename = filename.replace('.flac', '_sovits_pm.flac')
+    if not os.path.isfile(filename):
+      return ('File not found', None)
+  return (False, filename)
 
 async def tts(voice, text):
   try:

@@ -19,7 +19,7 @@ def check_new_keys_in_example_env():
     with open('.env', 'a') as file:
       file.write(towrite)
 
-DEPRECATED_KEYS = ['llm_active_model_type', 'sd_available_loras']
+DEPRECATED_KEYS = ['llm_active_model_type', 'sd_available_loras', 'tts_so_vits_svc_code_path']
 DEPRECATED_KVS = {
   'llm_assistant_chronicler': ['gpt4all', 'minchatgpt', 'alpaca'],
   'llm_python_model_type': 'cerebras_gpt'
