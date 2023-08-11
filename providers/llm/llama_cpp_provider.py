@@ -4,6 +4,8 @@ from providers.llm.abstract_llm import AbstractLLM
 import asyncio
 import os
 import logging
+from misc.memory_manager import mload
+from functools import partial
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +22,8 @@ class LlamaCPP(AbstractLLM):
       return logger.error('for GPU support, please read https://github.com/abetlen/llama-cpp-python')
     override = init_config.get('llama_cpp_init', {})
     lora_path = model_paths.get('path_to_llama_cpp_lora', None)
-    self.model = Llama(
+    self.load_model = partial(
+      Llama,
       n_ctx=min(init_config.get('context_size', 512), config.llm_lcpp_max_context_size),
       rope_freq_base=init_config.get('rope_freq_base', 10000),
       rope_freq_scale=init_config.get('rope_freq_scale', 1.0),
@@ -31,6 +34,12 @@ class LlamaCPP(AbstractLLM):
       **override  
     )
     self.filename = os.path.basename(model_paths['path_to_llama_cpp_weights'])
+    if config.mm_preload_models_on_start:
+      m = self.model
+  
+  @property
+  def model(self):
+    return mload('llm-llama.cpp', self.load_model, None)
     
   async def generate(self, prompt, length=64, model_params={}, assist=True):
     if 'repetition_penalty' in model_params:
@@ -54,7 +63,7 @@ class LlamaCPP(AbstractLLM):
       output = output['choices'][0]['text']
       logger.info(output)
       output = prompt + output
-    return (False, output) if not error else (True, error)
+    return (False, output) if not error else (error, None)
 
 ## process-based approach re-creates a new process and re-allocates memory on every run
 ## which is not optimal, I leave this code for future reference

@@ -9,6 +9,8 @@ assistant_mode = True
 
 class RemoteLLamaCPP(RemoteLLM):
   async def generate(self, prompt, length=64, model_params={}, assist=True):
+    if config.llm_remote_launch_process_automatically:
+      self.run_llm_service()
     data = {
       'prompt': prompt,
       'max_length': length,
@@ -20,6 +22,6 @@ class RemoteLLamaCPP(RemoteLLM):
       logger.info(response)
       return False, prompt + response.get('content')
     else:
-      return True, 'Error: ' + str(error)
+      return 'Error: ' + str(error), None
 
 init = RemoteLLamaCPP

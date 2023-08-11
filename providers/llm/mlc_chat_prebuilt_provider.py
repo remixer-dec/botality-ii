@@ -29,6 +29,6 @@ class MLCChatPrebuilt(AbstractLLM):
       self.model.reset()
     except Exception as e:
       error = str(e)
-    return (False, output) if not error else (True, error)
+    return (False, output) if not error else (error, None)
 
 init = MLCChatPrebuilt

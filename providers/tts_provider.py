@@ -15,6 +15,8 @@ import subprocess
 import os
 import time
 from config_reader import config
+from misc.memory_manager import mload
+from functools import partial
 
 synthesizers = {}
 so_vits_svc_voices = dict({m['voice'].lower().replace('-',''): m for m in config.tts_so_vits_svc_voices})
@@ -71,14 +73,15 @@ async def tts(voice, text):
       text = text.replace(r, config.tts_replacements[r])
     if voice in so_vits_svc_voices:
       return await so_vits_svc(voice, text)
-    if voice not in synthesizers:
-      synthesizers[voice] = Synthesizer(
-        tts_config_path=Path(config.tts_path) / "config.json",
-        tts_checkpoint=Path(config.tts_path) / (voice + ".pth"),
-        use_cuda=torch.cuda.is_available(),
-      )
-    data = synthesizers[voice].tts(text[:4096] + '.')
-    return (False, save_audio(voice, data))
+    loader = partial(
+      Synthesizer,
+      tts_config_path=Path(config.tts_path) / "config.json",
+      tts_checkpoint=Path(config.tts_path) / (voice + ".pth"),
+      use_cuda=torch.cuda.is_available(),
+    )
+    synth = mload('tts-' + voice, loader, None, gpu=torch.cuda.is_available())
+    data = synth.tts(text[:4096] + '.')
+    return (False, save_audio(synth, data))
   except Exception as e:
     return (str(e), None)
 
@@ -107,9 +110,9 @@ async def remote_tts(voice, text):
     except Exception as e:
       return (str(e), None)
 
-def save_audio(voice, wav_file):
+def save_audio(synth, wav_file):
   tmp_path = tempfile.TemporaryDirectory().name + 'record.wav'
-  synthesizers[voice].save_wav(wav_file, tmp_path)
+  synth.save_wav(wav_file, tmp_path)
   return tmp_path
 
 def convert_to_ogg(wav_path):

@@ -4,8 +4,12 @@ import json
 import random
 import asyncio
 import logging
+import subprocess
+import psutil
 from collections import defaultdict
 from config_reader import config
+from misc.memory_manager import mload
+from functools import partial
 
 
 logger = logging.getLogger(__name__)
@@ -32,6 +36,47 @@ loras = []
 
 sd_url = config.sd_host or "http://127.0.0.1:7860"
 
+sd_service = False
+sd_started = False
+
+def run_sd_service():
+  global sd_started
+  if not config.sd_launch_process_automatically:
+    return
+  p = partial(subprocess.Popen, config.sd_launch_command.split(' '), cwd=config.sd_launch_dir, stderr=subprocess.DEVNULL)
+  service = mload('sd-remote', 
+    p, 
+    lambda p: p.terminate() or (sd_started:=False),
+    lambda p: psutil.Process(p.pid).memory_info().rss, 
+    gpu=True
+  )
+  return service
+
+def check_server(async_func):
+  async def decorated_function(*args, **kwargs):
+    global sd_service, sd_started
+    if not config.sd_launch_process_automatically:
+      return await async_func(*args, **kwargs)
+    url = f"{sd_url}/sdapi/v1/sd-models"
+    try:
+      async with httpx.AsyncClient() as client:
+        await client.get(url)
+    except (httpx.HTTPError, httpx.NetworkError, ConnectionError, httpx.RemoteProtocolError):
+      print("SD server is down. Restarting it...")
+      if not sd_started or sd_service.poll() is not None:
+        sd_service = run_sd_service()
+        sd_started = True
+        # better idea is to read stdout and wait for server, but it doesn't work for some reason
+        await asyncio.sleep(config.sd_launch_waittime)
+      else:
+        # TODO: fix this mess sometime later
+        sd_service = run_sd_service()
+      return await async_func(*args, **kwargs)
+    sd_service = run_sd_service()
+    return await async_func(*args, **kwargs)
+  return decorated_function
+
+@check_server
 async def refresh_model_list():
   global models, embeddings, loras
   try:
@@ -62,7 +107,7 @@ async def refresh_model_list():
 def b642img(base64_image):
   return base64.b64decode(base64_image)
 
-
+@check_server
 async def switch_model(name):
   async with httpx.AsyncClient() as client:
     try:
@@ -74,8 +119,10 @@ async def switch_model(name):
       return False
   return False
 
-
+@check_server
 async def sd_get_images(payload, endpoint):
+  if len(models.values()) == 0:
+    await refresh_model_list()
   async with httpx.AsyncClient() as client:
     try:
       response = await client.post(url=f'{sd_url}/{endpoint}', json=payload, timeout=None)

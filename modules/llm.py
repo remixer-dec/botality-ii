@@ -42,7 +42,7 @@ class LargeLanguageModel:
     })
     wrapped_runner = semaphore_wrapper(self.semaphore, self.model.generate)
     error, result = await wrapped_runner(prompt, config.llm_max_assistant_tokens, params)
-    return chronicler.parse(result, context.get('chat_id', 0), len(prompt)) if not error else str(result)
+    return chronicler.parse(result, context.get('chat_id', 0), len(prompt)) if not error else str(error)
 
   async def complete_raw(self, text, context):
     wrapped_runner = semaphore_wrapper(self.semaphore, self.model.generate)

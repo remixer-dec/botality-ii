@@ -1,7 +1,7 @@
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message, BufferedInputFile
 from providers.tts_provider import convert_to_ogg
-from providers.tta_provider import generate_audio_async, tta_available
+from providers.tta_provider import generate_audio_async, tta_init
 from custom_queue import UserLimitedQueue, semaphore_wrapper
 from config_reader import config
 import asyncio
@@ -11,8 +11,11 @@ class TextToAudioModule:
     self.queue = UserLimitedQueue(config.tta_queue_size_per_user)
     self.semaphore = asyncio.Semaphore(1)
     
-    if not tta_available:
+    if 'tta' in config.active_modules:
+      self.available = tta_init()
+    if not self.available:
       return
+
     @dp.message(Command(commands=["tta", "sfx", "music"]), flags={"long_operation": "record_audio"})
     async def command_tta_handler(message: Message, command: CommandObject) -> None:
       with self.queue.for_user(message.from_user.id) as available:

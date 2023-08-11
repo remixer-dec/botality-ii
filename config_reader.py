@@ -40,6 +40,10 @@ class Settings(BaseSettings):
   sd_default_iti_steps: int
   sd_default_iti_denoising_strength: float
   sd_default_iti_sampler: str
+  sd_launch_process_automatically: bool
+  sd_launch_command: str
+  sd_launch_dir: str
+  sd_launch_waittime: int
   sd_lora_custom_activations: Dict
   sd_only_admins_can_change_models: bool
   sd_queue_size_per_user: int
@@ -60,6 +64,11 @@ class Settings(BaseSettings):
   llm_max_assistant_tokens: int
   llm_lcpp_gpu_layers: int
   llm_lcpp_max_context_size: int
+  llm_remote_launch_process_automatically: bool
+  llm_remote_launch_command: str
+  llm_remote_launch_dir: str
+  llm_remote_launch_waittime: int
+  llm_remote_model_name: str
   stt_backend: Literal['whisper', 'silero', 'wav2vec2']
   stt_model_path_or_name: str
   stt_autoreply_mode: Literal['none', 'assistant', 'chat']
@@ -71,6 +80,12 @@ class Settings(BaseSettings):
   tta_sfx_model: str
   tta_duration: int
   python_command: str
+  mm_preload_models_on_start: bool
+  mm_ram_cached_model_count_limit: int
+  mm_vram_cached_model_count_limit: int
+  mm_management_policy: Literal["COUNT", "MEMORY", "BOTH", "NONE"]
+  mm_unload_order_policy: Literal["LEAST_USED", "OLDEST_USE_TIME", "OLDEST_LOAD_ORDER", "MEMORY_FOOTPRINT"]
+  mm_autounload_after_seconds: int
   
   @validator('sd_max_resolution', 'sd_default_width', 'sd_default_height')
   def resolution_in_correct_ranges(cls, v):

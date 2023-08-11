@@ -33,7 +33,8 @@ class StableDiffusionModule:
   def __init__(self, dp, bot):
     self.queue = UserLimitedQueue(config.sd_queue_size_per_user)
     self.semaphore = asyncio.Semaphore(1)
-    asyncio.run(refresh_model_list())
+    if config.mm_preload_models_on_start:
+      asyncio.run(refresh_model_list())
 
     @dp.message(Command(commands=["tti", "iti", "ttiraw", "itiraw"]), flags={"long_operation": "upload_photo"})
     async def command_sd_handler(message: Message, command: CommandObject, album=False) -> None:
@@ -84,6 +85,8 @@ class StableDiffusionModule:
 
     @dp.message(Command(commands=["models", "loras", "embeddings"]), flags={"cooldown": 5})
     async def list_sd_models(message: Message, command: CommandObject):
+      if len(models.values()) == 0:
+        await refresh_model_list()
       if command.command == "models":
         return message.answer('<b>Available models:</b> \n' + "\n".join(models.values()))
       if command.command == "embeddings":

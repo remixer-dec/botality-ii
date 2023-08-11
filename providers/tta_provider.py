@@ -1,38 +1,36 @@
 from utils import cprint
 from config_reader import config
-try:
-  import torch
-  from audiocraft.models import MusicGen, AudioGen
-  from audiocraft.data.audio import audio_write
-  tta_available = True
-except ImportError:
-  AudioGen = None
-  MusicGen = None
-  tta_available = False
-  if 'tta' in config.active_modules:
-    cprint("TTA (AudioCraft) module not available, please reinstall it", color="red")
-
 from concurrent.futures import ThreadPoolExecutor
+from misc.memory_manager import mload
+from functools import partial
 import asyncio
 import tempfile
 
-models = {}
+AudioGen = None
+MusicGen = None
 
-def get_model(path, loader):
-  if path in models:
-    model = models[path]
-  else:
-    model = loader.get_pretrained(path, config.tta_device)
-    models[path] = model
+def tta_init():
+  global MusicGen, AudioGen, audio_write
+  try:
+    from audiocraft.models import MusicGen, AudioGen
+    from audiocraft.data.audio import audio_write
+    return True
+  except ImportError:
+    cprint("TTA (AudioCraft) module not available, please reinstall it", color="red")
+    return False
+
+def get_model(path, loader, name):
+  loader = partial(loader.get_pretrained, path, config.tta_device)
+  model = mload('tta-' + name, loader, None)
   return model
 
 
 def generate_audio(text, audio_type="music", duration=5, raw_data=False):
   try:
     if audio_type == "music":
-      model = get_model(config.tta_music_model, MusicGen)
+      model = get_model(config.tta_music_model, MusicGen, 'MusicGen')
     else:
-      model = get_model(config.tta_sfx_model, AudioGen)
+      model = get_model(config.tta_sfx_model, AudioGen, 'AudioGen')
     model.set_generation_params(duration=duration)
     wav = model.generate([text])
   except Exception as e:
