@@ -1,8 +1,10 @@
 ## v0.4
 - so-vits-svc-4.1 support
+- experimental memory manager (now supports all models except LLMs with pytorch backend)
 
 ### Breaking changes
 - `tts_so_vits_svc_code_path` config option has been renamed to `tts_so_vits_svc_4_0_code_path`, and `tts_so_vits_svc_4_1_code_path` option was added to support so-vits-svc-4.1 models, to specify that the model is a 4.1 mode, use "v": 4.1 in `tts_so_vits_svc_voices`.
+- `llm_host` has ben fixed in .env.example file, `llm_ob_host` has been removed
 
 
 ## v0.3

@@ -3,7 +3,7 @@
 This project is an implementation of a modular **telegram bot** based on [aiogram](https://github.com/aiogram/aiogram), designed for local ML Inference with remote service support. Currently integrated with:
 -  **Stable Diffusion** (using [stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) API),
 -  **TTS** built-in text-to-speech engine (using [TTS (VITS)](https://github.com/coqui-ai/TTS) and [so-vits-SVC](https://github.com/svc-develop-team/so-vits-svc/tree/4.0)).  
--  **STT** integrated with multiple speech recognition engines, including [whisper.cpp](https://github.com/ggerganov/whisper.cpp)[<lib>](https://github.com/stlukey/whispercpp.py), [silero](https://github.com/snakers4/silero-models), [wav2vec2](https://ai.meta.com/blog/wav2vec-20-learning-the-structure-of-speech-from-raw-audio/)  
+-  **STT** integrated with multiple speech recognition engines, including [whisper.cpp](https://github.com/ggerganov/whisper.cpp)[<sup>1</sup>](https://github.com/stlukey/whispercpp.py), [silero](https://github.com/snakers4/silero-models), [wav2vec2](https://ai.meta.com/blog/wav2vec-20-learning-the-structure-of-speech-from-raw-audio/)  
 -  **LLMs** such as [llama](https://github.com/facebookresearch/llama), [gpt-j-6b](https://github.com/kingoflolz/mesh-transformer-jax#gpt-j-6b), [gpt-2](https://huggingface.co/gpt2) with support for assistant mode   
 via [alpaca-lora](https://github.com/tloen/alpaca-lora), via [gpt4all-lora](https://github.com/nomic-ai/gpt4all#reproducibility), via [adapter-model](https://github.com/ZrrSkywalker/LLaMA-Adapter) and via [minChatGPT](https://github.com/ethanyanjiali/minChatGPT)  
 - **TTA** experimental text-to-audio support via [audiocraft](https://github.com/facebookresearch/audiocraft)  
@@ -17,7 +17,7 @@ evolved from predecessor [Botality I](https://github.com/remixer-dec/ru-gpt3-tel
 <img src="https://i.imgur.com/eCEcgCc.jpg" alt="preview" height="400">
 
 ### Changelog
-v0.2 has breaking changes, see [Changelog file](CHANGELOG.md) for more information
+Some versions have breaking changes, see [Changelog file](CHANGELOG.md) for more information
   
 
 ### Features
@@ -25,6 +25,7 @@ v0.2 has breaking changes, see [Changelog file](CHANGELOG.md) for more informati
 - User-based queues and delayed task processing
 - Multiple modes to filter access scopes (WL/BL/Both/Admin-only)
 - Support of accelerated inference on M1 Macs
+- Memory manager, keeps track of models loaded at the same time and loads/unloads them on demand.
 
 [LLM]
 - Supports dialog mode casually playing a role described in a character file, keeping chat history with all users in group chats or with each user separately
