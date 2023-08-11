@@ -47,6 +47,16 @@ class MemoryManager:
   
   def wrap(self, model_name, load_function=None, unload_function=None, memory='auto'):
     mem = self.get_memory()
+    # get keys and values of items with model != None as lists
+    [*alive_keys], [*alive_values] = zip(*((i.name, i) for i in self.cache.values() if i.model is not None)) \
+      if len(self.cache.keys()) > 0 else ([],[])
+    if config.mm_autounload_after_seconds > 0:
+      seconds = config.mm_autounload_after_seconds
+      for key in alive_keys:
+        if key != model_name and self.cache[key].last_used + seconds < time():
+          self.unload(key, 'timeout')
+          alive_keys.remove(key)
+          alive_values.remove(self.cache[key])
     if model_name not in self.cache:
       self.cache[model_name] = MModel(model_name, load_function, unload_function)
       self.cache[model_name].last_loaded = time()
@@ -59,17 +69,15 @@ class MemoryManager:
     item.memory = (mem_diff if memory == 'auto' else memory(item.model) or mem_diff) / 1e9
     item.last_used = time()
     item.use_count = (item.use_count + 1) if hasattr(item, 'use_count') else 1
-    alive_keys, alive_values = zip(*((item.name, item) for item in self.cache.values() if item.model is not None))    
-    if config.mm_autounload_after_seconds > 0:
-      seconds = config.mm_autounload_after_seconds
-      for key in alive_keys:
-        if key != model_name and self.cache[key].last_used + seconds < time():
-          self.unload(key, 'timeout')
     if self.mm_management_policy == 'COUNT' or self.mm_management_policy == 'BOTH':
       cache_count = len(alive_keys)
-      if cache_count > self.cached_model_count:
-        self.unload_by_policy(model_name, alive_values)
-    if self.mm_management_policy == 'MEMORY' or self.mm_management_policy == 'BOTH':
+      if cache_count > 0 and cache_count > self.cached_model_count:
+        unloaded_key = self.unload_by_policy(model_name, alive_values)
+        if self.mm_management_policy == 'BOTH':
+          alive_keys.remove(unloaded_key)
+          alive_values.remove(self.cache[unloaded_key])
+    if self.mm_management_policy == 'MEMORY' or self.mm_management_policy == 'BOTH' \
+    and len(alive_values) > 0:
       items_memory = list(item.memory for item in alive_values)
       total_memory_used = sum(items_memory)
       memory_available = self.get_memory()
@@ -99,6 +107,7 @@ class MemoryManager:
     if to_unload == model_name and len(items) > 1:
       to_unload = items[1].name
     self.unload(to_unload, config.mm_unload_order_policy)
+    return to_unload
     
 RAM = MemoryManager(get_system_ram_info, config.mm_ram_cached_model_count_limit)
 VRAM = MemoryManager(get_vram_info, config.mm_vram_cached_model_count_limit) if GPU_AVAILABLE else False
