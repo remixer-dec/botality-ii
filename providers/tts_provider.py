@@ -71,7 +71,7 @@ async def tts(voice, text):
     assert os.path.exists(config.tts_ffmpeg_path)
     for r in config.tts_replacements:
       text = text.replace(r, config.tts_replacements[r])
-    if voice in so_vits_svc_voices:
+    if voice.lower() in so_vits_svc_voices:
       return await so_vits_svc(voice, text)
     loader = partial(
       Synthesizer,
