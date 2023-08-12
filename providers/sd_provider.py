@@ -155,7 +155,7 @@ async def iti(override=None):
   payload['denoising_strength'] = config.sd_default_iti_denoising_strength
   payload['cfg_scale'] = config.sd_default_iti_cfg_scale
   payload['steps'] = config.sd_default_iti_steps
-  payload['sampler'] = config.sd_default_iti_sampler
+  payload['sampler_name'] = config.sd_default_iti_sampler
   if override:
     payload = {**payload, **override}
   return await sd_get_images(payload, 'sdapi/v1/img2img')
