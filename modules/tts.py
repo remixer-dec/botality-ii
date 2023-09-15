@@ -1,6 +1,6 @@
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message, BufferedInputFile
-from providers.tts_provider import tts, remote_tts, convert_to_ogg, so_vits_svc
+from providers.tts_provider import init as init_tts, tts, sts, remote_tts, convert_to_ogg, tts_voicemap, sts_voicemap
 from custom_queue import UserLimitedQueue, semaphore_wrapper
 from config_reader import config
 from utils import download_audio
@@ -11,10 +11,10 @@ class TextToSpeechModule:
   def __init__(self, dp, bot):
     self.queue = UserLimitedQueue(config.tts_queue_size_per_user)
     self.semaphore = asyncio.Semaphore(1)
-    
-    so_vits_svc_voices = list(v['voice'].lower().replace('-','') for v in config.tts_so_vits_svc_voices)
-    all_voices = [*config.tts_voices, *so_vits_svc_voices]
-    @dp.message(Command(commands=["tts", *config.tts_voices, *so_vits_svc_voices]), flags={"long_operation": "record_audio"})
+    init_tts()
+    sts_voices = sts_voicemap.keys()
+    all_voices = tts_voicemap.keys()
+    @dp.message(Command(commands=["tts", *all_voices]), flags={"long_operation": "record_audio"})
     async def command_tts_handler(message: Message, command: CommandObject) -> None:
       with self.queue.for_user(message.from_user.id) as available:
         if available:
@@ -35,17 +35,17 @@ class TextToSpeechModule:
     if config.tts_enable_so_vits_svc:
       @dp.message(Command(commands=["revoice", "sts"]), flags={"long_operation": "record_audio"})
       async def revoice(message: Message, command: CommandObject) -> None:
-        voice = str(command.args).split(' ')[0] if command.args else so_vits_svc_voices[0]
-        voice = voice if voice in so_vits_svc_voices else None
+        voice = str(command.args).split(' ')[0] if command.args else sts_voices[0]
+        voice = voice if voice in sts_voices else None
         if not voice:
           return await message.answer("<b>Voice not found</b>, available speech-to-speech voices: " +
-           ", ".join(so_vits_svc_voices))
+           ", ".join(sts_voices))
         if message.reply_to_message:
           if message.reply_to_message.voice:
             with tempfile.NamedTemporaryFile(suffix='.ogg', delete=False) as temp_file:
               await download_audio(bot, message.reply_to_message.voice.file_id, temp_file.name)
-              wrapped_runner = semaphore_wrapper(self.semaphore, so_vits_svc)
-              error, data = await wrapped_runner(voice, None, temp_file.name)
+              wrapped_runner = semaphore_wrapper(self.semaphore, sts)
+              error, data = await wrapped_runner(voice, temp_file.name)
               if error:
                 return await message.answer(f"Error, <b>{error}</b>")
               else:
