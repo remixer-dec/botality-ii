@@ -42,7 +42,7 @@ class LlamaOrig(AbstractLLM):
   def _load_multimodal_adapter(self, model_paths, llama_weights, llama_tokenizer):
     global generator, assistant_mode, visual_mode
     import llama
-    device = 'mps' if torch.backends.mps.is_available() else ('cuda' if torch.cuda.is_available else 'cpu')
+    device = 'mps' if torch.backends.mps.is_available() else ('cuda' if torch.cuda.is_available() else 'cpu')
     lpath = os.path.dirname(llama_tokenizer)
     orig_generator, preprocess = llama.load(model_paths['path_to_llama_multimodal_adapter'], lpath, device)
     self.assistant_mode = True
