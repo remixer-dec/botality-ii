@@ -12,7 +12,7 @@ class TTSx4(AbstractTTS):
     self.system = True
     self.voices = []
     self.is_available = False
-    self.name = 'default'
+    self.name = 'ttsx4'
     if is_remote:
       return
     try:

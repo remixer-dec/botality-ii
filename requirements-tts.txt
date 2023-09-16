@@ -1,5 +1,6 @@
 fastapi
 uvicorn
+pyttsx4
 TTS
 praat-parselmouth
 fairseq==0.12.2 

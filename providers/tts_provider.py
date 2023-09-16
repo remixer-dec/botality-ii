@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 tts_voicemap = {}
 system_voicemap = {}
 sts_voicemap = {}
+tts_backends_loaded = {}
 
 remote_tts = None
 
@@ -32,10 +33,12 @@ def init(allowRemote=True, threaded=True):
   threads = []
   if 'tts' in config.active_modules:
     for backend in tts_backends:
+      if backend not in config.tts_enable_backends:
+        continue
       if not threaded:
         init_backend(backend)
         continue
-      thread = threading.Thread(target=init_backend, args=(backend, not allowRemote))
+      thread = threading.Thread(target=init_backend, args=(backend, allowRemote))
       thread.start()
       threads.append(thread)
     for thread in threads:
@@ -46,17 +49,19 @@ def init(allowRemote=True, threaded=True):
 
 def init_backend(backend, remote):
   is_sts = issubclass(tts_backends[backend], AbstractSTS)
-  args = [remote, tts] if is_sts else [remote]
+  args = [tts, remote] if is_sts else [remote]
   b = tts_backends[backend](*args)
   if b.is_available:
     logger.debug('tts backend initialized: ' + backend)
   if b.is_available or config.tts_mode != 'local':
+    tts_backends_loaded[backend] = b
     for voice in b.voices:
       tts_voicemap[voice] = b
       if is_sts:
         sts_voicemap[voice] = b
       if b.system:
         system_voicemap[voice] = b
+  print(b.voices)
   return b
 
 def convert_to_ogg(wav_path):

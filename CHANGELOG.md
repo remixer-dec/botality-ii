@@ -1,3 +1,14 @@
+## v0.5  
+- full TTS refactoring  
+- universal system os TTS prvider (pyttsx4) support  
+- threaded initialization (configurable via `threaded_initialization` option)  
+- bugfixes
+
+### Breaking changes  
+- `tts_enable_so_vits_svc` config option has been removed in favor of `tts_enable_backends`.  
+- `tts_so_vits_svc_base_tts_provider` config option has been removed, you only need base voice from now on.  
+
+
 ## v0.4
 - so-vits-svc-4.1 support
 - experimental memory manager (now supports all models except LLMs with pytorch backend)

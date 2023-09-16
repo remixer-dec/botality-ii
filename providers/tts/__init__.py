@@ -9,7 +9,6 @@ from providers.tts.remote_tts import RemoteTTS
 
 tts_backends = OrderedDict()
 tts_backends['say_macos'] = Say
-tts_backends['default'] = TTSx4
+tts_backends['ttsx4'] = TTSx4
 tts_backends['coqui_tts'] = CoquiTTS
 tts_backends['so_vits_svc'] = SoVitsSVC
-

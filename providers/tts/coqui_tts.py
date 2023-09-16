@@ -9,6 +9,7 @@ import asyncio
 import torch
 import tempfile
 import logging
+import os
 logger = logging.Logger(__name__)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') # do not use MPS, currently it is bugged
@@ -31,10 +32,12 @@ class CoquiTTS(AbstractTTS):
         cprint("CoquiTTS provider not available", color="red")
   
   def _speak(self, voice, text):
+    config_path = Path(config.tts_path) / (voice + ".json")
+    config_path = Path(config.tts_path) / "config.json" if not os.path.exists(config_path) else config_path
     voic_model_loader = partial(
       self.TTS,
-      model_path =  Path(config.tts_path) / (voice + ".pth"), 
-      config_path = Path(config.tts_path) / "config.json"
+      model_path  = Path(config.tts_path) / (voice + ".pth"),       
+      config_path = config_path
     )
     loaded_model = mload('CoquiTTS-' + voice, voic_model_loader, None, gpu=torch.cuda.is_available())
     if (loaded_model.synthesizer.tts_model.device.type != device.type):

@@ -11,7 +11,7 @@ class TextToSpeechModule:
   def __init__(self, dp, bot):
     self.queue = UserLimitedQueue(config.tts_queue_size_per_user)
     self.semaphore = asyncio.Semaphore(1)
-    init_tts(config.threaded_initialization)
+    init_tts(config.tts_mode != 'local', config.threaded_initialization)
     sts_voices = sts_voicemap.keys()
     all_voices = tts_voicemap.keys()
     non_system_voices = [v for v in all_voices if v not in system_voicemap]
@@ -34,7 +34,7 @@ class TextToSpeechModule:
             audio = BufferedInputFile(convert_to_ogg(data), 'tts.ogg')
             return await message.answer_voice(voice=audio)
     
-    if config.tts_enable_so_vits_svc:
+    if 'so_vits_svc' in config.tts_enable_backends:
       @dp.message(Command(commands=["revoice", "sts"]), flags={"long_operation": "record_audio"})
       async def revoice(message: Message, command: CommandObject) -> None:
         voice = str(command.args).split(' ')[0] if command.args else sts_voices[0]
