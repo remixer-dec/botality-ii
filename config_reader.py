@@ -10,6 +10,7 @@ class Settings(BaseSettings):
   blacklist: List[int]
   ignore_mode: Literal["blacklist", "whitelist", "both"]
   active_modules: List[str]
+  threaded_initialization: bool
   apply_mps_fixes: bool
   tts_path: str
   tts_voices: List[str]
@@ -18,6 +19,7 @@ class Settings(BaseSettings):
   tts_credits: str
   tts_ffmpeg_path: str
   tts_enable_so_vits_svc: bool
+  tts_list_system_voices: bool
   tts_so_vits_svc_4_0_code_path: str
   tts_so_vits_svc_4_1_code_path: str
   tts_so_vits_svc_base_tts_provider: Literal["say_macos", "built_in"]

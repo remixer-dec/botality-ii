@@ -10,9 +10,14 @@ import os
 import time
 
 class SoVitsSVC(AbstractSTS):
-  def __init__(self, tts_instance):
+  def __init__(self, tts_instance, is_remote):
     self.tts = tts_instance
+    self.system = False
     self.voices = dict({m['voice'].lower().replace('-',''): m for m in config.tts_so_vits_svc_voices})
+    self.name = 'so_vits_svc'
+    self.is_available = False
+    if is_remote:
+      return
     self.v4_0_code_path = config.tts_so_vits_svc_4_0_code_path
     self.v4_1_code_path = config.tts_so_vits_svc_4_1_code_path
     self.v4_0_available = os.path.exists(self.v4_0_code_path)

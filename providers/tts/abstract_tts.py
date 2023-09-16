@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 
 class AbstractTTS(metaclass=ABCMeta):
-  def __init__(self):
+  def __init__(self, remote):
     pass
 
   @abstractmethod
@@ -9,7 +9,7 @@ class AbstractTTS(metaclass=ABCMeta):
     pass
 
 class AbstractSTS(metaclass=ABCMeta):
-  def __init__(self, tts_instance):
+  def __init__(self, remote, tts_instance):
     self.tts = tts_instance
     pass
 

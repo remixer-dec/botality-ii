@@ -1,6 +1,6 @@
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message, BufferedInputFile
-from providers.tts_provider import init as init_tts, tts, sts, remote_tts, convert_to_ogg, tts_voicemap, sts_voicemap
+from providers.tts_provider import init as init_tts, tts, sts, convert_to_ogg, tts_voicemap, sts_voicemap, system_voicemap
 from custom_queue import UserLimitedQueue, semaphore_wrapper
 from config_reader import config
 from utils import download_audio
@@ -11,20 +11,22 @@ class TextToSpeechModule:
   def __init__(self, dp, bot):
     self.queue = UserLimitedQueue(config.tts_queue_size_per_user)
     self.semaphore = asyncio.Semaphore(1)
-    init_tts()
+    init_tts(config.threaded_initialization)
     sts_voices = sts_voicemap.keys()
     all_voices = tts_voicemap.keys()
+    non_system_voices = [v for v in all_voices if v not in system_voicemap]
+    list_voices = all_voices if config.tts_list_system_voices else non_system_voices
+
     @dp.message(Command(commands=["tts", *all_voices]), flags={"long_operation": "record_audio"})
     async def command_tts_handler(message: Message, command: CommandObject) -> None:
       with self.queue.for_user(message.from_user.id) as available:
         if available:
-          #show helper message if no voice is selected
+          # show helper message if no voice is selected
           if command.command == "tts" or not command.args or str(command.args).strip() == "" or ('-help' in str(command.args)):
-            return await message.answer(f"usage: {' '.join(['/' + x for x in all_voices])} text, /revoice [recording]\nUse the commands like /command@botname \n{config.tts_credits}")
+            return await message.answer(f"usage: {' '.join(['/' + x for x in list_voices])} text, /revoice [recording]\nUse the commands like /command@botname \n{config.tts_credits}")
           voice = command.command
           text = str(command.args)
-          task_function = remote_tts if config.tts_mode != 'local' else tts
-          wrapped_runner = semaphore_wrapper(self.semaphore, task_function)
+          wrapped_runner = semaphore_wrapper(self.semaphore, tts)
           error, data = await wrapped_runner(voice, text)
           if error:
             return await message.answer(f"Error, <b>{error}</b>")

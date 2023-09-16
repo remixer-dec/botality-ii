@@ -8,8 +8,9 @@ import sys
 import os
 
 class Say(AbstractTTS):
-  def __init__(self):
+  def __init__(self, is_remote):
     self.is_available = sys.platform == "darwin"
+    self.system = True
     self.name = 'say_macos'
     self.voices = [
       'Alex', 'Alice', 'Alva', 'Amelie', 'Anna', 'Carmit', 'Damayanti', 'Daniel', 'Diego',

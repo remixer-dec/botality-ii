@@ -1,13 +1,26 @@
 import sys 
 import os
-sys.path.append('.')
-sys.path.append('..')
+import asyncio
 from fastapi import FastAPI
-from providers.tts_provider import tts, save_audio
 from pydantic import BaseModel, Field
 from fastapi.responses import StreamingResponse
 from io import BytesIO
 from typing_extensions import Literal
+sys.path.append('.')
+sys.path.append('..')
+from providers.tts_provider import init, tts
+
+
+# polyfill for python3.8
+if not hasattr(asyncio, 'to_thread'):
+  import functools
+  import contextvars
+  async def to_thread(func, /, *args, **kwargs):
+    loop = asyncio.get_running_loop()
+    ctx = contextvars.copy_context()
+    func_call = functools.partial(ctx.run, func, *args, **kwargs)
+    return await loop.run_in_executor(None, func_call)
+  asyncio.to_thread = to_thread
 
 app = FastAPI()
 
@@ -33,5 +46,6 @@ async def read_root(rqdata: Data):
 
 if __name__ == "__main__":
   import uvicorn
+  init(allowRemote=False)
   uvicorn.run(app, host="0.0.0.0", port=7077)
   

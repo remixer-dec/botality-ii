@@ -8,19 +8,25 @@ from pathlib import Path
 import asyncio
 import torch
 import tempfile
+import logging
+logger = logging.Logger(__name__)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') # do not use MPS, currently it is bugged
 
 class CoquiTTS(AbstractTTS):
-  def __init__(self):
+  def __init__(self, is_remote):
     self.name = 'coqui_tts'
     self.voices = config.tts_voices
+    self.system = False
+    self.is_available = False
+    if is_remote:
+      return
     try:
       from TTS.api import TTS
       self.TTS = TTS
       self.is_available = True
-    except Exception:
-      self.is_available = False
+    except Exception as e:
+      logger.error(e)
       if 'tts' in config.active_modules and config.tts_mode == 'local':
         cprint("CoquiTTS provider not available", color="red")
   
@@ -34,7 +40,7 @@ class CoquiTTS(AbstractTTS):
     if (loaded_model.synthesizer.tts_model.device.type != device.type):
       loaded_model.synthesizer.tts_model = loaded_model.synthesizer.tts_model.to(device)
     tmp_path = tempfile.TemporaryDirectory().name + 'record.wav'
-    if loaded_model.model_name is None:
+    if hasattr(loaded_model, 'model_name') and loaded_model.model_name is None:
       loaded_model.model_name = voice
     loaded_model.tts_to_file(text, file_path=tmp_path)
     return tmp_path
@@ -44,5 +50,5 @@ class CoquiTTS(AbstractTTS):
       with ThreadPoolExecutor():
         wav_file_path = await asyncio.to_thread(self._speak, voice, text + '.')
       return False, wav_file_path
-    except RuntimeWarning as e:
+    except Exception as e:
       return str(e), None 

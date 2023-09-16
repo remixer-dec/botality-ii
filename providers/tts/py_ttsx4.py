@@ -4,18 +4,25 @@ from concurrent.futures import ThreadPoolExecutor
 import asyncio
 import tempfile
 import sys 
+import logging
+logger = logging.Logger(__name__)
 
 class TTSx4(AbstractTTS):
-  def __init__(self):
+  def __init__(self, is_remote):
+    self.system = True
+    self.voices = []
+    self.is_available = False
+    self.name = 'default'
+    if is_remote:
+      return
     try:
       import pyttsx4
       self.engine = pyttsx4.init()
       self.prefix = 'com.apple.speech.synthesis.voice.' if sys.platform == "darwin" else ''
       self.voices = [v.name for v in self.engine.getProperty('voices')]
       self.is_available = True
-    except Exception:
-      self.is_available = False
-    self.name = 'default'
+    except Exception as e:
+      logger.error(e)
 
   def _speak(self, voice, text):
     tmp_path = tempfile.TemporaryDirectory().name + 'record.wav'
