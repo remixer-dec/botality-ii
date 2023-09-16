@@ -61,7 +61,7 @@ Some versions have breaking changes, see [Changelog file](CHANGELOG.md) for more
 - for llm module, see LLM Setup section bellow
 - run the bot with `python bot.py`  
   
-python3.10+ is recommended, due to aiogram compatibility  
+python3.10+ is recommended, due to aiogram compatibility, if you are experiencing problems with whisper or logging, please update numpy.
 ### Supported language models (tested):  
 #### Python/Pytorch backend  
 - [original llama](https://github.com/facebookresearch/llama/blob/main/example.py) (7b version was tested on [llama-mps fork](https://github.com/remixer-dec/llama-mps/tree/multimodal-adapter) for macs), requires running the bot with `python3.10 -m torch.distributed.launch --use_env bot.py`  

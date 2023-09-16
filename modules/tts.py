@@ -15,7 +15,7 @@ class TextToSpeechModule:
     sts_voices = sts_voicemap.keys()
     all_voices = tts_voicemap.keys()
     non_system_voices = [v for v in all_voices if v not in system_voicemap]
-    list_voices = all_voices if config.tts_list_system_voices else non_system_voices
+    self.voices = all_voices if config.tts_list_system_voices else non_system_voices
 
     @dp.message(Command(commands=["tts", *all_voices]), flags={"long_operation": "record_audio"})
     async def command_tts_handler(message: Message, command: CommandObject) -> None:
@@ -23,7 +23,7 @@ class TextToSpeechModule:
         if available:
           # show helper message if no voice is selected
           if command.command == "tts" or not command.args or str(command.args).strip() == "" or ('-help' in str(command.args)):
-            return await message.answer(f"usage: {' '.join(['/' + x for x in list_voices])} text, /revoice [recording]\nUse the commands like /command@botname \n{config.tts_credits}")
+            return await message.answer(f"usage: {' '.join(['/' + x for x in self.voices])} text, /revoice [recording]\nUse the commands like /command@botname \n{config.tts_credits}")
           voice = command.command
           text = str(command.args)
           wrapped_runner = semaphore_wrapper(self.semaphore, tts)
