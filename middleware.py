@@ -14,8 +14,8 @@ class ChatActionMiddleware(BaseMiddleware):
 
     if not long_operation_type:
       return await handler(event, data)
-
-    async with ChatActionSender(action=long_operation_type, chat_id=event.chat.id):
+    
+    async with ChatActionSender(action=long_operation_type, chat_id=event.chat.id, bot=data["bot"]):
       return await handler(event, data)
 
 class AccessMiddleware(BaseMiddleware):

@@ -1,4 +1,8 @@
-from pydantic import BaseSettings, SecretStr, validator
+from pydantic import SecretStr, validator
+try:
+  from pydantic_settings import BaseSettings
+except ImportError:
+  from pydantic import BaseSettings
 from typing import List, Dict
 from typing_extensions import Literal
 from utils import update_env
@@ -97,6 +101,7 @@ class Settings(BaseSettings):
   class Config:
     env_file = '.env'
     env_file_encoding = 'utf-8'
+    extra='ignore'
 
 # mirror all config changes to .env file
 class SettingsWrapper(Settings):

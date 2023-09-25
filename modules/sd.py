@@ -16,17 +16,17 @@ import random
 sd_available_resolutions = list(range(256, config.sd_max_resolution + 1, 64))
 
 class SDArguments(pydantic.BaseModel):
-  denoising_strength: float = pydantic.Field(None, ge=0, le=1, alias='d', description='Denoising strength')
-  cfg_scale: float = pydantic.Field(None, ge=1, le=25, alias='c', description='Cfg scale')
-  steps: int = pydantic.Field(None, ge=5, le=config.sd_max_steps, alias='st')
-  sampler_name: Literal[tuple(config.sd_available_samplers)] = pydantic.Field(None, alias="sa", description='Sampler')
-  width: Literal[tuple(sd_available_resolutions)] = pydantic.Field(None, alias="wi", description='Width')
-  height: Literal[tuple(sd_available_resolutions)] = pydantic.Field(None, alias="he", description='Height')
-  negative_prompt: str = pydantic.Field(None, alias='np', description='Negative prompt')
-  seed: int = pydantic.Field(None, ge=-1, alias='se', description='Seed')
-  prompt: str = pydantic.Field(None)
-  mask: Literal[1, -1] = pydantic.Field(None, alias='ma', description='Inpaint mask')
-  inpainting_fill: int = pydantic.Field(None, ge=0, le=3, alias='fi', description='Inpaint fill mode')
+  denoising_strength: float | None = pydantic.Field(None, ge=0, le=1, alias='d', description='Denoising strength')
+  cfg_scale: float | None = pydantic.Field(None, ge=1, le=25, alias='c', description='Cfg scale')
+  steps: int | None = pydantic.Field(None, ge=5, le=config.sd_max_steps, alias='st')
+  sampler_name: Literal[tuple(config.sd_available_samplers)] | None = pydantic.Field(None, alias="sa", description='Sampler')
+  width: Literal[tuple(sd_available_resolutions)] | None = pydantic.Field(None, alias="wi", description='Width')
+  height: Literal[tuple(sd_available_resolutions)] | None = pydantic.Field(None, alias="he", description='Height')
+  negative_prompt: str | None = pydantic.Field(None, alias='np', description='Negative prompt')
+  seed: int | None = pydantic.Field(None, ge=-1, alias='se', description='Seed')
+  prompt: str | None = pydantic.Field(None)
+  mask: Literal[1, -1] | None = pydantic.Field(None, alias='ma', description='Inpaint mask')
+  inpainting_fill: int | None = pydantic.Field(None, ge=0, le=3, alias='fi', description='Inpaint fill mode')
 
 
 class StableDiffusionModule:
