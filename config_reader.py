@@ -13,7 +13,7 @@ class Settings(BaseSettings):
   whitelist: List[int]
   blacklist: List[int]
   ignore_mode: Literal["blacklist", "whitelist", "both"]
-  active_modules: List[str]
+  active_modules: List[Literal["llm", "sd", "tts", "stt", "tta", "admin"]]
   threaded_initialization: bool
   apply_mps_fixes: bool
   tts_path: str
@@ -91,6 +91,8 @@ class Settings(BaseSettings):
   mm_management_policy: Literal["COUNT", "MEMORY", "BOTH", "NONE"]
   mm_unload_order_policy: Literal["LEAST_USED", "OLDEST_USE_TIME", "OLDEST_LOAD_ORDER", "MEMORY_FOOTPRINT"]
   mm_autounload_after_seconds: int
+  sys_webui_host: str
+  sys_api_host: str
   
   @validator('sd_max_resolution', 'sd_default_width', 'sd_default_height')
   def resolution_in_correct_ranges(cls, v):
@@ -102,11 +104,15 @@ class Settings(BaseSettings):
     env_file = '.env'
     env_file_encoding = 'utf-8'
     extra='ignore'
+    validate_assignment = True
+
 
 # mirror all config changes to .env file
 class SettingsWrapper(Settings):
   def __setattr__(self, name, value):
-    update_env('.env', name, value)
+    if name == 'bot_token':
+      raise KeyError('setting bot token dynamically is not allowed')
     super().__setattr__(name, value)
+    update_env(self.Config.env_file, name, value)
 
 config = SettingsWrapper()

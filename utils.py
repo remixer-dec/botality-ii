@@ -67,14 +67,14 @@ def update_env(path, key, value):
     try:
       for line in lines:
         if line.startswith(key + "="):
-          multiline = line.startswith(key + "='")
+          multiline = line.startswith(key + "='") and not line.endswith(tuple("'", "'\n","'\r\n"))
           if not multiline:
             to_write.append(f"{key}={value}\n")
           else:
             to_write.append(f"{key}='{json.dumps(json.loads(value), indent=2, sort_keys=True)}'\n")
           continue
         if multiline:
-          if line.endswith("'") or line.endswith("'\n") or line.endswith("'\r\n"):
+          if line.endswith(tuple("'", "'\n","'\r\n")):
             multiline = False
           continue
         to_write.append(line)
