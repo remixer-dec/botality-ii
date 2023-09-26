@@ -36,7 +36,6 @@ class Wav2Vec2(AbstractSTT):
     if device != 'cpu':
       processed['input_values'] = processed['input_values'].to(device)
       processed['attention_mask'] = processed['attention_mask'].to(device)
-    print(processed)
     with torch.no_grad():
       predicted_ids = model.generate(**processed)
     

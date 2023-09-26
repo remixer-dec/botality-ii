@@ -25,7 +25,7 @@ async def tts(voice, text):
 
 async def sts(voice, original_audio=False):
   if voice in sts_voicemap:
-    return await tts_voicemap[voice].mimic(voice, original_audio)
+    return await sts_voicemap[voice].mimic(voice, original_audio)
   return ('Voice not found', None)
 
 def init(allowRemote=True, threaded=True):
@@ -36,7 +36,7 @@ def init(allowRemote=True, threaded=True):
       if backend not in config.tts_enable_backends:
         continue
       if not threaded:
-        init_backend(backend)
+        init_backend(backend, allowRemote)
         continue
       thread = threading.Thread(target=init_backend, args=(backend, allowRemote))
       thread.start()
@@ -61,7 +61,6 @@ def init_backend(backend, remote):
         sts_voicemap[voice] = b
       if b.system:
         system_voicemap[voice] = b
-  print(b.voices)
   return b
 
 def convert_to_ogg(wav_path):
