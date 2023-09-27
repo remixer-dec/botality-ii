@@ -16,7 +16,7 @@ add_common_endpoints(vrouter)
 async def start_bot(action):
   global bot_instance
   if not bot_instance and action == 'start':
-    bot_instance = multiprocessing.Process(target=main)
+    bot_instance = multiprocessing.Process(target=main, kwargs={"api": True})
     bot_instance.start()
   elif bot_instance and action == 'stop':
     bot_instance.terminate()
@@ -52,8 +52,6 @@ app.mount("/", StaticFiles(directory="static", html=True), name="static")
 @app.exception_handler(404)
 async def not_found_handler(a, b):
   return FileResponse("static/index.html", status_code=200)
-
-
 
 def serve():
   import uvicorn

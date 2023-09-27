@@ -13,7 +13,6 @@ from modules.llm import LargeLanguageModel
 from modules.tta import TextToAudioModule
 from modules.stt import SpeechToTextModule
 
-
 logger = logging.getLogger(__name__)
 
 dp = Dispatcher()
@@ -49,12 +48,16 @@ def initialize(dp, bot, threaded=True):
   for thread in threads:
     thread.join()
 
-def main():
+def main(api=False):
   bot = Bot(token=config.bot_token.get_secret_value(), parse_mode="HTML")
   logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s',)
   initialize(dp, bot, config.threaded_initialization)
-  print('running')
-  dp.run_polling(bot)
+  if api:
+    from servers.api_sever import init_api_server
+    with init_api_server(dp).run_in_thread():
+      dp.run_polling(bot)
+  else:
+    dp.run_polling(bot)
 
 
 if __name__ == "__main__":
