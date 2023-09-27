@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="bg-gray-300 h-full">
+  <div id="app" class="bg-gray-300 min-h-full h-max">
     <Sidebar />
     <main class="transform translate-x-64 mr-64">
       <RouterView />

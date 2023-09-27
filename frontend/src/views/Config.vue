@@ -25,12 +25,17 @@ class ConfigItem {
           this.item.type = 'select'
         break
       case 'integer':
+      case 'number':
         this.item.type = 'slider'
         break
       case 'array':
-        this.item.type = 'text'
-        if (schema.enum)
+      case 'object':
+        this.item.type = 'list'
+        if (schema.enum || schema?.items?.enum)
           this.item.type = 'tags'
+        break
+      default:
+        console.log(schema.type)
     }
   }
 }
@@ -61,15 +66,23 @@ function syncConfigOptions(options, target, config, schema) {
 async function refreshData() {
   const schema = await api('GET', 'schema')
   const config = await api('GET', 'config')
-  const botConfigKeys = ['ignore_mode', 'threaded_initialization', 'active_modules']
+  const botConfigKeys = ['ignore_mode', 'threaded_initialization', 'active_modules', 'adminlist', 'blacklist', 'whitelist']
   syncConfigOptions(botConfigKeys, botConfig, config, schema.properties)
   syncConfigOptions('mm_', mmConfig, config, schema.properties)
+  syncConfigOptions('llm_', llmConfig, config, schema.properties)
+  syncConfigOptions('sd_', sdConfig, config, schema.properties)
+  syncConfigOptions('tts_', ttsConfig, config, schema.properties)
+  syncConfigOptions('stt_', sttConfig, config, schema.properties)
+  syncConfigOptions('tta_', ttaConfig, config, schema.properties)
 }
 
 const botConfig = reactive({
-  ignore_mode: { value: 'both', type: 'select', options: [] },
+  active_modules: { value: [], type: 'tags', options: [] },
   threaded_initialization: { value: false, type: Boolean },
-  active_modules: { value: [], type: 'tags', options: [] }
+  ignore_mode: { value: 'both', type: 'select', options: [] },
+  adminlist: { value: [], type: 'numbertags' },
+  blacklist: { value: [], type: 'numbertags', depends: o => o.ignore_mode.value !== 'whitelist' },
+  whitelist: { value: [], type: 'numbertags', depends: o => o.ignore_mode.value !== 'blacklist' }
 })
 
 const mmConfig = reactive({
@@ -79,14 +92,50 @@ const mmConfig = reactive({
   mm_vram_cached_model_count_limit: { value: '10', type: 'slider', min: 0, max: 30 }
 })
 
+const isLLMBackendRemote = o => o.llm_backend.value.startsWith('remote')
+const isLLMRemoteAndAutoLaunchOn = o => isLLMBackendRemote(o) && o.llm_remote_launch_process_automatically.value
+const isLLMBackendLlamaCpp = o => o.llm_backend.value === 'llama_cpp'
+const llmConfig = reactive({
+  llm_backend: { value: '', type: 'select', options: [] },
+  llm_python_model_type: { value: '', type: 'select', options: [], depends: o => o.llm_backend.value.startsWith('py') },
+  llm_host: { value: '', type: 'text', depends: isLLMBackendRemote },
+  llm_remote_model_name: { value: '', type: 'text', depends: isLLMBackendRemote },
+  llm_remote_launch_process_automatically: { value: '', type: Boolean, depends: isLLMBackendRemote },
+  llm_remote_launch_dir: { value: '', type: 'text', depends: isLLMRemoteAndAutoLaunchOn },
+  llm_remote_launch_command: { value: '', type: 'text', depends: isLLMRemoteAndAutoLaunchOn },
+  llm_remote_launch_waittime: { value: '', type: 'text', depends: isLLMRemoteAndAutoLaunchOn },
+  llm_lcpp_gpu_layers: { value: '0', type: 'slider', depends: isLLMBackendLlamaCpp },
+  llm_lcpp_max_context_size: { value: '0', type: 'slider', depends: isLLMBackendLlamaCpp }
+})
+
+const sdConfig = reactive({
+  sd_host: { value: '', type: 'text' }
+})
+
+const ttsConfig = reactive({
+  tts_mode: { value: '', type: 'select', options: [] },
+  tts_enable_backends: { value: [], type: 'tags', options: [] },
+  tts_host: { value: '', type: 'text', depends: o => o.tts_mode.value !== 'local' }
+})
+
+const sttConfig = reactive({
+  stt_backend: { value: '', type: 'select', options: [] }
+})
+
+const ttaConfig = reactive({
+  tta_duration: { value: 3, type: 'slider' }
+})
+
 refreshData().then(() => {
   const allConfigs = { ...mmConfig, ...botConfig }
 
   for (const item in allConfigs)
-    watch(() => allConfigs[item].value, v => itemChanged(item, v), { deep: true })
+    watch(() => allConfigs[item].value, v => itemChanged(item, v, allConfigs[item]), { deep: true })
 })
 
-function itemChanged(name, value) {
+function itemChanged(name, value, meta) {
+  if (meta.type === 'numbertags')
+    value = value.map(x => parseInt(x))
   api('PATCH', 'config', { body: JSON.stringify({ [name]: value }) })
     .then((r) => {
       if (r.error)
@@ -102,7 +151,7 @@ const inis = reactive({ value: '.env (default)', options: ['.env (default)'] })
 </script>
 
 <template>
-  <div class="w-full flex box-border">
+  <div class="w-full flex box-border flex-wrap justify-around">
     <Notification ref="notification" />
     <FormWrapper>
       <div slot="header" class="relative">
@@ -127,6 +176,41 @@ const inis = reactive({ value: '.env (default)', options: ['.env (default)'] })
         Memory manager
       </div>
       <ConfigForm slot="content" :config-obj="mmConfig" />
+    </FormWrapper>
+    <FormWrapper>
+      <div slot="header">
+        <hi-chat class=" align-sub" />
+        Large language models
+      </div>
+      <ConfigForm slot="content" :config-obj="llmConfig" />
+    </FormWrapper>
+    <FormWrapper>
+      <div slot="header">
+        <hi-brush-big class=" align-sub" />
+        Stable Diffusion
+      </div>
+      <ConfigForm slot="content" :config-obj="sdConfig" />
+    </FormWrapper>
+    <FormWrapper>
+      <div slot="header">
+        <hi-music-note class=" align-sub" />
+        Speech-to-Text
+      </div>
+      <ConfigForm slot="content" :config-obj="sttConfig" />
+    </FormWrapper>
+    <FormWrapper>
+      <div slot="header">
+        <hi-microphone class=" align-sub" />
+        Text-to-audio
+      </div>
+      <ConfigForm slot="content" :config-obj="ttaConfig" />
+    </FormWrapper>
+    <FormWrapper>
+      <div slot="header">
+        <hi-volume-2 class=" align-sub" />
+        Text-to-Speech
+      </div>
+      <ConfigForm slot="content" :config-obj="ttsConfig" />
     </FormWrapper>
   </div>
 </template>

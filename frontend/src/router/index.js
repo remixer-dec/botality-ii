@@ -9,7 +9,7 @@ Vue.use(VueRouter)
 export const routes = [
   {
     path: '/',
-    name: 'Home',
+    name: 'Dashboard',
     component: Home
     // NOTE: you can also lazy-load the component
     // component: () => import("@/views/About.vue")
