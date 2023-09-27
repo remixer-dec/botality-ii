@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.DS_Store
+.vscode/*
+frontend/*.zip
+frontend/*.env
+frontend/package-lock.json
 
 # C extensions
 *.so
@@ -123,6 +127,7 @@ celerybeat.pid
 # Environments
 .env
 .venv
+*.env
 env/
 venv/
 ENV/
