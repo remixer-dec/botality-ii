@@ -1,5 +1,4 @@
 import logging
-import automigration
 import threading
 
 from aiogram import Bot, Dispatcher

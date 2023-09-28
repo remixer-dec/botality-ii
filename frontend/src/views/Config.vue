@@ -1,7 +1,7 @@
 <script setup>
 import { FvlSelect, FvlForm } from 'formvuelar'
-import { reactive } from 'vue'
 import { api } from '../tools'
+import { globalState } from '../state'
 
 const notification = ref(null)
 const reductor = (pr, cur) => {
@@ -63,9 +63,12 @@ function syncConfigOptions(options, target, config, schema) {
     syncConfigOption(target, key, config, schema)
 }
 
+let isRefreshing = false
 async function refreshData() {
+  isRefreshing = true
   const schema = await api('GET', 'schema')
   const config = await api('GET', 'config')
+  const env = await api('GET', 'bot/env')
   const botConfigKeys = ['ignore_mode', 'threaded_initialization', 'active_modules', 'adminlist', 'blacklist', 'whitelist']
   syncConfigOptions(botConfigKeys, botConfig, config, schema.properties)
   syncConfigOptions('mm_', mmConfig, config, schema.properties)
@@ -74,6 +77,11 @@ async function refreshData() {
   syncConfigOptions('tts_', ttsConfig, config, schema.properties)
   syncConfigOptions('stt_', sttConfig, config, schema.properties)
   syncConfigOptions('tta_', ttaConfig, config, schema.properties)
+  envs.options = env.response.all.reduce(reductor, {})
+  envs.value = env.response.active
+  setTimeout(() => {
+    isRefreshing = false
+  }, 500)
 }
 
 const botConfig = reactive({
@@ -126,28 +134,43 @@ const ttaConfig = reactive({
   tta_duration: { value: 3, type: 'slider' }
 })
 
+function reportError(text) {
+  notification.value.$emit('showNotification', { message: text, type: 'error' })
+}
+
 refreshData().then(() => {
-  const allConfigs = { ...mmConfig, ...botConfig }
+  const allConfigs = { ...mmConfig, ...botConfig, ...sdConfig, ...ttsConfig, ...ttaConfig, ...sttConfig }
 
   for (const item in allConfigs)
     watch(() => allConfigs[item].value, v => itemChanged(item, v, allConfigs[item]), { deep: true })
+  watch(envs, (e) => {
+    if (!isRefreshing) {
+      api('PUT', 'bot/env', { body: JSON.stringify(envs.value), headers: { 'content-type': 'application/json' } })
+        .then((r) => {
+          if (r.error)
+            throw new Error(r.error)
+
+          refreshData()
+        })
+        .catch(reportError)
+    }
+  })
 })
 
 function itemChanged(name, value, meta) {
+  if (isRefreshing) return
   if (meta.type === 'numbertags')
     value = value.map(x => parseInt(x))
   api('PATCH', 'config', { body: JSON.stringify({ [name]: value }) })
     .then((r) => {
       if (r.error)
-        notification.value.$emit('showNotification', { message: r.error, type: 'error' })
+        reportError(r.error)
       else
         notification.value.$emit('showNotification', { message: '✅ saved', type: 'ok', duration: 500 })
     })
-    .catch((e) => {
-      notification.value.$emit('showNotification', { message: e, type: 'error' })
-    })
+    .catch(reportError)
 }
-const inis = reactive({ value: '.env (default)', options: ['.env (default)'] })
+const envs = reactive({ value: 'Loading...', options: ['Loading...'] })
 </script>
 
 <template>
@@ -155,16 +178,16 @@ const inis = reactive({ value: '.env (default)', options: ['.env (default)'] })
     <Notification ref="notification" />
     <FormWrapper>
       <div slot="header" class="relative">
-        <hi-code class="align-sub" :data="inis" />
+        <hi-code class="align-sub" :data="envs" />
         Bot configuration
-        <FvlForm url="#/inis" class="absolute right-0 -top-5">
+        <FvlForm v-show="!globalState.botIsRunning" url="#" class="absolute right-0 -top-5">
           <FvlSelect
             label=""
             name="preset"
             placeholder="default"
             :allow-empty="false"
-            :options="inis.options"
-            :selected.sync="inis.value"
+            :options="envs.options"
+            :selected.sync="envs.value"
           />
         </FvlForm>
       </div>

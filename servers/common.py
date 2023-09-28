@@ -3,20 +3,31 @@ from typing import Dict, Any
 from fastapi import status, Body
 from config_reader import config, Settings
 
-def add_common_endpoints(app):
+class DynamicConfig:
+  def __init__(self, get_updated_config):
+    self.get_updated_config = get_updated_config
+
+  def __call__(self):
+    if self.get_updated_config:
+      return self.get_updated_config()
+    else:
+      return config
+
+def add_common_endpoints(app, get_custom_config=False):
+  get_config = DynamicConfig(get_custom_config)
   @app.patch("/config")
   async def write_config(data: Dict[str, Any]):
     for key in data:
       try:
-        if (getattr(config, key, None)) is not None:
-          setattr(config, key, data[key])
+        if (getattr(get_config(), key, None)) is not None:
+          setattr(get_config(), key, data[key])
       except Exception as e:
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={'error': str(e)})
     return {"response": "ok"}
 
   @app.get("/config")
   async def read_config():
-    return config
+    return get_config()
 
   @app.get("/schema")
   async def schema():

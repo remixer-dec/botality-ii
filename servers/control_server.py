@@ -1,16 +1,19 @@
-from fastapi import FastAPI, Request, Response, status
+from fastapi import FastAPI, Request, Response, status, Body
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
+import config_reader
 from bot import main, config
 from servers.common import add_common_endpoints, VirtualRouter
 import httpx
 import multiprocessing
+import os
+import importlib
 
 bot_instance = None
 app = FastAPI(title='Botality WebUI')
 
 vrouter = VirtualRouter()
-add_common_endpoints(vrouter)
+add_common_endpoints(vrouter, lambda: config)
 
 @app.post("/api/bot/{action}")
 async def start_bot(action):
@@ -28,6 +31,24 @@ async def start_bot(action):
 @app.get("/api/bot/status")
 async def bot_status():
   return {"response": {"running": bot_instance is not None}}
+
+@app.get("/api/bot/env")
+async def env_files():
+  env_files = ['.env']
+  if os.path.exists('env') and os.path.isdir('env'):
+    env_files = [*env_files, *[x for x in os.listdir('env') if x.endswith('.env')]]
+  active = os.environ.get('BOTALITY_ENV_FILE', '.env')
+  active = os.path.basename(active)
+  return {"response": {"active": active, "all": env_files}}
+
+@app.put("/api/bot/env")
+async def set_env(filename: str = Body(...)):
+  global config
+  if (os.path.exists('env') and os.path.isdir('env') and filename in os.listdir('env')) or filename == '.env':
+    os.environ['BOTALITY_ENV_FILE'] = os.path.join('env', filename) if filename != '.env' else '.env'
+    config = importlib.reload(config_reader).config
+    return {"response": 'ok'}
+  return {"error": 'file not found'}
 
 @app.api_route("/api/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"])
 async def redirect_request(path: str, request: Request, response: Response):

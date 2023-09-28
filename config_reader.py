@@ -6,6 +6,9 @@ except ImportError:
 from typing import List, Dict
 from typing_extensions import Literal
 from utils import update_env
+import os
+from automigration import verify_environment
+
 
 class Settings(BaseSettings):
   bot_token: SecretStr
@@ -101,7 +104,7 @@ class Settings(BaseSettings):
     return v
   
   class Config:
-    env_file = '.env'
+    env_file = os.environ.get('BOTALITY_ENV_FILE', '.env')
     env_file_encoding = 'utf-8'
     extra='ignore'
     validate_assignment = True
@@ -115,4 +118,5 @@ class SettingsWrapper(Settings):
     super().__setattr__(name, value)
     update_env(self.Config.env_file, name, value)
 
+verify_environment()
 config = SettingsWrapper()
