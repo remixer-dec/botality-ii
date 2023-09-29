@@ -2,6 +2,9 @@ from fastapi.responses import JSONResponse
 from typing import Dict, Any
 from fastapi import status, Body
 from config_reader import config, Settings
+from asyncio import Lock, sleep
+
+config_write_lock = Lock()
 
 class DynamicConfig:
   def __init__(self, get_updated_config):
@@ -20,7 +23,8 @@ def add_common_endpoints(app, get_custom_config=False):
     for key in data:
       try:
         if (getattr(get_config(), key, None)) is not None:
-          setattr(get_config(), key, data[key])
+          async with config_write_lock:
+            setattr(get_config(), key, data[key])
       except Exception as e:
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={'error': str(e)})
     return {"response": "ok"}

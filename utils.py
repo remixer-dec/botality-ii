@@ -66,8 +66,8 @@ def update_env(path, key, value):
     multiline = False
     try:
       for line in lines:
-        if line.startswith(key + "="):
-          multiline = line.startswith(key + "='") and not line.endswith(tuple("'", "'\n","'\r\n"))
+        if line.replace(' ','').startswith(key + "="):
+          multiline = line.replace(' ','').startswith(key + "='") and not line.endswith(("'", "'\n","'\r\n",))
           if not multiline:
             if type(value) in (dict, list):
               value = json.dumps(value)
@@ -76,7 +76,7 @@ def update_env(path, key, value):
             to_write.append(f"{key}='{json.dumps(json.loads(value), indent=2, sort_keys=True)}'\n")
           continue
         if multiline:
-          if line.endswith(tuple("'", "'\n","'\r\n")):
+          if line.endswith(("'", "'\n","'\r\n",)):
             multiline = False
           continue
         to_write.append(line)
@@ -84,7 +84,7 @@ def update_env(path, key, value):
     except Exception as e:
       file.writelines(lines)
       cprint("Unable to update .env file: " + str(e), color='red')
-      raise Exception
+      raise Exception(e)
 
 async def download_audio(bot, file_id, dl_path):
   file_path = (await bot.get_file(file_id=file_id)).file_path

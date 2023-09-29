@@ -1,9 +1,11 @@
 <script setup>
 import { FvlSelect, FvlForm } from 'formvuelar'
+import { watchThrottled } from '@vueuse/core'
 import { api } from '../tools'
 import { globalState } from '../state'
 
-const notification = ref(null)
+const { proxy } = getCurrentInstance()
+
 const reductor = (pr, cur) => {
   if ('length' in pr)
     pr.push({ value: cur })
@@ -25,8 +27,10 @@ class ConfigItem {
           this.item.type = 'select'
         break
       case 'integer':
-      case 'number':
         this.item.type = 'slider'
+        break
+      case 'number':
+        this.item.type = 'floatslider'
         break
       case 'array':
       case 'object':
@@ -95,7 +99,7 @@ const botConfig = reactive({
 
 const mmConfig = reactive({
   mm_management_policy: { value: [], type: 'select', options: '' },
-  mm_autounload_after_seconds: { value: '0', type: 'slider', min: 0, max: 3600 },
+  mm_autounload_after_seconds: { value: '0', step: 60, type: 'slider', min: 0, max: 3600 },
   mm_ram_cached_model_count_limit: { value: '10', type: 'slider', min: 0, max: 30 },
   mm_vram_cached_model_count_limit: { value: '10', type: 'slider', min: 0, max: 30 }
 })
@@ -106,18 +110,30 @@ const isLLMBackendLlamaCpp = o => o.llm_backend.value === 'llama_cpp'
 const llmConfig = reactive({
   llm_backend: { value: '', type: 'select', options: [] },
   llm_python_model_type: { value: '', type: 'select', options: [], depends: o => o.llm_backend.value.startsWith('py') },
+  llm_max_tokens: { value: '0', type: 'slider', min: 2, max: 32768, step: 2, depends: isLLMBackendLlamaCpp },
+  llm_max_assistant_tokens: { value: '0', type: 'slider', min: 2, max: 32768, step: 2, depends: isLLMBackendLlamaCpp },
   llm_host: { value: '', type: 'text', depends: isLLMBackendRemote },
   llm_remote_model_name: { value: '', type: 'text', depends: isLLMBackendRemote },
   llm_remote_launch_process_automatically: { value: '', type: Boolean, depends: isLLMBackendRemote },
   llm_remote_launch_dir: { value: '', type: 'text', depends: isLLMRemoteAndAutoLaunchOn },
   llm_remote_launch_command: { value: '', type: 'text', depends: isLLMRemoteAndAutoLaunchOn },
   llm_remote_launch_waittime: { value: '', type: 'text', depends: isLLMRemoteAndAutoLaunchOn },
-  llm_lcpp_gpu_layers: { value: '0', type: 'slider', depends: isLLMBackendLlamaCpp },
-  llm_lcpp_max_context_size: { value: '0', type: 'slider', depends: isLLMBackendLlamaCpp }
+  llm_lcpp_gpu_layers: { value: '0', type: 'slider', min: 0, max: 1000, depends: isLLMBackendLlamaCpp },
+  llm_lcpp_max_context_size: { value: '0', type: 'slider', min: 1024, max: 32768, step: 128, depends: isLLMBackendLlamaCpp }
+
 })
 
+const isSDAutoLaunchOn = o => o.sd_launch_process_automatically.value
 const sdConfig = reactive({
-  sd_host: { value: '', type: 'text' }
+  sd_host: { value: '', type: 'text' },
+  sd_launch_process_automatically: { value: false, type: Boolean },
+  sd_launch_command: { value: '', type: 'text', depends: isSDAutoLaunchOn },
+  sd_launch_dir: { value: '', type: 'text', depends: isSDAutoLaunchOn },
+  sd_launch_waittime: { value: '', type: 'slider', depends: isSDAutoLaunchOn },
+  sd_default_width: { value: 512, type: 'slider', min: 128, max: 2048, step: 64 },
+  sd_default_height: { value: 512, type: 'slider', min: 128, max: 2048, step: 64 },
+  sd_max_resolution: { value: 1280, type: 'slider', min: 128, max: 2048, step: 64 },
+  sd_default_iti_denoising_strength: { value: 0.5, type: 'floatslider', min: 0.01, max: 1.01, step: 0.01 }
 })
 
 const ttsConfig = reactive({
@@ -135,14 +151,15 @@ const ttaConfig = reactive({
 })
 
 function reportError(text) {
-  notification.value.$emit('showNotification', { message: text, type: 'error' })
+  proxy.$root.$emit('showNotification', { message: text, type: 'error' })
 }
 
 refreshData().then(() => {
   const allConfigs = { ...mmConfig, ...botConfig, ...sdConfig, ...ttsConfig, ...ttaConfig, ...sttConfig }
 
   for (const item in allConfigs)
-    watch(() => allConfigs[item].value, v => itemChanged(item, v, allConfigs[item]), { deep: true })
+    watchThrottled(() => allConfigs[item].value, v => itemChanged(item, v, allConfigs[item]), { deep: true, throttle: 1000 })
+
   watch(envs, (e) => {
     if (!isRefreshing) {
       api('PUT', 'bot/env', { body: JSON.stringify(envs.value), headers: { 'content-type': 'application/json' } })
@@ -166,7 +183,7 @@ function itemChanged(name, value, meta) {
       if (r.error)
         reportError(r.error)
       else
-        notification.value.$emit('showNotification', { message: '✅ saved', type: 'ok', duration: 500 })
+        proxy.$root.$emit('showNotification', { message: '✅ saved', type: 'ok', duration: 500 })
     })
     .catch(reportError)
 }
@@ -175,11 +192,10 @@ const envs = reactive({ value: 'Loading...', options: ['Loading...'] })
 
 <template>
   <div class="w-full flex box-border flex-wrap justify-around">
-    <Notification ref="notification" />
     <FormWrapper>
       <div slot="header" class="relative">
         <hi-code class="align-sub" :data="envs" />
-        Bot configuration
+        Bot config
         <FvlForm v-show="!globalState.botIsRunning" url="#" class="absolute right-0 -top-5">
           <FvlSelect
             label=""
@@ -203,7 +219,7 @@ const envs = reactive({ value: 'Loading...', options: ['Loading...'] })
     <FormWrapper>
       <div slot="header">
         <hi-chat class=" align-sub" />
-        Large language models
+        Large Language Models
       </div>
       <ConfigForm slot="content" :config-obj="llmConfig" />
     </FormWrapper>
@@ -224,7 +240,7 @@ const envs = reactive({ value: 'Loading...', options: ['Loading...'] })
     <FormWrapper>
       <div slot="header">
         <hi-microphone class=" align-sub" />
-        Text-to-audio
+        Text-to-Audio
       </div>
       <ConfigForm slot="content" :config-obj="ttaConfig" />
     </FormWrapper>

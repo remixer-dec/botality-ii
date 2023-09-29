@@ -1,3 +1,4 @@
+<!-- eslint-disable no-invalid-this -->
 <!-- eslint-disable vue/no-mutating-props -->
 <script setup>
 import { FvlSwitch, FvlSelect, FvlTagSelect, FvlForm, FvlSlider, FvlInput } from 'formvuelar'
@@ -5,6 +6,14 @@ import { FvlSwitch, FvlSelect, FvlTagSelect, FvlForm, FvlSlider, FvlInput } from
 defineProps({
   configObj: { type: Object, required: true }
 })
+// original FvlSlider component does not support step prop, implement via labelclass
+FvlSlider.mounted = [function () {
+  if (this.$props.labelClass.startsWith('step:')) {
+    const step = this.$props.labelClass.split(':')[1]
+    this.$el.getElementsByTagName('input')[0].setAttribute('step', step)
+    this.$props.labelClass = ''
+  }
+}]
 </script>
 
 <template>
@@ -42,12 +51,13 @@ defineProps({
             placeholder="Select..."
           />
           <FvlSlider
-            v-if="option.type === 'slider'"
+            v-if="String(option.type).endsWith('slider')"
             :value.sync="option.value"
             :name="idx"
             :label="idx"
             :min="option.min"
             :max="option.max"
+            :label-class="option.step ? `step:${option.step}` : ''"
           />
           <FvlTagSelect
             v-if="option.type === 'numbertags'"

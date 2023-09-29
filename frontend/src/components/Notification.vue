@@ -4,25 +4,30 @@ const show = ref(false)
 const lastTimeout = ref(0)
 const isError = ref(false)
 const duration = ref(8000)
+const lockRemoval = ref(false)
 
 watchEffect(() => {
   if (message.value) {
     show.value = true
-    clearTimeout(lastTimeout)
-    lastTimeout.value = setTimeout(() => {
-      show.value = false
-      isError.value = false
-      message.value = ''
-      duration.value = 8000
-    }, duration.value)
+    clearTimeout(lastTimeout.value)
+    lastTimeout.value = setTimeout(hideNotification, duration.value)
   }
 })
+
+function hideNotification() {
+  if (lockRemoval.value)
+    return watchOnce(lockRemoval, hideNotification)
+
+  show.value = false
+  isError.value = false
+  message.value = ''
+  duration.value = 8000
+}
 
 function showNotification(event) {
   message.value = event.message
 
-  if (event.type === 'error')
-    isError.value = true
+  isError.value = event.type === 'error'
 
   if (event.duration)
     duration.value = event.duration
@@ -30,13 +35,19 @@ function showNotification(event) {
 
 onMounted(() => {
   const { proxy } = getCurrentInstance()
-  proxy.$on('showNotification', showNotification)
+  proxy.$root.$on('showNotification', showNotification)
 })
 </script>
 
 <template>
   <transition name="fade" mode="out-in">
-    <div v-if="show" class="fixed max-w-[400px] top-4 right-4 p-4 text-black rounded-md shadow-lg z-40 bg-white" :class="{ 'bg-red-400': isError, 'text-white': isError }" v-html="message" />
+    <div
+      v-if="show"
+      class="fixed max-w-[400px] p-4 text-black rounded-md shadow-lg z-40 bg-white" :class="{ 'bg-red-400': isError, 'text-white': isError }"
+      @mouseover="lockRemoval = true"
+      @mouseleave="lockRemoval = false"
+      v-html="message"
+    />
   </transition>
 </template>
 
