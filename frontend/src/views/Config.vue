@@ -33,10 +33,16 @@ class ConfigItem {
         this.item.type = 'floatslider'
         break
       case 'array':
-      case 'object':
-        this.item.type = 'list'
+        if (schema?.items?.type !== 'object') {
+          this.item.type = 'freetags'
+          this.item.subtype = schema.items.type
+        }
+        else { this.item.type = 'list' }
         if (schema.enum || schema?.items?.enum)
           this.item.type = 'tags'
+        break
+      case 'object':
+        this.item.type = 'kv'
         break
       default:
         console.log(schema.type)
@@ -92,9 +98,9 @@ const botConfig = reactive({
   active_modules: { value: [], type: 'tags', options: [] },
   threaded_initialization: { value: false, type: Boolean },
   ignore_mode: { value: 'both', type: 'select', options: [] },
-  adminlist: { value: [], type: 'numbertags' },
-  blacklist: { value: [], type: 'numbertags', depends: o => o.ignore_mode.value !== 'whitelist' },
-  whitelist: { value: [], type: 'numbertags', depends: o => o.ignore_mode.value !== 'blacklist' }
+  adminlist: { value: [], type: 'freetags', subtype: 'number' },
+  blacklist: { value: [], type: 'freetags', subtype: 'number', depends: o => o.ignore_mode.value !== 'whitelist' },
+  whitelist: { value: [], type: 'freetags', subtype: 'number', depends: o => o.ignore_mode.value !== 'blacklist' }
 })
 
 const mmConfig = reactive({
@@ -155,7 +161,7 @@ function reportError(text) {
 }
 
 refreshData().then(() => {
-  const allConfigs = { ...mmConfig, ...botConfig, ...sdConfig, ...ttsConfig, ...ttaConfig, ...sttConfig }
+  const allConfigs = { ...mmConfig, ...llmConfig, ...botConfig, ...sdConfig, ...ttsConfig, ...ttaConfig, ...sttConfig }
 
   for (const item in allConfigs)
     watchThrottled(() => allConfigs[item].value, v => itemChanged(item, v, allConfigs[item]), { deep: true, throttle: 1000 })
@@ -176,7 +182,7 @@ refreshData().then(() => {
 
 function itemChanged(name, value, meta) {
   if (isRefreshing) return
-  if (meta.type === 'numbertags')
+  if (meta.type === 'freetags' && meta.subtype === 'number')
     value = value.map(x => parseInt(x))
   api('PATCH', 'config', { body: JSON.stringify({ [name]: value }) })
     .then((r) => {

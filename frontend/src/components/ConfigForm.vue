@@ -2,6 +2,7 @@
 <!-- eslint-disable vue/no-mutating-props -->
 <script setup>
 import { FvlSwitch, FvlSelect, FvlTagSelect, FvlForm, FvlSlider, FvlInput } from 'formvuelar'
+import KVEditor from './KVEditor.vue'
 
 defineProps({
   configObj: { type: Object, required: true }
@@ -60,7 +61,7 @@ FvlSlider.mounted = [function () {
             :label-class="option.step ? `step:${option.step}` : ''"
           />
           <FvlTagSelect
-            v-if="option.type === 'numbertags'"
+            v-if="option.type === 'freetags'"
             :selected.sync="option.value"
             options=""
             :search-keys="['value']"
@@ -69,7 +70,7 @@ FvlSlider.mounted = [function () {
             option-value="value"
             :name="idx"
             :label="idx"
-            type="number"
+            :type="option.subtype"
             placeholder="Add..."
           />
           <FvlInput
@@ -80,6 +81,7 @@ FvlSlider.mounted = [function () {
             :value.sync="option.value"
             :placeholder="idx"
           />
+          <KVEditor v-if="option.type === 'kv'" :obj="option.value" :name="idx" />
           <span v-if="option.type === 'list'" class="fvl-submit-button m-2 inline-block cursor-pointer bg-opacity-70">
             <span class="fvl-submit-text">Manage {{ idx }}</span>
           </span>
