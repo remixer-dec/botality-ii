@@ -1,5 +1,5 @@
 <script setup>
-import Vue, { ref, getCurrentInstance, inject, onMounted, computed } from 'vue'
+import Vue, { ref, getCurrentInstance, onMounted, computed } from 'vue'
 import { api } from '../tools'
 import { globalState } from '../state'
 
@@ -14,23 +14,31 @@ const msg = ref('')
 const history = ref([])
 const onlyUserHistory = computed(() => history.value.filter(x => !x.fromBot))
 const formattedHistory = computed(() => history.value.map(x => ({ ...x, text: highlightCommands(x.text) })))
+const processingPromises = ref([])
 const isProcessing = ref(false)
 const scrollable = ref(null)
 const proxyRef = ref(null)
 function getBotReply(text) {
   const msg = { text }
   isProcessing.value = true
-  api('POST', 'chat', { body: JSON.stringify(msg), headers: { 'content-type': 'application/json' } }).then((json) => {
+  const request = api('POST', 'chat', { body: JSON.stringify(msg), headers: { 'content-type': 'application/json' } })
+  processingPromises.value.push(request)
+  request.then((json) => {
     if (json.error)
       throw new Error(json.error)
-
     history.value.push({ text: json.response.text, fromBot: true })
-    isProcessing.value = false
     scrollToBottom()
-  }).catch((e) => {
-    reportError(e)
-    isProcessing.value = false
+  }).catch(reportError).finally(() => {
+    Promise.allSettled(processingPromises.value).then(requestPromiseCompletionChecker)
   })
+}
+
+function requestPromiseCompletionChecker(arr) {
+  if (arr.length === processingPromises.value.length) {
+    isProcessing.value = false
+    processingPromises.value.length = 0
+  }
+  else { Promise.allSettled(processingPromises.value).then(requestPromiseCompletionChecker) }
 }
 
 function reportError(text) {

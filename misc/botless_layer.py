@@ -51,12 +51,15 @@ async def handle_message(data, dp):
   command = Command.extract_command(None, text)
   handler = dp.comamnd_map.get(command.prefix + command.command, None)
   reply_hijack, reply_future = getHijackerAndFuture()
-  user = User(id=1, is_bot=False, first_name='Admin', last_name='Local')
+  user = User(id=1, is_bot=False, first_name='Admin', last_name='')
   message = EmulatedMessage(reply_hijack, message_id=-1, date=0, chat=Chat(id=0, type='local'), from_user=user, text=text)
   if not handler:
     for magic_filter, get_handler in dp.filter_arr:
       if magic_filter.resolve(message):
-        await get_handler()(message=message)
+        handler = get_handler()
+        await handler(message=message)
+    if not handler:
+      reply_future.set_result({'response': {"text": 'Command not found'}})
   else:
     handler = handler()
     await handler(message=message, command=command)
