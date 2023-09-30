@@ -14,7 +14,7 @@
           This page does not exist.
         </p>
         <div class="flex justify-center">
-          <RouterLink :to="{ name: 'Home' }">
+          <RouterLink :to="{ name: 'Dashboard' }">
             <ButtonPrimary> Bring me back Home </ButtonPrimary>
           </RouterLink>
         </div>

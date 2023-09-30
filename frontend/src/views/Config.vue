@@ -204,6 +204,7 @@ const envs = reactive({ value: 'Loading...', options: ['Loading...'] })
         Bot config
         <FvlForm v-show="!globalState.botIsRunning" url="#" class="absolute right-0 -top-5">
           <FvlSelect
+            title="Change .env config profile to one in env/ directory"
             label=""
             name="preset"
             placeholder="default"

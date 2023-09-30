@@ -2,24 +2,11 @@
 import { RouterLink } from 'vue-router'
 import { onMounted } from 'vue'
 import { toggleBot, isBotAlive } from '../botControl'
+import { routes } from '../router'
 import { globalState } from '@/state'
-import dashboard from '~icons/humbleicons/dashboard'
-import cog from '~icons/humbleicons/cog'
-import power from '~icons/humbleicons/power'
 
 const textGlow = ref(false)
-const menuItems = ref([
-  {
-    icon: dashboard,
-    text: 'Dashboard',
-    link: '/'
-  },
-  {
-    icon: cog,
-    text: 'Configuration',
-    link: '/config'
-  }
-])
+const menuItems = ref(routes.filter(x => !x._hide))
 
 onMounted(() => {
   isBotAlive()
@@ -31,9 +18,9 @@ onMounted(() => {
     <h1 class="text-white p-4 text-3xl logo w-full text-center" :class="{ 'text-glow': textGlow }" @click="textGlow = !textGlow">
       Botality
     </h1>
-    <RouterLink v-for="item, index in menuItems" :key="index" class=" inline-block text-white w-full p-4 hover:bg-slate-800" :class="{ 'text-glow': textGlow }" :to="item.link">
+    <RouterLink v-for="item, index in menuItems" :key="index" class=" inline-block text-white w-full p-4 hover:bg-slate-800" :class="{ 'text-glow': textGlow }" :to="item.basePath">
       <component :is="item.icon" class="align-text-bottom mr-4 text-xl" />
-      {{ item.text }}
+      {{ item.name }}
     </RouterLink>
     <div class="absolute w-full bottom-0 left-0 bg-[#38b2ac] bg-opacity-20" @click="toggleBot">
       <div class="relative w-full h-full">
@@ -50,7 +37,7 @@ onMounted(() => {
             'animate-pulse': globalState.botStateLocked,
           }"
         >
-          <hiPower
+          <hi-power
             class=" text-4xl hover:text-cyan-600" :class="{ 'hover:text-gray-800': globalState.botIsRunning }"
           />
           <span class=" text-xl flex self-center justify-center w-full" :class="{ 'text-glow': textGlow }">{{ globalState.botStateText }}</span>
