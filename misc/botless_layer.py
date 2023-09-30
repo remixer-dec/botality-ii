@@ -2,6 +2,7 @@ from aiogram.types import Message, Chat, User
 from aiogram.filters import Command
 from asyncio import Future
 from types import SimpleNamespace
+import base64
 
 
 class CommandRegistrationHijacker:
@@ -32,27 +33,35 @@ class CommandRegistrationHijacker:
     return dec_wrapper
 
 class EmulatedMessage(Message):
-  def __init__(self, reply_hijacker, *args, **kwargs):
+  def __init__(self, reply_hijacker, voice_hijacker, *args, **kwargs):
     super().__init__(*args, **kwargs)
     self.__reply_hijacker = reply_hijacker
+    self.__voice_hijacker = voice_hijacker
   async def reply(self, *args, **kwargs):
     return await self.__reply_hijacker(*args, **kwargs)
   async def answer(self, *args, **kwargs):
     return await self.__reply_hijacker(*args, **kwargs)
+  async def answer_voice(self, *args, **kwargs):
+    return await self.__voice_hijacker(*args, **kwargs)
+  async def reply_voice(self, *args, **kwargs):
+    return await self.__voice_hijacker(*args, **kwargs)
+
 
 def getHijackerAndFuture():
   reply_future = Future()
-  async def reply_hijack(text, *args, **kwargs):
+  async def reply(text, *args, **kwargs):
     reply_future.set_result({"response": {"text": text}})
-  return reply_hijack, reply_future
+  async def sendVoice(voice, message_thread_id=None, caption=None):
+    reply_future.set_result({"response": {"voice": base64.b64encode(voice.data), "text": caption}})
+  return reply, sendVoice, reply_future
 
 async def handle_message(data, dp):
   text = data.get('text')
   command = Command.extract_command(None, text)
   handler = dp.comamnd_map.get(command.prefix + command.command, None)
-  reply_hijack, reply_future = getHijackerAndFuture()
+  reply_hijack, voice_hijack, reply_future = getHijackerAndFuture()
   user = User(id=1, is_bot=False, first_name='Admin', last_name='')
-  message = EmulatedMessage(reply_hijack, message_id=-1, date=0, chat=Chat(id=0, type='local'), from_user=user, text=text)
+  message = EmulatedMessage(reply_hijack, voice_hijack, message_id=-1, date=0, chat=Chat(id=0, type='local'), from_user=user, text=text)
   if not handler:
     for magic_filter, get_handler in dp.filter_arr:
       if magic_filter.resolve(message):

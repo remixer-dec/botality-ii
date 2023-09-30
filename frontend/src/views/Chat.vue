@@ -26,11 +26,21 @@ function getBotReply(text) {
   request.then((json) => {
     if (json.error)
       throw new Error(json.error)
-    history.value.push({ text: json.response.text, fromBot: true })
+    history.value.push({ text: json.response.text, voice: getAudioLink(json.response.voice), fromBot: true })
     scrollToBottom()
   }).catch(reportError).finally(() => {
     Promise.allSettled(processingPromises.value).then(requestPromiseCompletionChecker)
   })
+}
+
+function getAudioLink(b64Audio) {
+  if (!b64Audio) return
+  const binaryData = atob(b64Audio)
+  const byteArray = new Uint8Array(binaryData.length)
+  for (let i = 0; i < binaryData.length; i++)
+    byteArray[i] = binaryData.charCodeAt(i)
+  const blob = new Blob([byteArray], { type: 'audio/ogg' })
+  return URL.createObjectURL(blob)
 }
 
 function requestPromiseCompletionChecker(arr) {
@@ -46,6 +56,7 @@ function reportError(text) {
 }
 
 function highlightCommands(text) {
+  if (!text) return
   return text.replace(/([/][a-z0-9_.]+)([ ,;\n\r])/img, '<b class="command" data-command="$1">$1</b>$2')
 }
 
@@ -96,7 +107,10 @@ const msgIterator = messageIterator()
       <div ref="scrollable" class="w-full mb-10 h-full box-border overflow-y-auto">
         <div class="flex flex-col justify-end">
           <div v-for="message, index in formattedHistory" :key="index" class="message" :class="{ 'message-bot': message.fromBot }">
-            <div @click="messageClickHandler" v-html="message.text" />
+            <div v-if="message.text" @click="messageClickHandler" v-html="message.text" />
+            <div v-if="message.voice">
+              <audio controls :src="message.voice" />
+            </div>
           </div>
         </div>
       </div>
@@ -145,6 +159,9 @@ const msgIterator = messageIterator()
 }
 .message.message-bot::after {
   @apply right-auto left-0 rotate-z-0
+}
+audio {
+  -webkit-filter: brightness(2)
 }
 </style>
 
