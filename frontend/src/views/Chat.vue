@@ -26,20 +26,25 @@ function getBotReply(text) {
   request.then((json) => {
     if (json.error)
       throw new Error(json.error)
-    history.value.push({ text: json.response.text, voice: getAudioLink(json.response.voice), fromBot: true })
+    history.value.push({
+      text: json.response.text,
+      voice: b64ToBlobLink(json.response.voice, 'audio/ogg'),
+      photos: json.response.photos ? json.response.photos.map(x => b64ToBlobLink(x, 'image/png')) : null,
+      fromBot: true
+    })
     scrollToBottom()
   }).catch(reportError).finally(() => {
     Promise.allSettled(processingPromises.value).then(requestPromiseCompletionChecker)
   })
 }
 
-function getAudioLink(b64Audio) {
-  if (!b64Audio) return
-  const binaryData = atob(b64Audio)
+function b64ToBlobLink(b64, mime) {
+  if (!b64) return
+  const binaryData = atob(b64)
   const byteArray = new Uint8Array(binaryData.length)
   for (let i = 0; i < binaryData.length; i++)
     byteArray[i] = binaryData.charCodeAt(i)
-  const blob = new Blob([byteArray], { type: 'audio/ogg' })
+  const blob = new Blob([byteArray], { type: mime })
   return URL.createObjectURL(blob)
 }
 
@@ -107,6 +112,9 @@ const msgIterator = messageIterator()
       <div ref="scrollable" class="w-full mb-10 h-full box-border overflow-y-auto">
         <div class="flex flex-col justify-end">
           <div v-for="message, index in formattedHistory" :key="index" class="message" :class="{ 'message-bot': message.fromBot }">
+            <div v-if="message.photos">
+              <img v-for="photo, index in message.photos" :key="index" :src="photo">
+            </div>
             <div v-if="message.text" @click="messageClickHandler" v-html="message.text" />
             <div v-if="message.voice">
               <audio controls :src="message.voice" />
