@@ -4,6 +4,7 @@ import threading
 from aiogram import Bot, Dispatcher
 from config_reader import config
 from middleware import ChatActionMiddleware, AccessMiddleware, CooldownMiddleware, MediaGroupMiddleware
+from misc.botless_layer import CommandRegistrationHijacker
 
 from modules.sd import StableDiffusionModule
 from modules.tts import TextToSpeechModule
@@ -19,6 +20,8 @@ dp.message.middleware(AccessMiddleware())
 dp.message.middleware(ChatActionMiddleware())
 dp.message.middleware(CooldownMiddleware())
 dp.message.middleware(MediaGroupMiddleware())
+
+CommandRegistrationHijacker(dp)
 
 available_modules = {
   "sd": StableDiffusionModule,

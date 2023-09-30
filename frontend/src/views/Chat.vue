@@ -1,5 +1,5 @@
 <script setup>
-import Vue, { ref, getCurrentInstance, inject, onMounted } from 'vue'
+import Vue, { ref, getCurrentInstance, inject, onMounted, computed } from 'vue'
 import { api } from '../tools'
 import { globalState } from '../state'
 
@@ -12,6 +12,8 @@ onMounted(() => {
 <script>
 const msg = ref('')
 const history = ref([])
+const onlyUserHistory = computed(() => history.value.filter(x => !x.fromBot))
+const formattedHistory = computed(() => history.value.map(x => ({ ...x, text: highlightCommands(x.text) })))
 const isProcessing = ref(false)
 const scrollable = ref(null)
 const proxyRef = ref(null)
@@ -22,7 +24,7 @@ function getBotReply(text) {
     if (json.error)
       throw new Error(json.error)
 
-    history.value.push({ text: highlightCommands(json.response.text), fromBot: true })
+    history.value.push({ text: json.response.text, fromBot: true })
     isProcessing.value = false
     scrollToBottom()
   }).catch((e) => {
@@ -49,7 +51,7 @@ function sendMessage() {
   if (msg.value === '/clear') return [history.value, msg.value] = [[], '']
   history.value.push(
     {
-      text: highlightCommands(msg.value)
+      text: msg.value
     }
   )
   getBotReply(msg.value)
@@ -64,6 +66,7 @@ function scrollToBottom() {
 }
 
 function* messageIterator() {
+  const history = onlyUserHistory
   let index = history.value.length - 1
 
   while (true) {
@@ -84,7 +87,7 @@ const msgIterator = messageIterator()
     <div v-if="globalState.botIsRunning" class="flex flex-col relative h-screen p-8 w-full pb-12 2xl:px-48">
       <div ref="scrollable" class="w-full mb-10 h-full box-border overflow-y-auto">
         <div class="flex flex-col justify-end">
-          <div v-for="message, index in history" :key="index" class="message" :class="{ 'message-bot': message.fromBot }">
+          <div v-for="message, index in formattedHistory" :key="index" class="message" :class="{ 'message-bot': message.fromBot }">
             <div @click="messageClickHandler" v-html="message.text" />
           </div>
         </div>

@@ -16,7 +16,7 @@ vrouter = VirtualRouter()
 add_common_endpoints(vrouter, lambda: config)
 
 @app.post("/api/bot/{action}")
-async def start_bot(action):
+def bot_action(action):
   global bot_instance
   if not bot_instance and action == 'start':
     bot_instance = multiprocessing.Process(target=main, kwargs={"api": True})
@@ -61,7 +61,7 @@ async def redirect_request(path: str, request: Request, response: Response):
         headers.pop('host', None)
         headers['content-type'] = 'application/json'
         _json = await request.json() if request.method != 'GET' else None
-        redirect_response = await client.request(request.method, redirect_url, headers=headers, json=_json)
+        redirect_response = await client.request(request.method, redirect_url, headers=headers, json=_json, timeout=120)
       return redirect_response.json()
     except Exception:
       return JSONResponse(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, content={"error": "SERVICE UNAVAILABLE"})
@@ -77,7 +77,9 @@ async def not_found_handler(a, b):
 def serve():
   import uvicorn
   [protocol, slash2_host, port] = config.sys_webui_host.split(':')
-  uvicorn.run(app, host=slash2_host[2:], port=int(port))
+  if (os.environ.get('BOTALITY_AUTOSTART', '') == 'True'):
+    bot_action('start')
+  uvicorn.run(app, host=slash2_host[2:], port=int(port),  timeout_keep_alive=120)
 
 if __name__ == '__main__':
   serve()
