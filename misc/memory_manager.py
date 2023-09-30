@@ -76,8 +76,8 @@ class MemoryManager:
         if self.mm_management_policy == 'BOTH':
           alive_keys.remove(unloaded_key)
           alive_values.remove(self.cache[unloaded_key])
-    if self.mm_management_policy == 'MEMORY' or self.mm_management_policy == 'BOTH' \
-    and len(alive_values) > 0:
+    if (self.mm_management_policy == 'MEMORY' or self.mm_management_policy == 'BOTH') \
+    and (len(alive_values) > 0):
       items_memory = list(item.memory for item in alive_values)
       total_memory_used = sum(items_memory)
       memory_available = self.get_memory()
