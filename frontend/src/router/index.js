@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import Home from '@/views/Home.vue'
 import Config from '@/views/Config.vue'
 import Chat from '@/views/Chat.vue'
+import ModelManager from '@/views/ModelManager.vue'
 import NotFound from '@/views/NotFound.vue'
 
 import dashboard from '~icons/humbleicons/dashboard'
@@ -33,7 +34,7 @@ export const routes = [
     path: '/models',
     basePath: '/models',
     name: 'Model manager',
-    component: NotFound,
+    component: ModelManager,
     icon: downloadAlt
   },
   {

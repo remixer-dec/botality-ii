@@ -9,6 +9,7 @@ const notification = ref(null)
     <main class="transform translate-x-64 mr-64">
       <RouterView />
     </main>
+    <Modal />
   </div>
 </template>
 

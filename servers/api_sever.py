@@ -8,6 +8,7 @@ from config_reader import config
 from servers.common import add_common_endpoints
 from misc.botless_layer import handle_message
 from misc.memory_manager import RAM, VRAM
+from misc import model_manager
 
 app = FastAPI(title='Botality API')
 dispatcher = None
@@ -45,6 +46,10 @@ async def status():
     } if bot._me else None,
     "access_mode": config.ignore_mode
   }}
+
+@app.get("/models")
+async def models():
+  return {"response": model_manager.get_models()}
 
 class Server(uvicorn.Server):
   def install_signal_handlers(self):
