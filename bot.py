@@ -1,9 +1,10 @@
 import logging
 import threading
+import time
 
 from aiogram import Bot, Dispatcher
 from config_reader import config
-from middleware import ChatActionMiddleware, AccessMiddleware, CooldownMiddleware, MediaGroupMiddleware
+from middleware import ChatActionMiddleware, AccessMiddleware, CooldownMiddleware, MediaGroupMiddleware, CounterMiddleware
 from misc.botless_layer import CommandRegistrationHijacker
 
 from modules.sd import StableDiffusionModule
@@ -16,6 +17,7 @@ from modules.stt import SpeechToTextModule
 logger = logging.getLogger(__name__)
 
 dp = Dispatcher()
+dp.message.middleware(CounterMiddleware(dp))
 dp.message.middleware(AccessMiddleware())
 dp.message.middleware(ChatActionMiddleware())
 dp.message.middleware(CooldownMiddleware())
@@ -33,11 +35,16 @@ available_modules = {
 }
 
 def load_module(dp, bot, module):
-  dp['modules'][module] = available_modules[module](dp, bot)
+  dp.modules[module] = available_modules[module](dp, bot)
+  dp.timings[module] = round(time.time() - (dp.timings.get('last') or dp.timings['start']), 3)
+  if not config.threaded_initialization:
+    dp.timings['last'] = time.time()
   logger.info('loaded module: ' + module)
 
 def initialize(dp, bot, threaded=True):
-  dp['modules'] = {}
+  dp.modules = {}
+  dp.counters = {'msg': 0}
+  dp.timings = {'start': time.time()}
   threads = []
   for module in config.active_modules:
     if module in available_modules:
@@ -56,7 +63,7 @@ def main(api=False):
   initialize(dp, bot, config.threaded_initialization)
   if api:
     from servers.api_sever import init_api_server
-    with init_api_server(dp).run_in_thread():
+    with init_api_server(dp, bot).run_in_thread():
       dp.run_polling(bot)
   else:
     dp.run_polling(bot)

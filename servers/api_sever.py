@@ -7,6 +7,7 @@ from fastapi import FastAPI, Body
 from config_reader import config
 from servers.common import add_common_endpoints
 from misc.botless_layer import handle_message
+from misc.memory_manager import RAM, VRAM
 
 app = FastAPI(title='Botality API')
 dispatcher = None
@@ -19,11 +20,31 @@ async def ping():
   return {"response": "ok"}
 
 
-@app.post("/chat",)
+@app.post("/chat")
 async def message(data: Dict = Body):
   reply_future = await handle_message(data, dispatcher)
   await reply_future
   return reply_future.result()
+
+@app.get("/status")
+async def status():
+  print(repr(bot._me))
+  return { "response": {
+    "modules": list(dispatcher.modules.keys()),
+    "counters": dispatcher.counters,
+    "timings": dispatcher.timings,
+    "memory_manager": {
+      "RAM": RAM.stats(),
+      "VRAM": VRAM.stats() if VRAM else None
+    },
+    "bot": {
+      "name": bot._me.first_name,
+      "username": bot._me.username,
+      "can_join_groups": bot._me.can_join_groups,
+      "can_read_all_group_messages": bot._me.can_read_all_group_messages
+    } if bot._me else None,
+    "access_mode": config.ignore_mode
+  }}
 
 class Server(uvicorn.Server):
   def install_signal_handlers(self):
@@ -41,9 +62,10 @@ class Server(uvicorn.Server):
       self.should_exit = True
       thread.join()
 
-def init_api_server(dp):
-  global dispatcher
+def init_api_server(dp, bot_instance):
+  global dispatcher, bot
   dispatcher = dp
+  bot = bot_instance
   [protocol, slash2_host, port] = config.sys_api_host.split(':')
   serverConfig = uvicorn.Config(app, host=slash2_host[2:], port=int(port), log_level="info", timeout_keep_alive=120)
   api_server = Server(config=serverConfig)

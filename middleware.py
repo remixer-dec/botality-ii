@@ -63,3 +63,17 @@ class MediaGroupMiddleware(BaseMiddleware):
       except Exception as e:
         logger.error(e)
       return await handler(event, data)
+
+class CounterMiddleware(BaseMiddleware):
+  def __init__(self, dp):
+    self.dp = dp
+    self.counter = 0
+  async def __call__(
+    self,
+    make_request,
+    bot,
+    method
+  ):
+    self.counter += 1
+    self.dp.counters['msg'] = self.counter
+    return await make_request(bot, method)
