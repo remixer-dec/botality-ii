@@ -2,12 +2,13 @@
 import { RouterLink } from 'vue-router'
 import { onMounted } from 'vue'
 import { toggleBot, isBotAlive } from '../botControl'
-import { routes } from '../router'
+import router, { routes } from '../router'
 import { globalState } from '@/state'
 
 const textGlow = ref(false)
 const menuItems = ref(routes.filter(x => !x._hide))
-
+const isCurrentPathSelected = item => currentPathName.value.name === item.name
+const currentPathName = toRef(reactive(router), 'currentRoute')
 onMounted(() => {
   isBotAlive()
 })
@@ -18,7 +19,11 @@ onMounted(() => {
     <h1 class="text-white p-4 text-3xl logo w-full text-center" :class="{ 'text-glow': textGlow }" @click="textGlow = !textGlow">
       Botality
     </h1>
-    <RouterLink v-for="item, index in menuItems" :key="index" class=" inline-block text-white w-full p-4 hover:bg-slate-800" :class="{ 'text-glow': textGlow }" :to="item.basePath">
+    <RouterLink
+      v-for="item, index in menuItems" :key="index" class=" inline-block text-white w-full p-4 hover:bg-slate-800"
+      :class="{ 'text-glow': textGlow, 'selected-route': isCurrentPathSelected(item) }"
+      :to="item.basePath"
+    >
       <component :is="item.icon" class="align-text-bottom mr-4 text-xl" />
       {{ item.name }}
     </RouterLink>
@@ -48,6 +53,9 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.selected-route {
+  @apply border-r-2 border-white
+}
 .botstate-enter-active, .botstate-leave-active {
   transition: all .4s;
 }

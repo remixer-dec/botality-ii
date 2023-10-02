@@ -37,7 +37,7 @@ onUnmounted(() => {
 
 <template>
   <div class="w-full flex box-border flex-wrap justify-evenly flex-col min-h-screen">
-    <div class="bg-white w-1/2 table p-2 grid grid-cols-2 mx-auto mb-4 rounded-md">
+    <div class="bg-white w-full p-2 grid grid-cols-2 mx-auto mb-4 rounded-md lg:w-1/2">
       <div>Bot: </div>
       <div v-if="stats.bot">
         <a :href="`tg://resolve?domain=${stats.bot.username}`">{{ stats.bot.name }} (@{{ stats.bot.username }})</a>
@@ -54,13 +54,19 @@ onUnmounted(() => {
         <span v-if="stats.bot.can_read_all_group_messages" title="this bot can read all group messages" class="text-orange-400">[A]</span>
         <span v-else title="this bot cannot read all group messages and it is only activated via commands" />
       </div>
+      <div v-else>
+        -
+      </div>
       <div>Access restriction mode:</div>
       <div v-if="stats.access_mode">
         <span v-if="stats.access_mode !== 'whitelist'">blacklist</span>
         <span v-if="stats.access_mode === 'both'">+</span>
         <span v-if="stats.access_mode !== 'blacklist'">whitelist</span>
       </div>
-      <div>Active modules:</div>
+      <div v-else>
+        -
+      </div>
+      <div>Active modules (init time):</div>
       <div>
         <span v-for="module, index in stats.modules" :key="index" class="pr-4">
           {{ module }} ({{ stats.timings[module] }}s)
@@ -74,14 +80,14 @@ onUnmounted(() => {
       </div>
       <div>Total messages:</div><div>{{ stats?.counters?.msg }}</div>
     </div>
-    <div v-if="stats.memory_manager && globalState.botIsRunning" class="bg-white w-1/2 table p-2 mx-auto rounded-md">
+    <div v-if="stats.memory_manager && globalState.botIsRunning" class="bg-white table p-2 mx-auto rounded-md w-full lg:w-1/2 ">
       <div v-for="item, name in stats.memory_manager" v-show="item" :key="name">
         <div class="w-full text-center p-1">
           {{ name }}
         </div>
         <div class=" bg-gray-500 w-full h-10">
           <div
-            v-if="item" class=" bg-[#38b2ac] w-1/2 h-10 text-white flex justify-center items-center relative"
+            v-if="item" class=" bg-[#38b2ac] h-10 text-white flex justify-center items-center relative"
             :style="{ width: `${100 - 100 * (item.current_memory / item.total_memory)}%` }"
           >
             <div
@@ -111,14 +117,14 @@ onUnmounted(() => {
           <span class="p-2 mr-4">
             Cache:
           </span>
-          <span v-for="cached, idx in item.cache" :key="idx" class=" bg-[#38b2ac] p-2 m-1 ml-0 text-white inline-block">
+          <span v-for="cached, idx in item.cache" :key="idx" class=" bg-[#38b2ac] p-2 m-1 ml-0 text-white inline-block cursor-default">
             <span v-for="v, k in cached" :key="k" :title="`Estimated initial size: ${v}GB`">{{ k }}</span>
           </span>
         </div>
       </div>
     </div>
     <small class=" block absolute bottom-0  text-center w-full text-gray-500 p-4">
-      Botality (c) 2023 Remixer Dec |  <b><a href="http://github.com/remixer-dec/botality-ii" target="_blank">Github</a></b>
+      Botality &copy; 2023 Remixer Dec |  <b><a href="http://github.com/remixer-dec/botality-ii" target="_blank">Github</a></b>
     </small>
   </div>
 </template>

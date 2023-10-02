@@ -95,7 +95,7 @@ FvlSlider.mounted = [function () {
 form .list, .form .list > div {
   display: inline-block;
 }
-span[aria-disabled] {
+span[aria-disabled] > div {
   opacity: .4;
   pointer-events: none;
   z-index: 2;
