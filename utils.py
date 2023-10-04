@@ -73,7 +73,9 @@ def update_env(path, key, value):
               value = json.dumps(value)
             to_write.append(f"{key}={value}\n")
           else:
-            to_write.append(f"{key}='{json.dumps(json.loads(value), indent=2, sort_keys=True)}'\n")
+            if isinstance(value, str):
+              value = json.loads(value)
+            to_write.append(f"{key}='{json.dumps(value, indent=2, sort_keys=True)}'\n")
           continue
         if multiline:
           if line.endswith(("'", "'\n","'\r\n",)):

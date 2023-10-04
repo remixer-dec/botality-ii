@@ -3,7 +3,7 @@ try:
   from pydantic_settings import BaseSettings
 except ImportError:
   from pydantic import BaseSettings
-from typing import List, Dict
+from typing import List, Dict, Union
 from typing_extensions import Literal
 from utils import update_env
 import os
@@ -20,7 +20,7 @@ class Settings(BaseSettings):
   threaded_initialization: bool
   apply_mps_fixes: bool
   tts_path: str
-  tts_voices: List[str]
+  tts_voices: List[Union[str, Dict]]
   tts_mode: Literal["local", "localhttp", "remote"]
   tts_replacements: Dict
   tts_credits: str

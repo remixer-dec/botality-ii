@@ -17,7 +17,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') # do not u
 class CoquiTTS(AbstractTTS):
   def __init__(self, is_remote):
     self.name = 'coqui_tts'
-    self.voices = config.tts_voices
+    self.voices = list(map(lambda item: item if isinstance(item, str) else item.get('voice'), config.tts_voices))
     self.system = False
     self.is_available = False
     if is_remote:
