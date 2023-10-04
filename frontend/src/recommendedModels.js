@@ -44,7 +44,7 @@ const prTTS = ['Biden20k', 'BillClinton', 'BorisJohnson', 'GeorgeBush', 'Obama50
   }
 })
 
-const amoTTSModels = ['G_50000', 'G_100000', ' G_85000']
+const amoTTSModels = ['G_50000', 'G_100000', 'G_85000']
 const amoTTS = ['Glados_50k', 'Star-Trek-Computer', 'Boss_MGS_80k'].map((x, i) => {
   return {
     voice: x.replace(/_[0-9]+k|-/g, ''),
@@ -56,6 +56,15 @@ const amoTTS = ['Glados_50k', 'Star-Trek-Computer', 'Boss_MGS_80k'].map((x, i) =
   }
 })
 
+const tim = [{
+  voice: 'Tim_Cook',
+  model: 'Tim_Cook.pth',
+  author: 'Sucial',
+  repo: 'Sucial/so-vits-svc4.1-Tim_Cook',
+  path: '',
+  size: 0.2
+}]
+
 export const models = {
   TTS: {
     VITS: [
@@ -64,7 +73,8 @@ export const models = {
     ],
     SO_VITS_SVC: [
       ...prTTS,
-      ...amoTTS
+      ...amoTTS,
+      ...tim
     ]
   }
 }

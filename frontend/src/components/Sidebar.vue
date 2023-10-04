@@ -1,6 +1,6 @@
 <script setup>
 import { RouterLink } from 'vue-router'
-import { onMounted } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
 import { toggleBot, isBotAlive } from '../botControl'
 import router, { routes } from '../router'
 import { globalState } from '@/state'
@@ -9,8 +9,13 @@ const textGlow = ref(false)
 const menuItems = ref(routes.filter(x => !x._hide))
 const isCurrentPathSelected = item => currentPathName.value.name === item.name
 const currentPathName = toRef(reactive(router), 'currentRoute')
+let pingInterval
 onMounted(() => {
   isBotAlive()
+  pingInterval = setInterval(isBotAlive, 30000)
+})
+onUnmounted(() => {
+  clearInterval(pingInterval)
 })
 </script>
 

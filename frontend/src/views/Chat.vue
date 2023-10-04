@@ -72,6 +72,8 @@ function messageClickHandler(e) {
 }
 
 function sendMessage() {
+  msg.value = msg.value.trim()
+  if (msg.value.length === 0) return
   if (msg.value === '/clear') return [history.value, msg.value] = [[], '']
   history.value.push(
     {

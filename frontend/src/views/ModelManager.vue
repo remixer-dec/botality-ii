@@ -96,7 +96,7 @@ function showInstallWindow() {
         <ModelTable
           v-if="categoryTabs && categoryTabs.selectedItem === 'TTS' && subMenuSelectedItem
             && installed_models && installed_models[categoryTabs.selectedItem]"
-          :headers="['Voice', 'Path', 'Size (GB)']"
+          :headers="['Voice', 'Path', 'Size (GB)', 'Uninstall']"
           :data="installed_models[categoryTabs.selectedItem][subMenuSelectedItem]"
           :keys="['voice', 'path', 'size']"
           :can-be-installed="false"

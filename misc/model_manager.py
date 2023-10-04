@@ -5,6 +5,8 @@ import threading
 import pathlib
 from config_reader import config
 from logging import Logger
+from contextlib import contextmanager
+
 try:
   from huggingface_hub import hf_hub_download
 except ImportError:
@@ -48,20 +50,30 @@ def get_models():
 def get_task_info(task_id):
   return bg_cache.get(task_id, {'status': 'not found'})
 
-def install_model(model_type, model_config):
+@contextmanager
+def confirm(prompt):
+  original_stdin = sys.stdin
+  sys.stdin = open(0, closefd=False)
+  user_answer = input(prompt)
+  sys.stdin = original_stdin
+  yield user_answer.lower() in ['y', 'yes']
+
+def uninstall_model(model_type, model_config):
+  return install_model(model_type, model_config, True)
+
+def install_model(model_type, model_config, uninstall=False):
   if not hf_hub_download:
     return {"error": "Huggingface Hub library is not installed, please install it with $ pip install huggingface-hub"}
-  assert len(model_config.get('repo','').split('/')) == 2
+  if not uninstall:
+    assert len(model_config.get('repo','').split('/')) == 2
   if model_type in supported_models:
-    original_stdin = sys.stdin
-    sys.stdin = open(0, closefd=False)
-    user_answer = input(f"Do you want to install the {model_config.get('repo')} {model_type} model? (Y/n): ")
-    if user_answer.lower() in ['y', 'yes']:
-      try:
-        return supported_models[model_type](model_config)
-      except Exception as e:
-        return {'error': str(e)}
-    sys.stdin = original_stdin
+    un = 'un' if uninstall else ''
+    with confirm(f"Do you want to {un}install the {model_config.get('repo')} {model_config.get('voice')} {model_type} model? (Y/n): ") as confirmed:
+      if confirmed:
+        try:
+          return supported_models[model_type][1 if uninstall else 0](model_config)
+        except Exception as e:
+          return {'error': str(e)}
     return {'error': 'Permission denied'}
 
 def install_tts_model(model_config):
@@ -93,6 +105,26 @@ def install_tts_model(model_config):
     bg_thread.start()
     return {'response': {'status': 'running', 'task_id': bg_id}}
   return "ok"
+
+def uninstall_tts_model(model_config):
+  model_config_dict = get_models()['TTS'][model_config.get('_type')]
+  trusted_model_config = next((item for item in model_config_dict if (item if isinstance(item, str) else item.get('voice')) == model_config.get('voice')), None)
+  trusted_model_config['_type'] = model_config.get('_type')
+  model_config = trusted_model_config
+  model_dir = model_config.get('path')
+  filename = model_config.get('model') if model_config.get('_type') == 'SO_VITS_SVC' else (model_config.get('voice') + '.pth')
+  full_path = os.path.join(model_dir, filename)
+  print('deleting full_path', full_path)
+  os.unlink(full_path)
+  if model_config.get('_type') == 'SO_VITS_SVC':
+    new_config = [x for x in config.tts_so_vits_svc_voices if x.get('voice') != model_config.get('voice')]
+    config.tts_so_vits_svc_voices = new_config
+  if model_config.get('_type') == 'VITS':
+    new_config = [x for x in config.tts_voices if \
+      (x if isinstance(x, str) else x.get('voice')) != model_config.get('voice')]
+    config.tts_voices = new_config
+  return {'response': 'ok'}
+  
 
 def download_and_move(model_config, remote_file_path, local_file_path):
   cached_file_path = hf_hub_download(repo_id=model_config.get('repo'), filename=remote_file_path)
@@ -156,4 +188,7 @@ def install_so_vits_svc_background(model_config, remote_file_path, local_file_pa
     return
   bg_cache[task_id] = {'status': 'done'}
 
-supported_models = {'VITS': install_tts_model, 'SO_VITS_SVC': install_tts_model}
+supported_models = {
+  'VITS': (install_tts_model, uninstall_tts_model), 
+  'SO_VITS_SVC': (install_tts_model, uninstall_tts_model)
+}

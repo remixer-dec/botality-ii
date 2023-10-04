@@ -55,6 +55,10 @@ async def models():
 async def install_models(model_type: str, body: Dict = Body):
   return model_manager.install_model(model_type, body)
 
+@app.post("/models/uninstall/{model_type}")
+async def uninstall_models(model_type: str, body: Dict = Body):
+  return model_manager.uninstall_model(model_type, body)
+
 @app.get("/models/install/{task_id}")
 async def install_status(task_id: int):
   return {'response': model_manager.get_task_info(task_id)}
