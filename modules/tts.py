@@ -13,11 +13,11 @@ class TextToSpeechModule:
     self.semaphore = asyncio.Semaphore(1)
     init_tts(config.tts_mode != 'local', config.threaded_initialization)
     sts_voices = sts_voicemap.keys()
-    all_voices = tts_voicemap.keys()
-    non_system_voices = [v for v in all_voices if v not in system_voicemap]
-    self.voices = all_voices if config.tts_list_system_voices else non_system_voices
+    self.all_voices = tts_voicemap.keys()
+    non_system_voices = [v for v in self.all_voices if v not in system_voicemap]
+    self.voices = self.all_voices if config.tts_list_system_voices else non_system_voices
 
-    @dp.message(Command(commands=["tts", *all_voices]), flags={"long_operation": "record_audio"})
+    @dp.message(Command(commands=["tts", *self.all_voices]), flags={"long_operation": "record_audio"})
     async def command_tts_handler(message: Message, command: CommandObject) -> None:
       with self.queue.for_user(message.from_user.id) as available:
         if available:

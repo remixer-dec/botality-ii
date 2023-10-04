@@ -1,6 +1,7 @@
 <script setup>
-import { onMounted, getCurrentInstance } from 'vue'
+import { onMounted, getCurrentInstance, watch } from 'vue'
 import { api } from '../tools'
+import { globalState } from '../state'
 import SetupWindow from '../components/ModelSetupWindow.vue'
 
 const { proxy } = getCurrentInstance()
@@ -37,7 +38,22 @@ const refreshModels = async () => {
   recommended_models.value = recommended
   try {
     const installed = await api('GET', 'models')
+    if (installed.error) throw new Error(installed.error)
     installed_models.value = installed.response || []
+
+    // hide installed models from recommended
+    for (const modelType in recommended_models.value) {
+      for (const modelSubtype in recommended_models.value[modelType]) {
+        const targetSet = new Set()
+        installed_models.value[modelType][modelSubtype].forEach((x) => {
+          targetSet.add(x.repo + x.voice)
+        })
+        for (const recModel of recommended_models.value[modelType][modelSubtype]) {
+          if (targetSet.has(recModel.repo + recModel.voice))
+            recModel.hide = true
+        }
+      }
+    }
   }
   catch (e) {
     proxy.$root.$emit('showNotification', { message: String(e), type: 'error' })
@@ -45,6 +61,7 @@ const refreshModels = async () => {
 }
 
 proxy.$root.$on('refreshModels', refreshModels)
+watch(() => globalState.botIsRunning, () => globalState.botIsRunning ? refreshModels() : null)
 onMounted(refreshModels)
 
 function showInstallWindow() {
@@ -54,7 +71,7 @@ function showInstallWindow() {
 
 <template>
   <div class="w-full flex box-border flex-wrap justify-evenly flex-col">
-    <div class=" w-full flex flex-col">
+    <div v-if="globalState.botIsRunning" class=" w-full flex flex-col">
       <div class=" m-2 flex w-auto bg-white p-2 rounded-md relative">
         <div>
           <div class="mb-2">
@@ -98,6 +115,7 @@ function showInstallWindow() {
         />
       </div>
     </div>
+    <Offline message="Please start the bot to manage models." />
   </div>
 </template>
 

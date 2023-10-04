@@ -144,12 +144,7 @@ const msgIterator = messageIterator()
         </div>
       </div>
     </div>
-    <div v-else class="flex flex-col w-full align-center justify-center h-screen items-center">
-      <div class="text-xl">
-        <hi-wifi-off />
-      </div>
-      Please start the bot to chat with it.
-    </div>
+    <Offline message="Please start the bot to chat with it." />
   </div>
 </template>
 

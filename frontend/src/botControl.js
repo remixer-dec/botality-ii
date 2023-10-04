@@ -15,6 +15,9 @@ export async function isBotAlive() {
     G.botIsRunning = false
     G.botStateText = 'stopped'
   }
+  finally {
+    G.botStateUnknown = false
+  }
 }
 
 export function toggleBot() {

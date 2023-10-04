@@ -20,7 +20,7 @@ function showInstallWindow(modelConfig) {
       </tr>
     </thead>
     <tbody>
-      <tr v-for="model, idx in props.data" :key="idx">
+      <tr v-for="model, idx in props.data" v-show="!model.hide" :key="idx">
         <td v-for="k, index in props.keys" :key="index">
           <span v-if="props.headers[index] === 'Repo'">
             <a :href="`https://huggingface.co/${model[k]}`">{{ model[k] }}</a>

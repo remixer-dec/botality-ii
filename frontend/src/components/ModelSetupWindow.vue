@@ -1,5 +1,5 @@
 <script setup>
-import { FvlSelect, FvlForm, FvlInput } from 'formvuelar'
+import { FvlSelect, FvlForm, FvlInput, FvlSearchSelect } from 'formvuelar'
 import { reactive } from 'vue'
 import { api } from '../tools'
 
@@ -77,7 +77,20 @@ function runInstall() {
       <FvlInput name="installPath" label="Install path" type="text" :value.sync="model.installPath" />
       <FvlInput name="model" label="Model name" type="text" :value.sync="model.model" />
       <FvlInput v-if="model._type in ttsModels" name="voice" label="Voice" type="text" :value.sync="model.voice" />
-      <FvlInput v-if="model._type in stsModels" name="baseVoice" :requred="true" label="Base voice" type="text" :value.sync="model.baseVoice" />
+      <FvlSearchSelect
+        v-if="model._type in stsModels"
+        name="baseVoice"
+        :requred="true"
+        label="Base voice"
+        type="text"
+        :selected.sync="model.baseVoice"
+        :lazy-load="true"
+        response-data-path="response"
+        options-url="/api/voices"
+        option-key="voice"
+        option-value="voice"
+        :search-keys="['voice']"
+      />
       <span v-if="showConfirmAlert" class="text-orange-400 inline-block m-2">Please confirm the installation in the terminal!</span>
       <span v-if="modelLoadingInProgress" class="animate-spin inline-flex justify-center align-middle m-2"><hi-spinner-earring /></span>
       <span v-if="!(showConfirmAlert || modelLoadingInProgress)" class="fvl-submit-button m-2 inline-block cursor-pointer bg-opacity-70 float-right" @click="runInstall">

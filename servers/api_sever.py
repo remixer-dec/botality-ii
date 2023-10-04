@@ -51,7 +51,6 @@ async def status():
 async def models():
   return {"response": model_manager.get_models()}
 
-
 @app.post("/models/install/{model_type}")
 async def install_models(model_type: str, body: Dict = Body):
   return model_manager.install_model(model_type, body)
@@ -59,6 +58,14 @@ async def install_models(model_type: str, body: Dict = Body):
 @app.get("/models/install/{task_id}")
 async def install_status(task_id: int):
   return {'response': model_manager.get_task_info(task_id)}
+
+@app.get("/voices")
+async def voices():
+  tts = dispatcher.modules.get('tts')
+  if not tts:
+    return {'error': 'TTS module not initialized'}
+  else:
+    return {'response': [{'voice': v} for v in tts.all_voices]}
 
 class Server(uvicorn.Server):
   def install_signal_handlers(self):
