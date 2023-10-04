@@ -1,6 +1,13 @@
 module.exports = {
   darkMode: 'class', // or 'media'
-  theme: {},
+  theme:
+  {
+    extend: {
+      colors: {
+        main: '#38b2ac'
+      }
+    }
+  },
   variants: {},
   plugins: [],
   extract: {

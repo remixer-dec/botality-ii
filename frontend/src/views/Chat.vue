@@ -138,7 +138,7 @@ const msgIterator = messageIterator()
             @keydown.up="msg = msgIterator.next('up').value || msg"
             @keydown.down="msg = msgIterator.next('down').value || msg"
           >
-          <span class="button bg-[#38b2ac] text-white text-2xl rounded-[50%] w-8 h-8 cursor-pointer hover:bg-cyan-600" @click="sendMessage">
+          <span class="button bg-main text-white text-2xl rounded-[50%] w-8 h-8 cursor-pointer hover:bg-cyan-600" @click="sendMessage">
             <hi-navigation />
           </span>
         </div>

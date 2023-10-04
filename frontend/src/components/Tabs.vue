@@ -26,9 +26,9 @@ onMounted(() => {
 
 <style scoped>
 .tab {
-  @apply border-1 border-[#38b2ac] text-[#38b2ac];
+  @apply border-1 border-main text-main;
 }
 .selected {
-  @apply bg-[#38b2ac] text-white
+  @apply bg-main text-white
 }
 </style>

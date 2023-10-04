@@ -87,7 +87,7 @@ onUnmounted(() => {
         </div>
         <div class=" bg-gray-500 w-full h-10">
           <div
-            v-if="item" class=" bg-[#38b2ac] h-10 text-white flex justify-center items-center relative"
+            v-if="item" class=" bg-main h-10 text-white flex justify-center items-center relative"
             :style="{ width: `${100 - 100 * (item.current_memory / item.total_memory)}%` }"
           >
             <div
@@ -106,7 +106,7 @@ onUnmounted(() => {
           <div class=" border-l-20 border-gray-500 pl-2">
             TOTAL
           </div>
-          <div class=" border-l-20 border-[#38b2ac] pl-2">
+          <div class=" border-l-20 border-main pl-2">
             CONSUMED
           </div>
           <div v-if="item.process" class=" border-l-20 border-cyan-600 pl-2">
@@ -117,7 +117,7 @@ onUnmounted(() => {
           <span class="p-2 mr-4">
             Cache:
           </span>
-          <span v-for="cached, idx in item.cache" :key="idx" class=" bg-[#38b2ac] p-2 m-1 ml-0 text-white inline-block cursor-default">
+          <span v-for="cached, idx in item.cache" :key="idx" class=" bg-main p-2 m-1 ml-0 text-white inline-block cursor-default">
             <span v-for="v, k in cached" :key="k" :title="`Estimated initial size: ${v}GB`">{{ k }}</span>
           </span>
         </div>

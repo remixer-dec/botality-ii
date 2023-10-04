@@ -27,7 +27,7 @@ onMounted(() => {
       <component :is="item.icon" class="align-text-bottom mr-4 text-xl" />
       {{ item.name }}
     </RouterLink>
-    <div class="absolute w-full bottom-0 left-0 bg-[#38b2ac] bg-opacity-20" @click="toggleBot">
+    <div class="absolute w-full bottom-0 left-0 bg-main bg-opacity-20" @click="toggleBot">
       <div class="relative w-full h-full">
         <transition name="botstate">
           <div v-if="globalState.botIsRunning" class="w-full h-full absolute bg-green-400 bg-opacity-30 pointer-events-none" />
