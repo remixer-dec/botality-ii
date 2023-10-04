@@ -3,6 +3,7 @@ from typing import Dict, Any
 from fastapi import status, Body
 from config_reader import config, Settings
 from asyncio import Lock, sleep
+import os
 
 config_write_lock = Lock()
 
@@ -36,6 +37,10 @@ def add_common_endpoints(app, get_custom_config=False):
   @app.get("/schema")
   async def schema():
     return Settings.model_json_schema()
+  @app.get("/characters")
+  async def characters():
+    return {"response": [{'name': x[:-3], 'full': 'characters.' + x[:-3]} for x in os.listdir('characters/') \
+      if not (x.startswith('.') or x.startswith('__'))]}
 
 
 class VirtualRouter:

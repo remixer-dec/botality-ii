@@ -2,11 +2,11 @@
 <script setup>
 import { onMounted } from 'vue'
 
-const props = defineProps(['items'])
+const props = defineProps(['items', 'default'])
 const selectedItem = ref('')
 defineExpose({ selectedItem })
 onMounted(() => {
-  selectedItem.value = props.items[0].name
+  selectedItem.value = props.default || props.items[0].name
 })
 </script>
 

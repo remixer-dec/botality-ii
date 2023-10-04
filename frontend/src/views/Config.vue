@@ -37,7 +37,7 @@ class ConfigItem {
           this.item.type = 'freetags'
           this.item.subtype = schema.items.type
         }
-        else { this.item.type = 'list' }
+        else { this.item.type = 'custom' }
         if (schema.enum || schema?.items?.enum)
           this.item.type = 'tags'
         break
@@ -116,6 +116,7 @@ const isLLMBackendLlamaCpp = o => o.llm_backend.value === 'llama_cpp'
 const llmConfig = reactive({
   llm_backend: { value: '', type: 'select', options: [] },
   llm_python_model_type: { value: '', type: 'select', options: [], depends: o => o.llm_backend.value.startsWith('py') },
+  llm_character: { value: '', type: 'search-select', okey: 'full', ovalue: 'name', search: 'name', link: '/api/characters' },
   llm_max_tokens: { value: '0', type: 'slider', min: 2, max: 32768, step: 2, depends: isLLMBackendLlamaCpp },
   llm_max_assistant_tokens: { value: '0', type: 'slider', min: 2, max: 32768, step: 2, depends: isLLMBackendLlamaCpp },
   llm_host: { value: '', type: 'text', depends: isLLMBackendRemote },
@@ -145,7 +146,9 @@ const sdConfig = reactive({
 const ttsConfig = reactive({
   tts_mode: { value: '', type: 'select', options: [] },
   tts_enable_backends: { value: [], type: 'tags', options: [] },
-  tts_host: { value: '', type: 'text', depends: o => o.tts_mode.value !== 'local' }
+  tts_host: { value: '', type: 'text', depends: o => o.tts_mode.value !== 'local' },
+  tts_voices: { value: [], type: 'custom', link: '/models/TTS/VITS' },
+  tts_so_vits_svc_voices: { value: [], type: 'custom', link: '/models/TTS/SO_VITS_SVC' }
 })
 
 const sttConfig = reactive({

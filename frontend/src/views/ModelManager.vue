@@ -1,9 +1,10 @@
 <script setup>
-import { onMounted, getCurrentInstance, watch } from 'vue'
+import { onMounted, getCurrentInstance, watch, defineProps } from 'vue'
 import { api } from '../tools'
 import { globalState } from '../state'
 import SetupWindow from '../components/ModelSetupWindow.vue'
 
+const props = defineProps(['catType', 'subType'])
 const { proxy } = getCurrentInstance()
 
 const tabs = ref([
@@ -80,10 +81,10 @@ function showInstallWindow() {
               Install custom model
             </div>
           </div>
-          <Tabs ref="categoryTabs" :items="tabs" class="my-1" />
+          <Tabs ref="categoryTabs" :items="tabs" class="my-1" :default="props.catType" />
           <div v-if="categoryTabs">
-            <Tabs v-if="categoryTabs.selectedItem === 'TTS'" ref="ttsTabsComponent" :items="ttsTabs" />
-            <Tabs v-if="categoryTabs.selectedItem === 'LLM'" ref="llmTabsComponent" :items="llmTabs" />
+            <Tabs v-if="categoryTabs.selectedItem === 'TTS'" ref="ttsTabsComponent" :items="ttsTabs" :default="props.subType" />
+            <Tabs v-if="categoryTabs.selectedItem === 'LLM'" ref="llmTabsComponent" :items="llmTabs" :default="props.subType" />
           </div>
         </div>
       </div>

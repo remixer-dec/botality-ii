@@ -2,7 +2,7 @@
 <!-- eslint-disable vue/no-mutating-props -->
 <script setup>
 import KVEditor from './KVEditor.vue'
-import { FvlSwitch, FvlSelect, FvlTagSelect, FvlForm, FvlSlider, FvlInput } from '@/libs/formvuelar'
+import { FvlSwitch, FvlSelect, FvlTagSelect, FvlForm, FvlSlider, FvlInput, FvlSearchSelect } from '@/libs/formvuelar'
 
 defineProps({
   configObj: { type: Object, required: true }
@@ -82,9 +82,25 @@ FvlSlider.mounted = [function () {
             :placeholder="idx"
           />
           <KVEditor v-if="option.type === 'kv'" :obj="option.value" :name="idx" />
-          <span v-if="option.type === 'list'" class="fvl-submit-button m-2 inline-block cursor-pointer bg-opacity-70">
+          <FvlSearchSelect
+            v-if="option.type === 'search-select'"
+            :name="idx"
+            :label="idx"
+            :selected.sync="option.value"
+            :lazy-load="true"
+            response-data-path="response"
+            :options-url="option.link"
+            :option-key="option.okey"
+            :option-value="option.ovalue"
+            :search-keys="[option.search]"
+            :placeholder="option.value"
+          />
+          <RouterLink
+            v-if="option.type === 'custom'" class="fvl-submit-button m-2 inline-block cursor-pointer bg-opacity-70"
+            :to="option.link || ''"
+          >
             <span class="fvl-submit-text">Manage {{ idx }}</span>
-          </span>
+          </RouterLink>
         </span>
       </div>
     </FvlForm>

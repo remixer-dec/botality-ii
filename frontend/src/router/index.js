@@ -31,7 +31,8 @@ export const routes = [
     icon: cog
   },
   {
-    path: '/models',
+    path: '/models/:catType?/:subType?',
+    props: true,
     basePath: '/models',
     name: 'Model manager',
     component: ModelManager,
