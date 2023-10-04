@@ -1,11 +1,12 @@
 <script setup>
-import NotFound from '../views/NotFound.vue'
+import SetupWindow from './ModelSetupWindow.vue'
 
-const props = defineProps(['headers', 'data', 'keys', 'canBeInstalled'])
+const props = defineProps(['headers', 'data', 'keys', 'modelType', 'canBeInstalled'])
 const { proxy } = getCurrentInstance()
 
-function showInstallWindow() {
-  proxy.$root.$emit('showModal', NotFound)
+function showInstallWindow(modelConfig) {
+  modelConfig._type = props.modelType
+  proxy.$root.$emit('showModal', { component: SetupWindow, data: { modelConfig } })
 }
 </script>
 
@@ -26,7 +27,7 @@ function showInstallWindow() {
           </span>
           <span v-else>{{ model[k] }}</span>
         </td>
-        <td v-if="canBeInstalled" class=" cursor-pointer" @click="showInstallWindow()">
+        <td v-if="canBeInstalled" class=" cursor-pointer" @click="showInstallWindow(model)">
           <hi-download-alt />
         </td>
       </tr>

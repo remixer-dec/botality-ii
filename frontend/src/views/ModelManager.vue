@@ -1,6 +1,9 @@
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, getCurrentInstance } from 'vue'
 import { api } from '../tools'
+import SetupWindow from '../components/ModelSetupWindow.vue'
+
+const { proxy } = getCurrentInstance()
 
 const tabs = ref([
   { name: 'TTS' },
@@ -29,7 +32,7 @@ const subitem_map = reactive({
 const installed_models = ref([])
 const recommended_models = ref([])
 
-onMounted(async () => {
+const refreshModels = async () => {
   const recommended = (await import('../recommendedModels')).models
   recommended_models.value = recommended
   try {
@@ -37,18 +40,28 @@ onMounted(async () => {
     installed_models.value = installed.response || []
   }
   catch (e) {
-
+    proxy.$root.$emit('showNotification', { message: String(e), type: 'error' })
   }
-})
+}
+
+proxy.$root.$on('refreshModels', refreshModels)
+onMounted(refreshModels)
+
+function showInstallWindow() {
+  proxy.$root.$emit('showModal', { component: SetupWindow, data: {} })
+}
 </script>
 
 <template>
   <div class="w-full flex box-border flex-wrap justify-evenly flex-col">
     <div class=" w-full flex flex-col">
-      <div class=" m-2 flex w-auto bg-white p-2 rounded-md">
+      <div class=" m-2 flex w-auto bg-white p-2 rounded-md relative">
         <div>
           <div class="mb-2">
             Pretrained Models
+            <div class="bg-main p-2 text-white rounded-md absolute right-2 top-2 cursor-pointer" @click="showInstallWindow">
+              Install custom model
+            </div>
           </div>
           <Tabs ref="categoryTabs" :items="tabs" class="my-1" />
           <div v-if="categoryTabs">
@@ -69,6 +82,7 @@ onMounted(async () => {
           :data="installed_models[categoryTabs.selectedItem][subMenuSelectedItem]"
           :keys="['voice', 'path', 'size']"
           :can-be-installed="false"
+          :model-type="subMenuSelectedItem"
         />
         <div class="mt-8 mb-2">
           Recommended Models
@@ -80,6 +94,7 @@ onMounted(async () => {
           :data="recommended_models[categoryTabs.selectedItem][subMenuSelectedItem]"
           :keys="['voice', 'repo', 'size']"
           :can-be-installed="true"
+          :model-type="subMenuSelectedItem"
         />
       </div>
     </div>
