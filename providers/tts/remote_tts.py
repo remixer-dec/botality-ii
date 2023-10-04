@@ -9,6 +9,7 @@ class RemoteTTS(AbstractTTS):
     self.is_available = config.tts_mode != 'local'
     self.name = 'remote'
     self.voices = []
+    self.authors = []
     self.system = False
   
   async def speak(self, voice, text):

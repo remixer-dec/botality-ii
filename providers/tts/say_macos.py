@@ -12,6 +12,7 @@ class Say(AbstractTTS):
     self.is_available = sys.platform == "darwin"
     self.system = True
     self.name = 'say_macos'
+    self.authors = ['Apple']
     self.voices = [
       'Alex', 'Alice', 'Alva', 'Amelie', 'Anna', 'Carmit', 'Damayanti', 'Daniel', 'Diego',
       'Ellen', 'Fiona', 'Fred', 'Ioana', 'Joana', 'Jorge', 'Juan', 'Kanya', 'Karen',

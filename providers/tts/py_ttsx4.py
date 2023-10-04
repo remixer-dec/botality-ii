@@ -11,6 +11,7 @@ class TTSx4(AbstractTTS):
   def __init__(self, is_remote):
     self.system = True
     self.voices = []
+    self.authors = []
     self.is_available = False
     self.name = 'ttsx4'
     if is_remote:

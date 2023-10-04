@@ -11,6 +11,7 @@ tts_voicemap = {}
 system_voicemap = {}
 sts_voicemap = {}
 tts_backends_loaded = {}
+tts_authors = set()
 
 remote_tts = None
 
@@ -61,6 +62,9 @@ def init_backend(backend, remote):
         sts_voicemap[voice] = b
       if b.system:
         system_voicemap[voice] = b
+    for author in b.authors:
+      if author is not None:
+        tts_authors.add(author)
   return b
 
 def convert_to_ogg(wav_path):

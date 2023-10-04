@@ -1,6 +1,6 @@
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message, BufferedInputFile
-from providers.tts_provider import init as init_tts, tts, sts, convert_to_ogg, tts_voicemap, sts_voicemap, system_voicemap
+from providers.tts_provider import init as init_tts, tts, sts, convert_to_ogg, tts_voicemap, sts_voicemap, system_voicemap, tts_authors
 from custom_queue import UserLimitedQueue, semaphore_wrapper
 from config_reader import config
 from utils import download_audio
@@ -23,7 +23,9 @@ class TextToSpeechModule:
         if available:
           # show helper message if no voice is selected
           if command.command == "tts" or not command.args or str(command.args).strip() == "" or ('-help' in str(command.args)):
-            return await message.answer(f"usage: {' '.join(['/' + x for x in self.voices])} text, /revoice [recording]\nUse the commands like /command@botname \n{config.tts_credits}")
+            desc_part2 = "Use the commands like /command@botname \n"
+            desc_part3 = f"{config.tts_credits}{', '.join(list(tts_authors))}"
+            return await message.answer(f"usage: {' '.join(['/' + x for x in self.voices])} text, /revoice [recording]\n{desc_part2}{desc_part3}")
           voice = command.command
           text = str(command.args)
           wrapped_runner = semaphore_wrapper(self.semaphore, tts)
