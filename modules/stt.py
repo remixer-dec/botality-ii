@@ -23,8 +23,8 @@ class SpeechToTextModule:
       async def handle_voice_messages(message: Message):
         error, text = await self.recognize_voice_message(message)
         if text and 'llm' in config.active_modules:
-          llm = dp['modules']['llm']
-          tts = dp['modules']['tts']
+          llm = dp.modules['llm']
+          tts = dp.modules['tts']
           llm_call_func = llm.assist if config.stt_autoreply_mode == 'assist' else llm.chat
           reply = await llm_call_func(text, llm.get_common_chat_attributes(message))
           if 'tts' in config.active_modules:

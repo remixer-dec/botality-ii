@@ -5,7 +5,7 @@ from aiogram.types import Message, BufferedInputFile, InputMediaPhoto
 from providers.sd_provider import tti, iti, models, embeddings, loras, switch_model, refresh_model_list
 from utils import tg_image_to_data, parse_photo, CustomArgumentParser, JoinNargsAction
 from custom_queue import UserLimitedQueue, semaphore_wrapper
-from typing import Literal
+from typing import Literal, Union
 from config_reader import config
 import asyncio
 import pydantic
@@ -16,17 +16,17 @@ import random
 sd_available_resolutions = list(range(256, config.sd_max_resolution + 1, 64))
 
 class SDArguments(pydantic.BaseModel):
-  denoising_strength: float | None = pydantic.Field(None, ge=0, le=1, alias='d', description='Denoising strength')
-  cfg_scale: float | None = pydantic.Field(None, ge=1, le=25, alias='c', description='Cfg scale')
-  steps: int | None = pydantic.Field(None, ge=5, le=config.sd_max_steps, alias='st')
-  sampler_name: Literal[tuple(config.sd_available_samplers)] | None = pydantic.Field(None, alias="sa", description='Sampler')
-  width: Literal[tuple(sd_available_resolutions)] | None = pydantic.Field(None, alias="wi", description='Width')
-  height: Literal[tuple(sd_available_resolutions)] | None = pydantic.Field(None, alias="he", description='Height')
-  negative_prompt: str | None = pydantic.Field(None, alias='np', description='Negative prompt')
-  seed: int | None = pydantic.Field(None, ge=-1, alias='se', description='Seed')
-  prompt: str | None = pydantic.Field(None)
-  mask: Literal[1, -1] | None = pydantic.Field(None, alias='ma', description='Inpaint mask')
-  inpainting_fill: int | None = pydantic.Field(None, ge=0, le=3, alias='fi', description='Inpaint fill mode')
+  denoising_strength: Union[float, None] = pydantic.Field(None, ge=0, le=1, alias='d', description='Denoising strength')
+  cfg_scale: Union[float, None] = pydantic.Field(None, ge=1, le=25, alias='c', description='Cfg scale')
+  steps: Union[int, None] = pydantic.Field(None, ge=5, le=config.sd_max_steps, alias='st')
+  sampler_name: Union[Literal[tuple(config.sd_available_samplers)], None] = pydantic.Field(None, alias="sa", description='Sampler')
+  width: Union[Literal[tuple(sd_available_resolutions)], None] = pydantic.Field(None, alias="wi", description='Width')
+  height: Union[Literal[tuple(sd_available_resolutions)], None] = pydantic.Field(None, alias="he", description='Height')
+  negative_prompt: Union[str, None] = pydantic.Field(None, alias='np', description='Negative prompt')
+  seed: Union[int, None] = pydantic.Field(None, ge=-1, alias='se', description='Seed')
+  prompt: Union[str, None] = pydantic.Field(None)
+  mask: Union[Literal[1, -1], None] = pydantic.Field(None, alias='ma', description='Inpaint mask')
+  inpainting_fill: Union[int, None] = pydantic.Field(None, ge=0, le=3, alias='fi', description='Inpaint fill mode')
 
 
 class StableDiffusionModule:
@@ -128,15 +128,15 @@ class StableDiffusionModule:
       parser.add_argument('-se', type=int, help='Seed')
       parser.add_argument('-wi', type=int, help='Image width')
       parser.add_argument('-he', type=int, help='Image height')
-      parser.add_argument('-ma', type=int, help='Use the 2nd image as inpaint regular/inverse mask (1 or -1)')
-      parser.add_argument('-fi', type=int, help='Inpaint mask fill mode [0 <= fi <= 3], fill/original/l.noise/l.nothing')
+      parser.add_argument('-ma', type=int, help='Use the 2nd image as inpaint regular / inverse mask (1 or -1)')
+      parser.add_argument('-fi', type=int, help='Inpaint mask fill mode [0 <= fi <= 3], fill / original / l.noise / l.nothing')
       parser.add_argument('-np', type=str, help='Negative prompt')
       parser.add_argument('prompt', type=str, help='prompt', nargs="*", action=JoinNargsAction)
       try:
         # override default -h behavior
         if '-help' in user_input or '—help' in user_input or '-h ' in user_input:
           return (parser.format_help().replace(
-            'bot.py','/tti /iti /ttiraw /itiraw, /models /loras /embeddings /command@botname params text' 
+            parser.prog,'/tti /iti /ttiraw /itiraw, /models /loras /embeddings /command@botname params text' 
           ), None)
         # parse arguments using custom arg parser
         args = parser.parse_args(shlex.split(user_input))
