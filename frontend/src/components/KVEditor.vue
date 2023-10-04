@@ -1,6 +1,6 @@
 <script setup>
-import { FvlInput, FvlForm, FvlSelect } from 'formvuelar'
 import Vue, { isReactive, isRef } from 'vue'
+import { FvlInput, FvlForm, FvlSelect } from '@/libs/formvuelar'
 
 const props = defineProps(['obj', 'name'])
 const emit = defineEmits(['change'])

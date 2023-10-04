@@ -23,6 +23,7 @@
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-unused-imports": "^3.0.0",
     "eslint-plugin-vue": "^9.17.0",
+    "sass": "^1.68.0",
     "unplugin-auto-import": "^0.15.2",
     "unplugin-icons": "^0.17.0",
     "unplugin-vue-components": "^0.24.1",

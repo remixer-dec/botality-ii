@@ -10,14 +10,22 @@ import AutoImport from 'unplugin-auto-import/vite'
 const config = defineConfig({
   resolve: {
     alias: {
-      '@': `${path.resolve(__dirname, 'src')}`
+      '@': `${path.resolve(__dirname, 'src')}`,
+      '%': `${path.resolve(__dirname, 'node_modules')}`
     }
   },
 
   build: {
     minify: false,
     emptyOutDir: true,
-    outDir: '../static'
+    outDir: '../static',
+    rollupOptions: {
+      output: {
+        entryFileNames: 'assets/[name].js',
+        chunkFileNames: 'assets/[name].js',
+        assetFileNames: 'assets/[name].[ext]'
+      }
+    }
   },
 
   plugins: [

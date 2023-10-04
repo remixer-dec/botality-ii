@@ -1,8 +1,8 @@
 <!-- eslint-disable no-invalid-this -->
 <!-- eslint-disable vue/no-mutating-props -->
 <script setup>
-import { FvlSwitch, FvlSelect, FvlTagSelect, FvlForm, FvlSlider, FvlInput } from 'formvuelar'
 import KVEditor from './KVEditor.vue'
+import { FvlSwitch, FvlSelect, FvlTagSelect, FvlForm, FvlSlider, FvlInput } from '@/libs/formvuelar'
 
 defineProps({
   configObj: { type: Object, required: true }

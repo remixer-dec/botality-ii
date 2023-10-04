@@ -1,7 +1,7 @@
 <script setup>
-import { FvlSelect, FvlForm, FvlInput, FvlSearchSelect } from 'formvuelar'
 import { reactive } from 'vue'
 import { api } from '../tools'
+import { FvlSelect, FvlForm, FvlInput, FvlSearchSelect } from '@/libs/formvuelar'
 
 const props = defineProps(['modelConfig'])
 const showConfirmAlert = ref(false)

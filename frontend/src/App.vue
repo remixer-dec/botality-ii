@@ -14,7 +14,7 @@ const notification = ref(null)
 </template>
 
 <style>
-@import '../node_modules/formvuelar/dist/formvuelar.css';
+@import '%/formvuelar/dist/formvuelar.css';
 svg {
   display: inline-block !important;
 }

@@ -1,8 +1,8 @@
 <script setup>
-import { FvlSelect, FvlForm } from 'formvuelar'
 import { watchThrottled } from '@vueuse/core'
 import { api } from '../tools'
 import { globalState } from '../state'
+import { FvlSelect, FvlForm } from '@/libs/formvuelar'
 
 const { proxy } = getCurrentInstance()
 
