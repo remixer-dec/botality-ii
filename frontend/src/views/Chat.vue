@@ -2,6 +2,7 @@
 import Vue, { ref, getCurrentInstance, onMounted, computed } from 'vue'
 import { api } from '../tools'
 import { globalState } from '../state'
+import locale from '../locale'
 
 const { proxy } = getCurrentInstance()
 onMounted(() => {
@@ -129,12 +130,12 @@ const msgIterator = messageIterator()
           <div v-if="isProcessing" class="absolute text-gray-400 pointer-events-none">
             <div class="relative -top-10 animate-pulse">
               <span class="animate-spin inline-flex justify-center align-middle"><hi-spinner-earring /></span>
-              processing
+              {{ locale.processing }}
             </div>
           </div>
           <input
             v-model="msg" type="text"
-            placeholder="Type your message"
+            :placeholder="locale.empty_message"
             class="w-full focus:outline-none"
             @keydown.enter="sendMessage"
             @keydown.up="msg = msgIterator.next('up').value || msg"
@@ -146,7 +147,7 @@ const msgIterator = messageIterator()
         </div>
       </div>
     </div>
-    <Offline message="Please start the bot to chat with it." />
+    <Offline :message="locale.chat_offline" />
   </div>
 </template>
 

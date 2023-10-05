@@ -1,5 +1,6 @@
 <script setup>
 import { api } from '../tools'
+import locale from '../locale'
 import SetupWindow from './ModelSetupWindow.vue'
 
 const props = defineProps(['headers', 'data', 'keys', 'modelType', 'canBeInstalled'])
@@ -12,12 +13,12 @@ function showInstallWindow(modelConfig) {
 
 function deleteModel(modelConfig) {
   modelConfig._type = props.modelType
-  if (confirm('Are you sure?')) {
+  if (confirm(locale.are_you_sure)) {
     api('POST', `models/uninstall/${modelConfig._type}`,
       { body: JSON.stringify(modelConfig), headers: { 'content-type': 'application/json' } }).then(() => {
       proxy.$root.$emit('refreshModels')
     })
-    alert('Please confirm that you want to delete the model in the terminal')
+    alert(locale.confirm_uninstall)
   }
 }
 </script>

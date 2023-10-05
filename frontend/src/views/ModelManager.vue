@@ -2,6 +2,7 @@
 import { onMounted, getCurrentInstance, watch, defineProps } from 'vue'
 import { api } from '../tools'
 import { globalState } from '../state'
+import locale from '../locale'
 import SetupWindow from '../components/ModelSetupWindow.vue'
 
 const props = defineProps(['catType', 'subType'])
@@ -32,16 +33,17 @@ const subitem_map = reactive({
 })
 
 function getCategoryHeaders(category, install) {
+  const l = locale
   const hmap = {
-    TTS: ['Voice', 'Path', 'Size (GB)'],
-    LLM: ['Name', 'Path', 'Size (GB)']
+    TTS: [l.voice, install ? l.repo : l.path, l.size],
+    LLM: [l.name, install ? l.repo : l.path, l.size]
   }
-  return [...hmap[category], install ? 'Install' : 'Uninstall']
+  return [...hmap[category], install ? l.install : l.uninstall]
 }
-function getCategoryKeys(category) {
+function getCategoryKeys(category, install) {
   const kmap = {
-    TTS: ['voice', 'path', 'size'],
-    LLM: ['name', 'path', 'size']
+    TTS: ['voice', install ? 'repo' : 'path', 'size'],
+    LLM: ['name', install ? 'repo' : 'path', 'size']
   }
   return kmap[category]
 }
@@ -91,9 +93,9 @@ function showInstallWindow() {
       <div class=" m-2 flex w-auto bg-white p-2 rounded-md relative">
         <div>
           <div class="mb-2">
-            Pretrained Models
+            {{ locale.model_manager_header }}
             <div class="bg-main p-2 text-white rounded-md absolute right-2 top-2 cursor-pointer" @click="showInstallWindow">
-              Install custom model
+              {{ locale.install_model }}
             </div>
           </div>
           <Tabs ref="categoryTabs" :items="tabs" class="my-1" :default="props.catType" />
@@ -106,32 +108,32 @@ function showInstallWindow() {
 
       <div class=" m-2 flex flex-col bg-white w-auto p-2 rounded-md">
         <div class="mb-2">
-          Installed Models
+          {{ locale.installed_models }}
         </div>
         <ModelTable
           v-if="categoryTabs && categoryTabs.selectedItem && subMenuSelectedItem
             && installed_models && installed_models[categoryTabs.selectedItem]"
           :headers="getCategoryHeaders(categoryTabs.selectedItem, false)"
           :data="installed_models[categoryTabs.selectedItem][subMenuSelectedItem]"
-          :keys="getCategoryKeys(categoryTabs.selectedItem)"
+          :keys="getCategoryKeys(categoryTabs.selectedItem, false)"
           :can-be-installed="false"
           :model-type="subMenuSelectedItem"
         />
         <div class="mt-8 mb-2">
-          Recommended Models
+          {{ locale.recommended_models }}
         </div>
         <ModelTable
           v-if="categoryTabs && categoryTabs.selectedItem && subMenuSelectedItem
             && recommended_models && recommended_models[categoryTabs.selectedItem]"
           :headers="getCategoryHeaders(categoryTabs.selectedItem, true)"
           :data="recommended_models[categoryTabs.selectedItem][subMenuSelectedItem]"
-          :keys="getCategoryKeys(categoryTabs.selectedItem)"
+          :keys="getCategoryKeys(categoryTabs.selectedItem, true)"
           :can-be-installed="true"
           :model-type="subMenuSelectedItem"
         />
       </div>
     </div>
-    <Offline message="Please start the bot to manage models." />
+    <Offline :message="locale.mmanager_offline" />
   </div>
 </template>
 

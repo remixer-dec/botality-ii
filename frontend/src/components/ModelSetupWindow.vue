@@ -1,6 +1,7 @@
 <script setup>
 import { reactive } from 'vue'
 import { api } from '../tools'
+import locale from '../locale'
 import { FvlSelect, FvlForm, FvlInput, FvlSearchSelect } from '@/libs/formvuelar'
 
 const props = defineProps(['modelConfig'])
@@ -28,8 +29,8 @@ function reportError(text) {
 
 function runInstall() {
   if (!model._type) return
-  if (model._type === 'SO_VITS_SVC' && !model.baseVoice) return reportError('Base voice is required for voice-to-voice models')
-  if (model.path.length > 0 && !(model.path.endsWith('/'))) return reportError('Repo path must end with a slash')
+  if (model._type === 'SO_VITS_SVC' && !model.baseVoice) return reportError(locale.no_base_voice)
+  if (model.path.length > 0 && !(model.path.endsWith('/'))) return reportError(locale.wrong_repo_format)
   if (typeof (model.rename) === 'undefined' && model._type === 'VITS') model.rename = true
   api('POST', `models/install/${model._type}`, { body: JSON.stringify(model), headers: { 'content-type': 'application/json' } })
     .then((r) => {
@@ -51,7 +52,7 @@ function runInstall() {
             case 'done':
               modelLoadingInProgress.value = false
               clearInterval(taskCheckInterval)
-              proxy.$root.$emit('showNotification', { message: '✅ Model installed!' })
+              proxy.$root.$emit('showNotification', { message: locale.model_installed })
               proxy.$root.$emit('hideModal')
               proxy.$root.$emit('refreshModels')
           }
@@ -70,24 +71,24 @@ function runInstall() {
 <template>
   <div>
     <FvlForm :data="model" url="#" class="relative">
-      <FvlInput name="repo" label="HuggingFace Repo" type="text" :value.sync="model.repo" />
+      <FvlInput name="repo" :label="locale.hf_repo" type="text" :value.sync="model.repo" />
       <FvlSelect
-        label="Model type"
+        :label="locale.model_type"
         name="type"
-        placeholder="Model type"
+        :placeholder="locale.model_type"
         :selected.sync="model._type"
         :options="options"
         :disabled="props.modelConfig ? true : false"
       />
-      <FvlInput name="path" label="Repo path" type="text" :value.sync="model.path" />
-      <FvlInput name="installPath" label="Install path" type="text" :value.sync="model.installPath" />
-      <FvlInput name="model" label="Model name" type="text" :value.sync="model.model" />
-      <FvlInput v-if="model._type in ttsModels" name="voice" label="Voice" type="text" :value.sync="model.voice" />
+      <FvlInput name="path" :label="locale.repo_path" type="text" :value.sync="model.path" />
+      <FvlInput name="installPath" :label="locale.install_path" type="text" :value.sync="model.installPath" />
+      <FvlInput name="model" :label="locale.model_filename" type="text" :value.sync="model.model" />
+      <FvlInput v-if="model._type in ttsModels" name="voice" :label="locale.voice" type="text" :value.sync="model.voice" />
       <FvlSelect
         v-if="model.quants"
-        label="Quantization"
+        :label="locale.quant"
         name="Quantization"
-        placeholder="Quantization"
+        :placeholder="locale.quant"
         :selected.sync="model.quant"
         :options="model.quants.reduce((prev, cur) => { prev[cur] = cur; return prev }, {})"
       />
@@ -95,7 +96,7 @@ function runInstall() {
         v-if="model._type in stsModels"
         name="baseVoice"
         :requred="true"
-        label="Base voice"
+        :label="locale.base_voice"
         type="text"
         :selected.sync="model.baseVoice"
         :lazy-load="true"
@@ -105,10 +106,10 @@ function runInstall() {
         option-value="voice"
         :search-keys="['voice']"
       />
-      <span v-if="showConfirmAlert" class="text-orange-400 inline-block m-2">Please confirm the installation in the terminal!</span>
+      <span v-if="showConfirmAlert" class="text-orange-400 inline-block m-2">{{ locale.confirm_install }}</span>
       <span v-if="modelLoadingInProgress" class="animate-spin inline-flex justify-center align-middle m-2"><hi-spinner-earring /></span>
       <span v-if="!(showConfirmAlert || modelLoadingInProgress)" class="fvl-submit-button m-2 inline-block cursor-pointer bg-opacity-70 float-right" @click="runInstall">
-        <span class="fvl-submit-text">Install</span>
+        <span class="fvl-submit-text">{{ locale.install }}</span>
       </span>
     </FvlForm>
   </div>

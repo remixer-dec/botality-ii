@@ -2,6 +2,7 @@
 import { computed, onMounted, onUnmounted, watch } from 'vue'
 import { api } from '../tools'
 import { globalState } from '../state'
+import locale from '../locale'
 
 const stats = ref({ timings: { start: 0 } })
 const uptime = computed(() => ~~(((new Date()).getTime() - new Date(stats.value.timings.start * 1000).getTime()) / 1000) - parseInt(trigger.value))
@@ -38,26 +39,26 @@ onUnmounted(() => {
 <template>
   <div class="w-full flex box-border flex-wrap justify-evenly flex-col min-h-screen">
     <div class="bg-white w-full p-2 grid grid-cols-2 mx-auto mb-4 rounded-md lg:w-1/2">
-      <div>Bot: </div>
+      <div>{{ locale.bot }}: </div>
       <div v-if="stats.bot">
         <a :href="`tg://resolve?domain=${stats.bot.username}`">{{ stats.bot.name }} (@{{ stats.bot.username }})</a>
       </div>
       <div v-else>
         -
       </div>
-      <div>Status:</div>
-      <div>{{ globalState.botIsRunning ? 'started' : 'stopped' }}</div>
-      <div>Flags: </div>
+      <div>{{ locale.status }}:</div>
+      <div>{{ locale.get(globalState.botIsRunning ? 'started' : 'stopped') }}</div>
+      <div>{{ locale.flags }}: </div>
       <div v-if="stats.bot">
-        <span v-if="stats.bot.can_join_groups" title="this bot can join groups">[G]</span>
-        <span v-else title="this bot cannot join groups, change configuration in BotFather" class="text-orange">[G]</span>
-        <span v-if="stats.bot.can_read_all_group_messages" title="this bot can read all group messages" class="text-orange-400">[A]</span>
-        <span v-else title="this bot cannot read all group messages and it is only activated via commands" />
+        <span v-if="stats.bot.can_join_groups" :title="locale.get('can_join_groups')">[G]</span>
+        <span v-else :title="locale.get('cannot_join_groups')" class="text-orange">[G]</span>
+        <span v-if="stats.bot.can_read_all_group_messages" :title="locale.get('can_read_all')" class="text-orange-400">[A]</span>
+        <span v-else :title="locale.get('cannot_read_all')" />
       </div>
       <div v-else>
         -
       </div>
-      <div>Access restriction mode:</div>
+      <div>{{ locale.access_mode }}:</div>
       <div v-if="stats.access_mode">
         <span v-if="stats.access_mode !== 'whitelist'">blacklist</span>
         <span v-if="stats.access_mode === 'both'">+</span>
@@ -66,19 +67,19 @@ onUnmounted(() => {
       <div v-else>
         -
       </div>
-      <div>Active modules (init time):</div>
+      <div>{{ locale.main_active_modules }}:</div>
       <div>
-        <span v-for="module, index in stats.modules" :key="index" class="pr-4">
+        <div v-for="module, index in stats.modules" :key="index" class="pr-4">
           {{ module }} ({{ stats.timings[module] }}s)
-        </span>
+        </div>
       </div>
-      <div>Uptime:</div>
+      <div>{{ locale.uptime }}:</div>
       <div>
         <span v-show="stats.timings.start">
-          {{ uptime }} seconds
+          {{ uptime }} {{ locale.seconds }}
         </span>
       </div>
-      <div>Total messages:</div><div>{{ stats?.counters?.msg }}</div>
+      <div>{{ locale.total_messages }}:</div><div>{{ stats?.counters?.msg }}</div>
     </div>
     <div v-if="stats.memory_manager && globalState.botIsRunning" class="bg-white table p-2 mx-auto rounded-md w-full lg:w-1/2 ">
       <div v-for="item, name in stats.memory_manager" v-show="item" :key="name">
@@ -104,21 +105,21 @@ onUnmounted(() => {
         </div>
         <div v-if="item && item.process" class="grid grid-cols-3 w-full my-2">
           <div class=" border-l-20 border-gray-500 pl-2">
-            TOTAL
+            {{ locale.total }}
           </div>
           <div class=" border-l-20 border-main pl-2">
-            CONSUMED
+            {{ locale.consumed }}
           </div>
           <div v-if="item.process" class=" border-l-20 border-cyan-600 pl-2">
-            PROCESS ({{ item.process }} GB)
+            {{ locale.process }} ({{ item.process }} GB)
           </div>
         </div>
         <div v-if="item && item.cache && item.cache.length > 0" class="mt-4 ">
           <span class="p-2 mr-4">
-            Cache:
+            {{ locale.cache }}:
           </span>
           <span v-for="cached, idx in item.cache" :key="idx" class=" bg-main p-2 m-1 ml-0 text-white inline-block cursor-default">
-            <span v-for="v, k in cached" :key="k" :title="`Estimated initial size: ${v}GB`">{{ k }}</span>
+            <span v-for="v, k in cached" :key="k" :title="`locale.cache_size: ${v}GB`">{{ k }}</span>
           </span>
         </div>
       </div>

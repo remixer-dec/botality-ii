@@ -1,6 +1,7 @@
 <!-- eslint-disable no-invalid-this -->
 <!-- eslint-disable vue/no-mutating-props -->
 <script setup>
+import locale from '../locale'
 import KVEditor from './KVEditor.vue'
 import { FvlSwitch, FvlSelect, FvlTagSelect, FvlForm, FvlSlider, FvlInput, FvlSearchSelect } from '@/libs/formvuelar'
 
@@ -21,7 +22,10 @@ FvlSlider.mounted = [function () {
   <div>
     <FvlForm :data="configObj" url="#/select " class="relative">
       <div v-for="option, idx in configObj" :key="idx" :class="`${idx} ${option.type}`">
-        <span :aria-disabled="option.depends ? !option.depends(configObj) : false">
+        <span :aria-disabled="option.depends ? !option.depends(configObj) : false" class="relative inline-block w-full confbox">
+          <div class=" absolute top-0 right-2 text-gray-100 z-30 hint" :hint-content="locale.get(idx)">
+            <hi-bulb-off />
+          </div>
           <FvlSwitch
             v-if="option.type === Boolean"
             class="relative"
@@ -115,6 +119,23 @@ span[aria-disabled] > div {
   opacity: .4;
   pointer-events: none;
   z-index: 2;
+}
+.confbox:hover .hint {
+  @apply text-gray-400
+}
+.hint:hover{
+  @apply text-yellow-500
+}
+.hint:hover:before {
+  float: left;
+  z-index: 10;
+  background: rgba(0, 0, 0,.8);
+  color: #fff;
+  content: attr(hint-content);
+  max-width: 330px;
+  border-radius: 4px;
+  padding: 10px;
+  box-shadow: 0 0 6px 1px rgba(0,0,0,.2);
 }
 </style>
 

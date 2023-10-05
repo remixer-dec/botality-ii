@@ -3,6 +3,7 @@ import { RouterLink } from 'vue-router'
 import { onMounted, onUnmounted } from 'vue'
 import { toggleBot, isBotAlive } from '../botControl'
 import router, { routes } from '../router'
+import locale from '../locale'
 import { globalState } from '@/state'
 
 const textGlow = ref(false)
@@ -59,7 +60,7 @@ onUnmounted(() => {
           <hi-power
             class=" text-4xl hover:text-cyan-600" :class="{ 'hover:text-gray-800': globalState.botIsRunning }"
           />
-          <span class=" text-xl flex self-center justify-center w-full" :class="{ 'text-glow': textGlow }">{{ globalState.botStateText }}</span>
+          <span class=" text-xl flex self-center justify-center w-full" :class="{ 'text-glow': textGlow }">{{ locale.get(globalState.botStateText) }}</span>
         </div>
       </div>
     </div>

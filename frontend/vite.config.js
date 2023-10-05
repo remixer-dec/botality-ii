@@ -6,6 +6,7 @@ import Components from 'unplugin-vue-components/vite'
 import Icons from 'unplugin-icons/vite'
 import IconsResolver from 'unplugin-icons/resolver'
 import AutoImport from 'unplugin-auto-import/vite'
+import TopLevelAwait from 'vite-plugin-top-level-await'
 
 const config = defineConfig({
   resolve: {
@@ -49,7 +50,12 @@ const config = defineConfig({
         '@vueuse/core'
       ],
       dts: 'src/auto-imports.d.ts'
+    }),
+    TopLevelAwait({
+      promiseExportName: '__tla',
+      promiseImportName: i => `__tla_${i}`
     })
+
   ],
 
   server: {

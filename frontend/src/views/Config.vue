@@ -6,6 +6,7 @@ import { FvlSelect, FvlForm } from '@/libs/formvuelar'
 
 const { proxy } = getCurrentInstance()
 
+const dataSynced = ref(false)
 const reductor = (pr, cur) => {
   if ('length' in pr)
     pr.push({ value: cur })
@@ -78,6 +79,7 @@ async function refreshData() {
   isRefreshing = true
   const schema = await api('GET', 'schema')
   const config = await api('GET', 'config')
+  console.log(config)
   const env = await api('GET', 'bot/env')
   const botConfigKeys = ['ignore_mode', 'threaded_initialization', 'active_modules', 'adminlist', 'blacklist', 'whitelist']
   syncConfigOptions(botConfigKeys, botConfig, config, schema.properties)
@@ -164,6 +166,7 @@ function reportError(text) {
 }
 
 refreshData().then(() => {
+  dataSynced.value = true
   const allConfigs = { ...mmConfig, ...llmConfig, ...botConfig, ...sdConfig, ...ttsConfig, ...ttaConfig, ...sttConfig }
 
   for (const item in allConfigs)
@@ -184,6 +187,7 @@ refreshData().then(() => {
 })
 
 function itemChanged(name, value, meta) {
+  if (!dataSynced.value) return
   if (isRefreshing) return
   if (meta.type === 'freetags' && meta.subtype === 'number')
     value = value.map(x => parseInt(x))

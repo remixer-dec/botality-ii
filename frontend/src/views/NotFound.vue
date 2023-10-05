@@ -1,3 +1,7 @@
+<script setup>
+import locale from '../locale'
+</script>
+
 <template>
   <section class="text-gray-600 body-font">
     <div
@@ -11,11 +15,13 @@
       <div class="w-full text-center lg:w-2/3">
         <h2>404</h2>
         <p class="mb-8 leading-relaxed dark:text-gray-300">
-          This page does not exist.
+          {{ locale.page404 }}
         </p>
         <div class="flex justify-center">
-          <RouterLink :to="{ name: 'Dashboard' }">
-            <ButtonPrimary> Bring me back Home </ButtonPrimary>
+          <RouterLink to="/">
+            <span class="fvl-submit-button m-2 inline-block cursor-pointer bg-opacity-70">
+              {{ locale.goBack }}
+            </span>
           </RouterLink>
         </div>
       </div>

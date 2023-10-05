@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import locale from '../locale'
 import Home from '@/views/Home.vue'
 import Config from '@/views/Config.vue'
 import Chat from '@/views/Chat.vue'
@@ -12,12 +13,11 @@ import downloadAlt from '~icons/humbleicons/download-alt'
 import chats from '~icons/humbleicons/chats'
 
 Vue.use(VueRouter)
-
 export const routes = [
   {
     path: '/',
     basePath: '/',
-    name: 'Dashboard',
+    name: locale.dashboard,
     component: Home,
     icon: dashboard
     // NOTE: you can also lazy-load the component
@@ -26,7 +26,7 @@ export const routes = [
   {
     path: '/config',
     basePath: '/config',
-    name: 'Configuration',
+    name: locale.configuration,
     component: Config,
     icon: cog
   },
@@ -34,14 +34,14 @@ export const routes = [
     path: '/models/:catType?/:subType?',
     props: true,
     basePath: '/models',
-    name: 'Model manager',
+    name: locale.model_manager,
     component: ModelManager,
     icon: downloadAlt
   },
   {
     path: '/chat',
     basePath: '/chat',
-    name: 'Chat',
+    name: locale.chat,
     component: Chat,
     icon: chats
   },
