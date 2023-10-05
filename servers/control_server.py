@@ -61,12 +61,16 @@ async def redirect_request(path: str, request: Request, response: Response):
         headers.pop('host', None)
         headers['content-type'] = 'application/json'
         _json = await request.json() if request.method != 'GET' else None
-        redirect_response = await client.request(request.method, redirect_url, headers=headers, json=_json, timeout=120)
+        redirect_response = await client.request(request.method, redirect_url, headers=headers, json=_json, timeout=config.sys_request_timeout)
       return redirect_response.json()
     except Exception:
       return JSONResponse(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, content={"error": "SERVICE UNAVAILABLE"})
   else:
     return await vrouter.run('/' + path, request.method, ((await request.json()) if request.method != 'GET' else None))
+
+@app.on_event("startup")
+def startup_event():
+    print("Botality WebUI server is running on", config.sys_webui_host)
 
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
@@ -79,7 +83,12 @@ def serve():
   [protocol, slash2_host, port] = config.sys_webui_host.split(':')
   if (os.environ.get('BOTALITY_AUTOSTART', '') == 'True'):
     bot_action('start')
-  uvicorn.run(app, host=slash2_host[2:], port=int(port),  timeout_keep_alive=120)
+  uvicorn.run(app, 
+    host=slash2_host[2:], 
+    port=int(port), 
+    timeout_keep_alive=config.sys_request_timeout,
+    log_level=config.sys_api_log_level
+  )
 
 if __name__ == '__main__':
   serve()

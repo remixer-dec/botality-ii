@@ -67,6 +67,7 @@ class Settings(BaseSettings):
   llm_assistant_cfg_override: Dict
   llm_assistant_chronicler: Literal["alpaca", "instruct", "raw"]
   llm_assistant_use_in_chat_mode: bool
+  llm_assistant_add_reply_context: bool
   llm_force_assistant_for_unsupported_models: bool
   llm_max_tokens: int
   llm_max_assistant_tokens: int
@@ -96,6 +97,8 @@ class Settings(BaseSettings):
   mm_autounload_after_seconds: int
   sys_webui_host: str
   sys_api_host: str
+  sys_request_timeout: int
+  sys_api_log_level: str
   
   @validator('sd_max_resolution', 'sd_default_width', 'sd_default_height')
   def resolution_in_correct_ranges(cls, v):

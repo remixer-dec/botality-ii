@@ -22,8 +22,8 @@ onUnmounted(() => {
 
 <template>
   <div
-    class="fixed sm:left-0 top-0 w-64 min-h-screen z-10 transition-all will-change-transform" style="background: linear-gradient(180deg, #3d8066 0%, #0a2f62 100%);"
-    :class="{ 'transform -translate-x-64': !mobileBurgerOpen }"
+    class="fixed sm:left-0 top-0 transform sm:-translate-x-0 w-64 min-h-screen z-10 transition-all will-change-transform" style="background: linear-gradient(180deg, #3d8066 0%, #0a2f62 100%);"
+    :class="{ '-translate-x-64': !mobileBurgerOpen }"
   >
     <div class="absolute bg-red p-2 -right-10 top-2 text-white text-2xl z-50 bg-[#3b7d66] rounded-r-md sm:hidden" @click="mobileBurgerOpen = !mobileBurgerOpen">
       <hi-bars />

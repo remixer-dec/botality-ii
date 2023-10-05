@@ -4,6 +4,7 @@ import threading
 import uvicorn
 from typing import Dict
 from fastapi import FastAPI, Body
+from fastapi.responses import RedirectResponse
 from config_reader import config
 from servers.common import add_common_endpoints
 from misc.botless_layer import handle_message
@@ -16,10 +17,17 @@ bot = None
 
 add_common_endpoints(app)
 
+@app.on_event("startup")
+def startup_event():
+    print("Botality API server is running on", config.sys_api_host)
+
+@app.get("/")
+async def ping():
+  return RedirectResponse(url=config.sys_webui_host, status_code=301)
+
 @app.get("/ping")
 async def ping():
   return {"response": "ok"}
-
 
 @app.post("/chat")
 async def message(data: Dict = Body):
@@ -29,7 +37,6 @@ async def message(data: Dict = Body):
 
 @app.get("/status")
 async def status():
-  print(repr(bot._me))
   return { "response": {
     "modules": list(dispatcher.modules.keys()),
     "counters": dispatcher.counters,
@@ -92,6 +99,9 @@ def init_api_server(dp, bot_instance):
   dispatcher = dp
   bot = bot_instance
   [protocol, slash2_host, port] = config.sys_api_host.split(':')
-  serverConfig = uvicorn.Config(app, host=slash2_host[2:], port=int(port), log_level="info", timeout_keep_alive=120)
+  serverConfig = uvicorn.Config(
+    app, host=slash2_host[2:], port=int(port), 
+    log_level=config.sys_api_log_level, timeout_keep_alive=config.sys_request_timeout
+  )
   api_server = Server(config=serverConfig)
   return api_server

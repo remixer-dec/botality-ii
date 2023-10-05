@@ -54,7 +54,7 @@ class LargeLanguageModel:
     is_reply_from_bot = reply and reply.from_user.id == bot._me.id
     is_qa_format = reply and reply.text and reply.text.startswith('Q:')
     always_assist = config.llm_assistant_use_in_chat_mode and assistant_model_available(self.model)
-    return is_reply_from_bot and (is_qa_format or always_assist)
+    return is_reply_from_bot and (is_qa_format or always_assist) and config.llm_assistant_add_reply_context
 
   def get_common_chat_attributes(self, message, additional={}):
     return {
