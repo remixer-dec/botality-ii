@@ -70,8 +70,7 @@ class LargeLanguageModel:
     self.chatter = chroniclers['chat'](config.llm_character, False, config.llm_max_history_items)
     self.assistant = chroniclers[config.llm_assistant_chronicler](config.llm_character)
     self.replier = chroniclers['reply'](config.llm_character)
-    model = active_model.init(config.llm_paths, self.chatter.init_cfg())
-    self.model = model
+    self.model = active_model.init(config.llm_paths, self.chatter.init_cfg()) 
     self.chat_cfg_override = config.llm_generation_cfg_override
     self.assistant_cfg_override = config.llm_assistant_cfg_override
     
@@ -79,8 +78,8 @@ class LargeLanguageModel:
     async def handle_messages(message: Message):
       parse_reply = self.should_use_reply_chronicler(message, bot)
       # if should be handled in assistant mode
-      if (config.llm_assistant_use_in_chat_mode and assistant_model_available(model))\
-      or (visual_mode_available(model) and parse_photo(message)) or parse_reply:
+      if (config.llm_assistant_use_in_chat_mode and assistant_model_available(self.model))\
+      or (visual_mode_available(self.model) and parse_photo(message)) or parse_reply:
         command = SimpleNamespace(args=message.text, parse_reply=parse_reply)
         return await assist_message(message=message, command=command)
       with self.queue.for_user(message.from_user.id) as available:
@@ -97,10 +96,10 @@ class LargeLanguageModel:
       msg = str(command.args).strip()
       if not (msg and command.args):
         return
-      if not assistant_model_available(model):
+      if not assistant_model_available(self.model):
         return await message.reply(text='Assistant model is not available')
       img_input = {"visual_input": await tg_image_to_data(parse_photo(message), bot)}\
-                  if visual_mode_available(model) \
+                  if visual_mode_available(self.model) \
                   else {}
       with self.queue.for_user(message.from_user.id) as available:
         if not available:
@@ -122,13 +121,22 @@ class LargeLanguageModel:
 
     @dp.message(Command(commands=['llm']), flags={"cooldown": 20})
     async def helpfunction(message: Message, command: Command):
-      text = f'''[LLM module].
-      Commands: /ask
-      Active model type: {config.llm_backend}
-      Assistant mode: {str(assistant_model_available(model))} ({config.llm_assistant_chronicler})
+      return await message.reply(text=self.help(dp, bot))
+  
+  def help(self, dp, bot):
+    extra_backend_info = ''
+    if config.llm_backend == 'pytorch':
+      extra_backend_info = '\nModel type: '+ config.llm_python_model_type + '\n'
+    text = f'''<b>[LLM module]</b>.
+      Commands: /ask /llm /reset
+      Active model type: {config.llm_backend}{extra_backend_info}
+      Assistant mode: {str(assistant_model_available(self.model))} ({config.llm_assistant_chronicler})
       Character: {config.llm_character}
       Context visibility: {config.llm_history_grouping}
-      Model: {model.filename if model.model else 'unknown'}
+      Max new tokens: {str(config.llm_max_tokens)}
+      Max new tokens (assistant): {str(config.llm_max_assistant_tokens)}
+      Visual adapter: {'supported' if visual_mode_available(self.model) else 'not supported'}
+      Model: {self.model.filename if hasattr(self.model, 'filename') else 'unknown'}
       Config: 
 {json.dumps(self.chatter.gen_cfg(self.assistant_cfg_override), sort_keys=True, indent=4)}'''
-      return await message.reply(text=text)
+    return text

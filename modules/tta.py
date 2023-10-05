@@ -22,7 +22,7 @@ class TextToAudioModule:
         if not available:
           return
         if command.command == "tta" or not command.args or str(command.args).strip() == "" or ('-help' in str(command.args)):
-          return await message.answer(f"Usage: /sfx text /music text\nUse the commands like /command@botname")
+          return await message.answer(self.help(dp, bot))
         else:
           audio_type = command.command
           text = str(command.args)
@@ -34,6 +34,10 @@ class TextToAudioModule:
           else:
             audio = BufferedInputFile(convert_to_ogg(data), 'audio.ogg')
             return await message.answer_voice(voice=audio)
+  def help(self, dp, bot):
+    return f'''<b>[Text-To-Audio]</b> Usage:
+/sfx@{bot._me.username} prompt
+/music{bot._me.username} prompt'''
 
 
 

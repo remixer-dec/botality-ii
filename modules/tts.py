@@ -22,10 +22,12 @@ class TextToSpeechModule:
       with self.queue.for_user(message.from_user.id) as available:
         if available:
           # show helper message if no voice is selected
-          if command.command == "tts" or not command.args or str(command.args).strip() == "" or ('-help' in str(command.args)):
-            desc_part2 = "Use the commands like /command@botname \n"
-            desc_part3 = f"{config.tts_credits}{', '.join(list(tts_authors))}"
-            return await message.answer(f"usage: {' '.join(['/' + x for x in self.voices])} text, /revoice [recording]\n{desc_part2}{desc_part3}")
+          if command.command == "tts" \
+          or not command.args \
+          or str(command.args).strip() == "" \
+          or ('-help' in str(command.args)):
+            return await message.answer(self.help(dp, bot))
+
           voice = command.command
           text = str(command.args)
           wrapped_runner = semaphore_wrapper(self.semaphore, tts)
@@ -39,7 +41,7 @@ class TextToSpeechModule:
     if 'so_vits_svc' in config.tts_enable_backends:
       @dp.message(Command(commands=["revoice", "sts"]), flags={"long_operation": "record_audio"})
       async def revoice(message: Message, command: CommandObject) -> None:
-        voice = str(command.args).split(' ')[0] if command.args else sts_voices[0]
+        voice = (str(command.args).split(' ')[0]) if command.args else None
         voice = voice if voice in sts_voices else None
         if not voice:
           return await message.answer("<b>Voice not found</b>, available speech-to-speech voices: " +
@@ -58,22 +60,11 @@ class TextToSpeechModule:
         return await message.answer("No audio found. Use this command replying to voice messages")
 
     bot.reply_tts = command_tts_handler
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  
+  def help(self, dp, bot):
+    voice_commands = ' '.join(['/' + x for x in self.voices])
+    return f'''<b>[Text-To-Speech]</b> Usage: {voice_commands} text,
+Use the commands like /command@{bot._me.username}
+[Speech-to-speech] /revoice %voice% *voice_message*
+{config.tts_credits} {', '.join(list(tts_authors))}
+'''

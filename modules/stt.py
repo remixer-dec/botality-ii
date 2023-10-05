@@ -43,7 +43,7 @@ class SpeechToTextModule:
         if not available:
           return
         if command.command == "stt" and ('-h' in str(command.args) or not (message.reply_to_message and message.reply_to_message.voice)):
-          return await message.answer(f"Usage: /stt [voice_message] \nUse the commands like /command@botname")
+          return await message.answer(self.help(dp, bot))
         else:
           error, text = await self.recognize_voice_message(message)
           if error:
@@ -62,6 +62,8 @@ class SpeechToTextModule:
   async def recognize(self, audio_path):
     return await self.model.recognize(audio_path)
 
+  def help(self, dp, bot):
+    return f"<b>[Speech-to-text]</b> Usage: /stt@{bot._me.username} *voice_message*"
 
 
 

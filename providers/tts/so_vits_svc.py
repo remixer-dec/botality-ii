@@ -33,7 +33,7 @@ class SoVitsSVC(AbstractSTS):
     so_vits_config = Path(v['path']) / 'config.json'
     so_vits_voice = v['voice']
     subprocess.run([
-      config.python_command, 
+      config.python_command or 'python', 
       f"inference_main.py", 
       "-m", str(so_vits_model), 
       "-c", str(so_vits_config), 

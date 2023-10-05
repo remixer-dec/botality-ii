@@ -119,7 +119,7 @@ onUnmounted(() => {
             {{ locale.cache }}:
           </span>
           <span v-for="cached, idx in item.cache" :key="idx" class=" bg-main p-2 m-1 ml-0 text-white inline-block cursor-default">
-            <span v-for="v, k in cached" :key="k" :title="`locale.cache_size: ${v}GB`">{{ k }}</span>
+            <span v-for="v, k in cached" :key="k" :title="`${locale.cache_size}: ${v}GB`">{{ k }}</span>
           </span>
         </div>
       </div>

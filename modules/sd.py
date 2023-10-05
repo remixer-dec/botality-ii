@@ -115,8 +115,9 @@ class StableDiffusionModule:
           if not command.args:
             return message.answer('use this command with model name to change the model, try /models for all model names')
           return message.answer('<b>Model not found</b>')
-
-
+  
+  def help(self, dp, bot):
+    return self.parse_input('-help')
 
   def parse_input(self, user_input):
       user_input = str(user_input) + ' '
