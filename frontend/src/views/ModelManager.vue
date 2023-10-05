@@ -65,7 +65,7 @@ const refreshModels = async () => {
           targetSet.add(x.repo + (x.voice || x.model))
         })
         for (const recModel of recommended_models.value[modelType][modelSubtype]) {
-          if (targetSet.has(recModel.repo + (recModel.voice || x.model)))
+          if (targetSet.has(recModel.repo + (recModel.voice || recModel.model)))
             recModel.hide = true
         }
       }
