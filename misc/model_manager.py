@@ -45,6 +45,18 @@ def get_models():
         "repo": model.get('repo'),
         "size": round(os.path.getsize(path) / 1024**3,3)
       }) 
+  models['LLM'] = {}
+  models['LLM']['GGUF'] = []
+  GGUF_DIR = config.llm_paths.get('path_to_llama_cpp_weights_dir', 'doesnotexist')
+  if os.path.exists(GGUF_DIR):
+    gguf_list = [x for x in os.listdir(GGUF_DIR) if x.lower().endswith('gguf')]
+    models['LLM']['GGUF'] = [
+      {
+        'name': x,
+        'model': x,
+        'size': round(os.path.getsize(os.path.join(GGUF_DIR, x)) / 1024**3,3),
+        'path': GGUF_DIR
+      } for x in gguf_list]
   return models
 
 def get_task_info(task_id):
@@ -68,13 +80,55 @@ def install_model(model_type, model_config, uninstall=False):
     assert len(model_config.get('repo','').split('/')) == 2
   if model_type in supported_models:
     un = 'un' if uninstall else ''
-    with confirm(f"Do you want to {un}install the {model_config.get('repo')} {model_config.get('voice')} {model_type} model? (Y/n): ") as confirmed:
+    with confirm(f"Do you want to {un}install the {model_config.get('repo','')} {model_config.get('voice', model_config.get('name'))} {model_type} model? (Y/n): ") as confirmed:
       if confirmed:
         try:
           return supported_models[model_type][1 if uninstall else 0](model_config)
         except Exception as e:
           return {'error': str(e)}
     return {'error': 'Permission denied'}
+
+def uninstall_gguf_model(model_config):
+  GGUF_DIR = config.llm_paths.get('path_to_llama_cpp_weights_dir', None)
+  if GGUF_DIR is None:
+    return {'error': 'Please set up path_to_llama_cpp_weights_dir in llm_paths in your .env file'}
+  else:
+    if model_config.get('model') in os.listdir(GGUF_DIR):
+      os.unlink(os.path.join(GGUF_DIR, model_config.get('model')))
+      return {'response': 'ok'}
+  return {'error': 'Unknown error'}
+
+def install_gguf_model(model_config):
+  global bg_id
+  if '$path_to_llama_cpp_weights_dir' in model_config.get('installPath'):
+    GGUF_DIR = config.llm_paths.get('path_to_llama_cpp_weights_dir', None)
+    if GGUF_DIR is None:
+      return {'error': 'Please set up path_to_llama_cpp_weights_dir in llm_paths in your .env file'}
+    else:
+      model_config['installPath'] = model_config['installPath'].replace('$path_to_llama_cpp_weights_dir', GGUF_DIR)
+  dldir_path = model_config.get('installPath')
+  model_name = model_config.get('model').replace('$', model_config.get('quant'))
+  download_file_path = os.path.join(dldir_path, model_name)
+  hf_file_path = model_config.get('path') + model_name
+  if not os.path.exists(dldir_path):
+    print('download dir does not exist, creating it', dldir_path)
+    os.makedirs(dldir_path)
+  if os.path.exists(download_file_path):
+    return {'error': 'model already exists!'}
+  bg_id = (bg_id + 1)
+  bg_cache[bg_id] = {'status': 'running'}
+  bg_thread = threading.Thread(target=install_gguf_model_bg, args=(model_config, hf_file_path, download_file_path, bg_id,))
+  bg_thread.start()
+  return {'response': {'status': 'running', 'task_id': bg_id}}
+
+def install_gguf_model_bg(model_config, remote_file_path, local_file_path, task_id):
+  try:
+    download_and_move(model_config, remote_file_path, local_file_path)
+  except Exception as e:
+    logger.error(e)
+    bg_cache[task_id] = {'status': 'error', 'error': str(e)}
+    return
+  bg_cache[task_id] = {'status': 'done'}
 
 def install_tts_model(model_config):
   global bg_id
@@ -151,7 +205,6 @@ def install_vits_background(model_config, remote_file_path, local_file_path, tas
     del model_config['installPath']
     config.tts_voices.append(model_config)
     config.tts_voices = config.tts_voices
-    print(config.tts_voices)
   except Exception as e:
     logger.error(e)
     bg_cache[task_id] = {'status': 'error', 'error': str(e)}
@@ -190,5 +243,6 @@ def install_so_vits_svc_background(model_config, remote_file_path, local_file_pa
 
 supported_models = {
   'VITS': (install_tts_model, uninstall_tts_model), 
-  'SO_VITS_SVC': (install_tts_model, uninstall_tts_model)
+  'SO_VITS_SVC': (install_tts_model, uninstall_tts_model),
+  'GGUF': (install_gguf_model, uninstall_gguf_model),
 }

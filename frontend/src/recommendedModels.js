@@ -65,6 +65,36 @@ const tim = [{
   size: 0.2
 }]
 
+const standardQuants = ['2_K', '3_K_L', '3_K_M', '3_K_S', '4_0', '4_K_M', '4_K_S', '5_0', '5_K_M', '5_K_S', '6_K', '8_0']
+const theBloke = [
+  ['TheBloke/llama2_7b_chat_uncensored-GGUF', 'llama2_7b_chat_uncensored.Q$.gguf', standardQuants],
+  ['TheBloke/Luna-AI-Llama2-Uncensored-GGUF', 'luna-ai-llama2-uncensored.Q$.gguf', standardQuants],
+  ['TheBloke/Mistral-7B-Instruct-v0.1-GGUF', 'mistral-7b-instruct-v0.1.Q$.gguf', standardQuants],
+  ['TheBloke/WizardLM-1.0-Uncensored-Llama2-13B-GGUF',
+    'wizardlm-1.0-uncensored-llama2-13b.Q$.gguf',
+    standardQuants
+  ],
+  ['TheBloke/Speechless-Llama2-Hermes-Orca-Platypus-WizardLM-13B-GGUF',
+    'speechless-llama2-hermes-orca-platypus-wizardlm-13b.Q$.gguf',
+    standardQuants
+  ],
+  ['TheBloke/OpenBuddy-Llama2-13B-v11.1-GGUF',
+    'openbuddy-llama2-13b-v11.1.Q$.gguf',
+    standardQuants
+  ],
+  ['TheBloke/TinyLlama-1.1B-Chat-v0.3-GGUF', 'tinyllama-1.1b-chat-v0.3.Q$.gguf', standardQuants]
+].map((x) => {
+  return {
+    name: x[1].split('.')[0],
+    repo: x[0],
+    model: x[1],
+    quants: x[2],
+    author: 'TheBloke',
+    path: '',
+    size: '2-14'
+  }
+})
+
 export const models = {
   TTS: {
     VITS: [
@@ -75,6 +105,11 @@ export const models = {
       ...prTTS,
       ...amoTTS,
       ...tim
+    ]
+  },
+  LLM: {
+    GGUF: [
+      ...theBloke
     ]
   }
 }

@@ -7,14 +7,20 @@ const props = defineProps(['modelConfig'])
 const showConfirmAlert = ref(false)
 const modelLoadingInProgress = ref(false)
 let model = props.modelConfig || {}
-model.installPath = '$TTS_PATH/'
-const options = { SO_VITS_SVC: 'SO_VITS_SVC', VITS: 'VITS' }
+const options = { SO_VITS_SVC: 'SO_VITS_SVC', VITS: 'VITS', GGUF: 'GGUF' }
 model._type = (model._type || options[0])
 
 const ttsModels = { SO_VITS_SVC: true, VITS: true }
 const stsModels = { SO_VITS_SVC: true }
-
+const llModels = { GGUF: true }
+if (model._type in ttsModels)
+  model.installPath = '$TTS_PATH/'
+if (model._type === 'GGUF') {
+  model.installPath = '$path_to_llama_cpp_weights_dir'
+  model.quant = '2_K'
+}
 model = reactive({ ...model })
+
 const { proxy } = getCurrentInstance()
 function reportError(text) {
   proxy.$root.$emit('showNotification', { message: text, type: 'error' })
@@ -77,6 +83,14 @@ function runInstall() {
       <FvlInput name="installPath" label="Install path" type="text" :value.sync="model.installPath" />
       <FvlInput name="model" label="Model name" type="text" :value.sync="model.model" />
       <FvlInput v-if="model._type in ttsModels" name="voice" label="Voice" type="text" :value.sync="model.voice" />
+      <FvlSelect
+        v-if="model.quants"
+        label="Quantization"
+        name="Quantization"
+        placeholder="Quantization"
+        :selected.sync="model.quant"
+        :options="model.quants.reduce((prev, cur) => { prev[cur] = cur; return prev }, {})"
+      />
       <FvlSearchSelect
         v-if="model._type in stsModels"
         name="baseVoice"

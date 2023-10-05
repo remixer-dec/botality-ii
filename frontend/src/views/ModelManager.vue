@@ -31,6 +31,21 @@ const subitem_map = reactive({
   LLM: llmTabsComponent
 })
 
+function getCategoryHeaders(category, install) {
+  const hmap = {
+    TTS: ['Voice', 'Path', 'Size (GB)'],
+    LLM: ['Name', 'Path', 'Size (GB)']
+  }
+  return [...hmap[category], install ? 'Install' : 'Uninstall']
+}
+function getCategoryKeys(category) {
+  const kmap = {
+    TTS: ['voice', 'path', 'size'],
+    LLM: ['name', 'path', 'size']
+  }
+  return kmap[category]
+}
+
 const installed_models = ref([])
 const recommended_models = ref([])
 
@@ -47,10 +62,10 @@ const refreshModels = async () => {
       for (const modelSubtype in recommended_models.value[modelType]) {
         const targetSet = new Set()
         installed_models.value[modelType][modelSubtype].forEach((x) => {
-          targetSet.add(x.repo + x.voice)
+          targetSet.add(x.repo + (x.voice || x.model))
         })
         for (const recModel of recommended_models.value[modelType][modelSubtype]) {
-          if (targetSet.has(recModel.repo + recModel.voice))
+          if (targetSet.has(recModel.repo + (recModel.voice || x.model)))
             recModel.hide = true
         }
       }
@@ -94,11 +109,11 @@ function showInstallWindow() {
           Installed Models
         </div>
         <ModelTable
-          v-if="categoryTabs && categoryTabs.selectedItem === 'TTS' && subMenuSelectedItem
+          v-if="categoryTabs && categoryTabs.selectedItem && subMenuSelectedItem
             && installed_models && installed_models[categoryTabs.selectedItem]"
-          :headers="['Voice', 'Path', 'Size (GB)', 'Uninstall']"
+          :headers="getCategoryHeaders(categoryTabs.selectedItem, false)"
           :data="installed_models[categoryTabs.selectedItem][subMenuSelectedItem]"
-          :keys="['voice', 'path', 'size']"
+          :keys="getCategoryKeys(categoryTabs.selectedItem)"
           :can-be-installed="false"
           :model-type="subMenuSelectedItem"
         />
@@ -106,11 +121,11 @@ function showInstallWindow() {
           Recommended Models
         </div>
         <ModelTable
-          v-if="categoryTabs && categoryTabs.selectedItem === 'TTS' && subMenuSelectedItem
+          v-if="categoryTabs && categoryTabs.selectedItem && subMenuSelectedItem
             && recommended_models && recommended_models[categoryTabs.selectedItem]"
-          :headers="['Voice', 'Repo', 'Size (GB)', 'Install']"
+          :headers="getCategoryHeaders(categoryTabs.selectedItem, true)"
           :data="recommended_models[categoryTabs.selectedItem][subMenuSelectedItem]"
-          :keys="['voice', 'repo', 'size']"
+          :keys="getCategoryKeys(categoryTabs.selectedItem)"
           :can-be-installed="true"
           :model-type="subMenuSelectedItem"
         />
