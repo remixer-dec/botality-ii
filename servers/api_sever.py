@@ -22,7 +22,7 @@ def startup_event():
     print("Botality API server is running on", config.sys_api_host)
 
 @app.get("/")
-async def ping():
+async def movetowebui():
   return RedirectResponse(url=config.sys_webui_host, status_code=301)
 
 @app.get("/ping")
@@ -69,6 +69,10 @@ async def uninstall_models(model_type: str, body: Dict = Body):
 @app.get("/models/install/{task_id}")
 async def install_status(task_id: int):
   return {'response': model_manager.get_task_info(task_id)}
+
+@app.post("/models/select/{model_type}")
+async def select_model(model_type: str, body: Dict = Body):
+  return model_manager.select_model(model_type, body)
 
 @app.get("/voices")
 async def voices():

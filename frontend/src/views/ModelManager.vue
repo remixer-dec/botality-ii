@@ -36,7 +36,7 @@ function getCategoryHeaders(category, install) {
   const l = locale
   const hmap = {
     TTS: [l.voice, install ? l.repo : l.path, l.size],
-    LLM: [l.name, install ? l.repo : l.path, l.size]
+    LLM: [l.name, install ? l.repo : l.path, l.size, ...(install ? [] : [l.model_selected])]
   }
   return [...hmap[category], install ? l.install : l.uninstall]
 }
@@ -117,6 +117,7 @@ function showInstallWindow() {
           :data="installed_models[categoryTabs.selectedItem][subMenuSelectedItem]"
           :keys="getCategoryKeys(categoryTabs.selectedItem, false)"
           :can-be-installed="false"
+          :can-be-selected="subMenuSelectedItem === 'GGUF'"
           :model-type="subMenuSelectedItem"
         />
         <div class="mt-8 mb-2">

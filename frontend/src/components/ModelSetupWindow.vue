@@ -1,5 +1,5 @@
 <script setup>
-import { reactive } from 'vue'
+import { reactive, watch } from 'vue'
 import { api } from '../tools'
 import locale from '../locale'
 import { FvlSelect, FvlForm, FvlInput, FvlSearchSelect } from '@/libs/formvuelar'
@@ -14,13 +14,18 @@ model._type = (model._type || options[0])
 const ttsModels = { SO_VITS_SVC: true, VITS: true }
 const stsModels = { SO_VITS_SVC: true }
 const llModels = { GGUF: true }
-if (model._type in ttsModels)
-  model.installPath = '$TTS_PATH/'
-if (model._type === 'GGUF') {
-  model.installPath = '$path_to_llama_cpp_weights_dir'
-  model.quant = '2_K'
+function helpWithInstallPath() {
+  if (model.installPath) return
+  if (model._type in ttsModels)
+    model.installPath = '$TTS_PATH/'
+  if (model._type === 'GGUF') {
+    model.installPath = '$path_to_llama_cpp_weights_dir'
+    model.quant = '2_K'
+  }
 }
 model = reactive({ ...model })
+helpWithInstallPath()
+watch(() => model._type, helpWithInstallPath)
 
 const { proxy } = getCurrentInstance()
 function reportError(text) {

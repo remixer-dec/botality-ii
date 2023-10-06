@@ -49,12 +49,14 @@ def get_models():
   models['LLM']['GGUF'] = []
   GGUF_DIR = config.llm_paths.get('path_to_llama_cpp_weights_dir', 'doesnotexist')
   if os.path.exists(GGUF_DIR):
+    active_model = config.llm_paths.get('path_to_llama_cpp_weights')
     gguf_list = [x for x in os.listdir(GGUF_DIR) if x.lower().endswith('gguf')]
     models['LLM']['GGUF'] = [
       {
         'name': x,
         'model': x,
         'size': round(os.path.getsize(os.path.join(GGUF_DIR, x)) / 1024**3,3),
+        'selected': os.path.samefile(os.path.join(GGUF_DIR, x), active_model),
         'path': GGUF_DIR
       } for x in gguf_list]
   return models
@@ -240,6 +242,18 @@ def install_so_vits_svc_background(model_config, remote_file_path, local_file_pa
     bg_cache[task_id] = {'status': 'error', 'error': str(e)}
     return
   bg_cache[task_id] = {'status': 'done'}
+
+def select_model(model_type, body):
+  can_be_selected = {"GGUF": "path_to_llama_cpp_weights"}
+  if model_type in can_be_selected:
+    model_config_dict = get_models()['LLM'][model_type]
+    for model in model_config_dict:
+      if model['name'] == body.get('name'):
+        config.llm_paths[can_be_selected[model_type]] = os.path.join(model['path'], model['name'])
+        config.llm_paths = config.llm_paths
+        return {'response': 'ok'}
+    return {'error': 'model not found'}
+  return {'error': 'model not supported'}
 
 supported_models = {
   'VITS': (install_tts_model, uninstall_tts_model), 
