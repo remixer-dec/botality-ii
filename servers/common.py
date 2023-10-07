@@ -4,6 +4,7 @@ from fastapi import status, Body
 from config_reader import config, Settings
 from asyncio import Lock, sleep
 import os
+import json
 
 config_write_lock = Lock()
 
@@ -36,7 +37,7 @@ def add_common_endpoints(app, get_custom_config=False):
 
   @app.get("/schema")
   async def schema():
-    return Settings.model_json_schema()
+    return Settings.model_json_schema() if hasattr(Settings, 'model_json_schema') else json.loads(Settings.schema_json())
   @app.get("/characters")
   async def characters():
     return {"response": [{'name': x[:-3], 'full': 'characters.' + x[:-3]} for x in os.listdir('characters/') \

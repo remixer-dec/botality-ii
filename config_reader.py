@@ -100,7 +100,7 @@ class Settings(BaseSettings):
   sys_request_timeout: int
   sys_api_log_level: str
   
-  @validator('sd_max_resolution', 'sd_default_width', 'sd_default_height')
+  @validator('sd_max_resolution', 'sd_default_width', 'sd_default_height', allow_reuse=True)
   def resolution_in_correct_ranges(cls, v):
     if v % 64 != 0 or v < 256 or v > 2048:
       raise ValueError('incorrect value')
