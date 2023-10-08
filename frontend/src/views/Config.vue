@@ -79,7 +79,6 @@ async function refreshData() {
   isRefreshing = true
   const schema = await api('GET', 'schema')
   const config = await api('GET', 'config')
-  console.log(config)
   const env = await api('GET', 'bot/env')
   const botConfigKeys = ['ignore_mode', 'threaded_initialization', 'active_modules', 'adminlist', 'blacklist', 'whitelist']
   syncConfigOptions(botConfigKeys, botConfig, config, schema.properties)

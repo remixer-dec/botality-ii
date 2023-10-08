@@ -1,11 +1,11 @@
-
 from aiogram import html, F
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message, BufferedInputFile, InputMediaPhoto
 from providers.sd_provider import tti, iti, models, embeddings, loras, switch_model, refresh_model_list
 from utils import tg_image_to_data, parse_photo, CustomArgumentParser, JoinNargsAction
 from custom_queue import UserLimitedQueue, semaphore_wrapper
-from typing import Literal, Union
+from typing import Union
+from typing_extensions import Literal
 from config_reader import config
 import asyncio
 import pydantic

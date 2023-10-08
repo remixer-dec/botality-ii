@@ -2,23 +2,22 @@
   
 This project is an implementation of a modular **telegram bot** based on [aiogram](https://github.com/aiogram/aiogram), designed for local ML Inference with remote service support. Currently integrated with:
 -  **Stable Diffusion** (using [stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) API),
--  **TTS** built-in text-to-speech engine (using [TTS (VITS)](https://github.com/coqui-ai/TTS) and [so-vits-SVC](https://github.com/svc-develop-team/so-vits-svc/tree/4.0)).  
+-  **TTS** text-to-speech engine (using [TTS (VITS)](https://github.com/coqui-ai/TTS) and [so-vits-SVC](https://github.com/svc-develop-team/so-vits-svc/tree/4.0)) as well as OS voices.  
 -  **STT** integrated with multiple speech recognition engines, including [whisper.cpp](https://github.com/ggerganov/whisper.cpp)[<sup>1</sup>](https://github.com/stlukey/whispercpp.py), [silero](https://github.com/snakers4/silero-models), [wav2vec2](https://ai.meta.com/blog/wav2vec-20-learning-the-structure-of-speech-from-raw-audio/)  
--  **LLMs** such as [llama](https://github.com/facebookresearch/llama), [gpt-j-6b](https://github.com/kingoflolz/mesh-transformer-jax#gpt-j-6b), [gpt-2](https://huggingface.co/gpt2) with support for assistant mode   
-via [alpaca-lora](https://github.com/tloen/alpaca-lora), via [gpt4all-lora](https://github.com/nomic-ai/gpt4all#reproducibility), via [adapter-model](https://github.com/ZrrSkywalker/LLaMA-Adapter) and via [minChatGPT](https://github.com/ethanyanjiali/minChatGPT)  
+-  **LLMs** such as [llama](https://github.com/facebookresearch/llama), [gpt-j](https://github.com/kingoflolz/mesh-transformer-jax#gpt-j-6b), [gpt-2](https://huggingface.co/gpt2) with support for assistant mode via instruct-tuned lora models and multimodality via [adapter-model](https://github.com/OpenGVLab/LLaMA-Adapter) 
 - **TTA** experimental text-to-audio support via [audiocraft](https://github.com/facebookresearch/audiocraft)  
 
 Accelerated LLM inference support: [llama.cpp](https://github.com/ggerganov/llama.cpp), [mlc-llm](https://github.com/mlc-ai/mlc-llm) and [llama-mps](https://github.com/remixer-dec/llama-mps/)  
 Remote LLM inference support: [oobabooga/text-generation-webui](https://github.com/oobabooga/text-generation-webui/), [LostRuins/koboldcpp](https://github.com/LostRuins/koboldcpp) and [llama.cpp server](https://github.com/ggerganov/llama.cpp/tree/master/examples/server)  
 Compatibility table is available [here](COMPATIBILITY.md)  
   
-evolved from predecessor [Botality I](https://github.com/remixer-dec/ru-gpt3-telegram-bot)  
+Evolved from predecessor [Botality I](https://github.com/remixer-dec/ru-gpt3-telegram-bot)  
+Shipped with an easy-to-use webui, you can run commands and talk with the bot right in the webui.
 
-<img src="https://i.imgur.com/eCEcgCc.jpg" alt="preview" height="400">
+<img src="https://i.imgur.com/cnLXvTa.png" alt="preview" height="400">
 
 ### Changelog
 Some versions have breaking changes, see [Changelog file](CHANGELOG.md) for more information
-  
 
 ### Features
 [Bot]
@@ -50,6 +49,8 @@ Some versions have breaking changes, see [Changelog file](CHANGELOG.md) for more
 
 [TTA]
 - can be used with /sfx and /music commands after adding `tta` to `active_modules`  
+
+<img src="https://i.imgur.com/eCEcgCc.jpg" alt="multimodality demo" height="400">
   
 ### Setup:
 - rename `.env.example` to `.env`, and do NOT add the .env file to your commits! 
@@ -60,6 +61,7 @@ Some versions have breaking changes, see [Changelog file](CHANGELOG.md) for more
 - for text-to-speech module download VITS models, put their names in `tts_voices` configuration option and path to their directory in `tts_path`
 - for llm module, see LLM Setup section bellow
 - run the bot with `python bot.py`  
+- if you want to use webui + api, run it with `python dashboard.py`  
   
 python3.10+ is recommended, due to aiogram compatibility, if you are experiencing problems with whisper or logging, please update numpy.
 ### Supported language models (tested):  

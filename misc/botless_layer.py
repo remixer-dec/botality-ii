@@ -39,6 +39,11 @@ class EmulatedMessage(Message):
     self.__voice_hijacker = hijacks.get('voice')
     self.__photo_hijacker = hijacks.get('photo')
     self.__mediaGroup_hijacker = hijacks.get('mediaGroup')
+
+  # prevent calling setattr of parent frozen Message class instance
+  def __setattr__(self, name, value):
+    self.__dict__[name] = value
+
   async def reply(self, *args, **kwargs):
     return await self.__reply_hijacker(*args, **kwargs)
   async def answer(self, *args, **kwargs):

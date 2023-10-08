@@ -33,7 +33,7 @@
   <tr>
     <td>llama.cpp<br>remote-lcpp<br></td>
     <td>any llama-based<br></td>
-    <td>- quantized GGML model support<br>- lora support<br>- built-in GPU acceleration<br></td>
+    <td>- quantized GGML model support<br>- lora support<br>- built-in GPU acceleration<br>- memory manager support</td>
     <td>CPU<br>CUDA<br>Metal<br><br></td>
     <td>instruct</td>
   </tr>
@@ -47,7 +47,7 @@
   <tr>
     <td>remote_ob</td>
     <td>any supported by oobabooga webui and kobold.cpp<br></td>
-    <td>- all features of Oobabooga webui, including GPTQ support that are available via API<br><br>- all features of Kobold.cpp that are available via API<br></td>
+    <td>- all features of Oobabooga webui, including GPTQ support that are available via API<br><br>- all features of Kobold.cpp that are available via API<br>- memory manager support</td>
     <td>+<br></td>
     <td>instruct</td>
   </tr>

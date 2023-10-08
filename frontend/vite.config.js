@@ -17,7 +17,7 @@ const config = defineConfig({
   },
 
   build: {
-    minify: false,
+    minify: true,
     emptyOutDir: true,
     outDir: '../static',
     rollupOptions: {

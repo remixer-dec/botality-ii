@@ -1,6 +1,18 @@
+## v0.6
+- Migrated to `aiogram==3.1.1`, `pydantic==2.4.0`, if you want to keep old pydantic, use `aiogram==3.0.0b7`.
+- WebUI made with Vue is available! Run it with `dashboard.py`
+- Configuration preset switching in WebUI, to change path of default .env file, use `--env` on `dashboard.py`, additional configuration files should are stored with .env extension in env directory.
+- New configuration options: `sys_webui_host`, `sys_api_host`, `sys_request_timeout`, `sys_api_log_level`
+- Fixed TTS initialization failing when threaded mode was off
+- Fixed memory manager initialization
+- For model configuration UI the `path_to_llama_cpp_weights_dir` key has been added to `llm_paths`
+- Reply context (1-step memory) can now be toggled with `llm_assistant_add_reply_context` option
+- Configuration hints are available in the WebUI.
+- Model manager in the WebUI can be used to download and set up models. A few types of models are initially supported.
+
 ## v0.5  
 - full TTS refactoring  
-- universal system os TTS prvider (pyttsx4) support  
+- universal cross-platform os TTS provider (pyttsx4) support  
 - threaded initialization (configurable via `threaded_initialization` option)  
 - bugfixes
 
