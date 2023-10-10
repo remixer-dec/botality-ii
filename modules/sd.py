@@ -2,7 +2,7 @@ from aiogram import html, F
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message, BufferedInputFile, InputMediaPhoto
 from providers.sd_provider import tti, iti, models, embeddings, loras, switch_model, refresh_model_list
-from utils import tg_image_to_data, parse_photo, CustomArgumentParser, JoinNargsAction
+from utils import tg_image_to_data, parse_photo, CustomArgumentParser, CustomHelpFormatter, JoinNargsAction
 from custom_queue import UserLimitedQueue, semaphore_wrapper
 from typing import Union
 from typing_extensions import Literal
@@ -93,7 +93,7 @@ class StableDiffusionModule:
         return message.answer('<b>Available embeddings:</b> \n' + "\n".join(embeddings))
       if command.command == "loras":
         loras_list = sorted([*loras, *config.sd_lora_custom_activations.keys()])
-        return message.answer('<b>Available loras:</b> \n' + "\n".join(loras_list))
+        return message.answer('<b>Available loras:</b> \n' + ("\n".join(loras_list))[:4000])
 
     @dp.message(
       Command(commands=["model", "changemodel", "switchmodel"]), 
@@ -121,7 +121,7 @@ class StableDiffusionModule:
 
   def parse_input(self, user_input):
       user_input = str(user_input) + ' '
-      parser = CustomArgumentParser(description='generate images from text and other images')
+      parser = CustomArgumentParser(description='generate images from text and other images', formatter_class=CustomHelpFormatter)
       parser.add_argument('-d', type=float, help='Denoising strength (for image-to-image) (0 <= d <= 1)')
       parser.add_argument('-c', type=float, help='Cfg scale (1 <= c <= 25)')
       parser.add_argument('-sa', choices=['Euler a', 'Euler', 'Heun', 'DPM++ 2M', 'DPM++ 2S a'], help='Sampler')

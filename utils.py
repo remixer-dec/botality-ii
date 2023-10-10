@@ -24,6 +24,13 @@ class CustomArgumentParser(argparse.ArgumentParser):
   def error(self, message):
     raise Exception(message)
 
+# prevents excessive line-breaks
+class CustomHelpFormatter(argparse.HelpFormatter):
+  def __init__(self, *args, **kwargs):
+    kwargs["max_help_position"] = 24
+    kwargs["width"] = 245
+    super().__init__(*args, **kwargs)
+
 # join the rest of the arguments, so they can be validated
 class JoinNargsAction(argparse.Action):
   def __call__(self, parser, namespace, values, option_string=None):
