@@ -14,7 +14,7 @@ Compatibility table is available [here](COMPATIBILITY.md)
 Evolved from predecessor [Botality I](https://github.com/remixer-dec/ru-gpt3-telegram-bot)  
 Shipped with an easy-to-use webui, you can run commands and talk with the bot right in the webui.
 
-<img src="https://i.imgur.com/cnLXvTa.png" alt="preview" height="400">
+<img src="https://i.imgur.com/cnLXvTa.png" alt="preview" height="500">
 
 ### Changelog
 Some versions have breaking changes, see [Changelog file](CHANGELOG.md) for more information
@@ -50,18 +50,18 @@ Some versions have breaking changes, see [Changelog file](CHANGELOG.md) for more
 [TTA]
 - can be used with /sfx and /music commands after adding `tta` to `active_modules`  
 
-<img src="https://i.imgur.com/eCEcgCc.jpg" alt="multimodality demo" height="400">
+<img src="https://i.imgur.com/eCEcgCc.jpg" alt="multimodality demo" title="multimodality demo" height="400">  
   
 ### Setup:
-- rename `.env.example` to `.env`, and do NOT add the .env file to your commits! 
-- set up your telegram bot token and other configuration options
+- copy `.env.example` file and rename the copy to `.env`, do NOT add the .env file to your commits! 
+- set up your telegram bot token and other configuration options in `.env` file
 - install requirements `pip install -r requrements.txt`
 - install optional requirements if you want to use tts and tts_server `pip install -r requrements-tts.txt` and `pip install -r requrements-llm.txt` if you want to use llm, you'll probably also need a fresh version of [pytorch](https://pytorch.org/get-started/locally/). For speech-to-text run `pip install -r requrements-stt.txt`, for text-to-audio run `pip install -U git+https://git@github.com/facebookresearch/audiocraft#egg=audiocraft`
+- you can continue configuration in the webui, it has helpful tips about each configuration option
 - for stable diffusion module, make sure that you have webui installed and it is running with `--api` flag
 - for text-to-speech module download VITS models, put their names in `tts_voices` configuration option and path to their directory in `tts_path`
 - for llm module, see LLM Setup section bellow
-- run the bot with `python bot.py`  
-- if you want to use webui + api, run it with `python dashboard.py`  
+- if you want to use webui + api, run it with `python dashboard.py`, otherwise run the bot with `python bot.py` 
   
 python3.10+ is recommended, due to aiogram compatibility, if you are experiencing problems with whisper or logging, please update numpy.
 ### Supported language models (tested):  
