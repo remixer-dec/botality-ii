@@ -12,8 +12,8 @@ class TextToSpeechModule:
     self.queue = UserLimitedQueue(config.tts_queue_size_per_user)
     self.semaphore = asyncio.Semaphore(1)
     init_tts(config.tts_mode != 'local', config.threaded_initialization)
-    sts_voices = sts_voicemap.keys()
-    self.all_voices = tts_voicemap.keys()
+    self.sts_voices = list(sts_voicemap.keys())
+    self.all_voices = list(tts_voicemap.keys())
     non_system_voices = [v for v in self.all_voices if v not in system_voicemap]
     self.voices = self.all_voices if config.tts_list_system_voices else non_system_voices
 
@@ -42,10 +42,10 @@ class TextToSpeechModule:
       @dp.message(Command(commands=["revoice", "sts"]), flags={"long_operation": "record_audio"})
       async def revoice(message: Message, command: CommandObject) -> None:
         voice = (str(command.args).split(' ')[0]) if command.args else None
-        voice = voice if voice in sts_voices else None
+        voice = voice if voice in self.sts_voices else None
         if not voice:
           return await message.answer("<b>Voice not found</b>, available speech-to-speech voices: " +
-           ", ".join(sts_voices))
+           ", ".join(self.sts_voices))
         if message.reply_to_message:
           if message.reply_to_message.voice:
             with tempfile.NamedTemporaryFile(suffix='.ogg', delete=False) as temp_file:

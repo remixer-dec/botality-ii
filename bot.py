@@ -55,7 +55,7 @@ def initialize(dp, bot, threaded=True):
       thread.start()
       threads.append(thread)
   for thread in threads:
-    thread.join()
+    thread.join(config.sys_request_timeout)
 
 def main(api=False):
   bot = Bot(token=config.bot_token.get_secret_value(), parse_mode="HTML")
