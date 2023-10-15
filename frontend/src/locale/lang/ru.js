@@ -57,6 +57,11 @@ export default {
   running: 'запущен',
   initializing: 'запуск',
   stopping: 'остановка',
+  manage_models: 'Manage',
+  select_tag: 'Select...',
+  expand_config: 'Expand',
+  add_tag: 'Add...',
+  add_new_config_item: 'Add new item',
   // config
   adminlist: 'Список id администраторов бота, имеющих доступ к административным командам',
   whitelist: 'Список id чатов и пользователей, которым разрешено вызывать бота',

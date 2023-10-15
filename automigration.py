@@ -6,10 +6,12 @@ import json
 
 def verify_environment():
   env_filename = os.environ.get('BOTALITY_ENV_FILE', '.env')
-  assert os.path.exists(env_filename) and os.path.exists('.env.example'), \
+  assert os.path.exists(env_filename), \
     f"Specified configuration file ({env_filename}) does not exist, please make a copy of .env.example and edit it."
   assert not env_filename.endswith('.env.example'), \
     "You should not use example file as your configuration, please copy it to .env file."
+  assert os.path.exists('.env.example'), \
+    f".env.example does not exist, please recover it, the file is used to automatically add new config options after updating"
   assert env_filename.endswith('.env'), \
     "Configuration files must have .env extension"
   

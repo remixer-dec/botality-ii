@@ -53,7 +53,7 @@ FvlSlider.mounted = [function () {
             option-value="value"
             :name="idx"
             :label="idx"
-            placeholder="Select..."
+            :placeholder="locale.select_tag"
           />
           <FvlSlider
             v-if="String(option.type).endsWith('slider')"
@@ -75,7 +75,7 @@ FvlSlider.mounted = [function () {
             :name="idx"
             :label="idx"
             :type="option.subtype"
-            placeholder="Add..."
+            :placeholder="locale.add_tag"
           />
           <FvlInput
             v-if="option.type === 'text'"
@@ -103,7 +103,7 @@ FvlSlider.mounted = [function () {
             v-if="option.type === 'custom'" class="fvl-submit-button m-2 inline-block cursor-pointer bg-opacity-70"
             :to="option.link || ''"
           >
-            <span class="fvl-submit-text">Manage {{ idx }}</span>
+            <span class="fvl-submit-text">{{ locale.manage_models }} {{ idx }}</span>
           </RouterLink>
         </span>
       </div>

@@ -11,7 +11,7 @@ class TextToSpeechModule:
   def __init__(self, dp, bot):
     self.queue = UserLimitedQueue(config.tts_queue_size_per_user)
     self.semaphore = asyncio.Semaphore(1)
-    init_tts(config.tts_mode != 'local', config.threaded_initialization)
+    init_tts(allowRemote=config.tts_mode != 'local', threaded=config.threaded_initialization)
     self.sts_voices = list(sts_voicemap.keys())
     self.all_voices = list(tts_voicemap.keys())
     non_system_voices = [v for v in self.all_voices if v not in system_voicemap]
@@ -22,10 +22,7 @@ class TextToSpeechModule:
       with self.queue.for_user(message.from_user.id) as available:
         if available:
           # show helper message if no voice is selected
-          if command.command == "tts" \
-          or not command.args \
-          or str(command.args).strip() == "" \
-          or ('-help' in str(command.args)):
+          if self.should_print_help(command, message):
             return await message.answer(self.help(dp, bot))
 
           voice = command.command
@@ -61,6 +58,14 @@ class TextToSpeechModule:
 
     bot.reply_tts = command_tts_handler
   
+  def should_print_help(self, command, message):
+    if command.command == "tts" \
+    or not command.args \
+    or str(command.args).strip() == "" \
+    or ('-help' in str(command.args)):
+      return True
+    return False
+    
   def help(self, dp, bot):
     voice_commands = ' '.join(['/' + x for x in self.voices])
     return f'''<b>[Text-To-Speech]</b> Usage: {voice_commands} text,

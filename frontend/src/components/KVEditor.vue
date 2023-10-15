@@ -1,5 +1,6 @@
 <script setup>
 import Vue, { isReactive, isRef } from 'vue'
+import locale from '../locale'
 import { FvlInput, FvlForm, FvlSelect } from '@/libs/formvuelar'
 
 const props = defineProps(['obj', 'name'])
@@ -60,7 +61,7 @@ function deleteItem(key, obj) {
     </span>
     <div v-if="itemsHidden" class="fvl-submit-button mt-0 mb-2 bg-slate-300 mx-2 cursor-pointer" @click="itemsHidden = false">
       <hi-arrows-vertical />
-      Expand
+      {{ locale.expand_config }}
     </div>
     <div v-else class="bg-slate-200 bg-opacity-20 rounded-md m-2 overflow-hidden">
       <div v-for="value, key in props.obj" :key="key" class="relative grid overflow-hidden">
@@ -99,7 +100,7 @@ function deleteItem(key, obj) {
         </span>
       </div>
       <div v-if="editableItemName !== '<NEW_ITEM_NAME>'" class="min-h-6">
-        <span class="px-2 bg-slate-300 text-white float-right cursor-pointer" @click="addNewItem(props.obj)">Add new item</span>
+        <span class="px-2 bg-slate-300 text-white float-right cursor-pointer" @click="addNewItem(props.obj)">{{ locale.add_new_config_item }}</span>
       </div>
     </div>
   </FvlForm>

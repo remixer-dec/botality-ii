@@ -70,7 +70,7 @@ async def redirect_request(path: str, request: Request, response: Response):
 
 @app.on_event("startup")
 def startup_event():
-    print("Botality WebUI server is running on", config.sys_webui_host)
+  print("Botality WebUI server is running on", config.sys_webui_host)
 
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
