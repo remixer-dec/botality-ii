@@ -16,12 +16,13 @@ except ImportError:
 
 class LlamaCPP(AbstractLLM):
   assistant_mode = True
-  def __init__(self, model_paths, init_config={}):
+  def __init__(self, model_paths, init_config):
     if not Llama:
       logger.error('llama.cpp is not installed, run "pip install llama-cpp-python" to install it')
       return logger.error('for GPU support, please read https://github.com/abetlen/llama-cpp-python')
     override = init_config.get('llama_cpp_init', {})
-    lora_path = model_paths.get('path_to_llama_cpp_lora', None)
+    lora_path = model_paths.get('path_to_llama_cpp_lora', '') 
+    lora_path = lora_path if os.path.exists(lora_path) else None
     self.load_model = partial(
       Llama,
       n_ctx=min(init_config.get('context_size', 512), config.llm_lcpp_max_context_size),

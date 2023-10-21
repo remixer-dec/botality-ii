@@ -9,7 +9,7 @@ model = None
 device = torch.device("cpu")
 
 class GPTJ(AbstractLLM):
-  def __init__(self, model_paths, init_config={}):
+  def __init__(self, model_paths, init_config):
     from transformers import AutoTokenizer, GPTJForCausalLM
     weights = model_paths['path_to_gptj_weights']
     self.tokenizer = AutoTokenizer.from_pretrained(weights)

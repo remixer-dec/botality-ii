@@ -13,7 +13,7 @@ class LlamaOrig(AbstractLLM):
   generator = None
   assistant_mode = False
   visual_mode = False
-  def __init__(self, model_paths, init_config={}):
+  def __init__(self, model_paths, init_config):
     llama_weights = model_paths['path_to_llama_weights']
     llama_tokenizer = model_paths['path_to_llama_tokenizer']
     sys.path.append(model_paths['path_to_llama_code'])

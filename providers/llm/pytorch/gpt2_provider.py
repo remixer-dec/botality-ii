@@ -10,7 +10,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class GPT2(AbstractLLM):
   is_nanoGPT = False
   assistant_mode = False
-  def __init__(self, model_paths, init_config={}):
+  def __init__(self, model_paths, init_config):
     from transformers import GPT2LMHeadModel, GPT2Tokenizer
     weights = model_paths['path_to_gpt2_weights']
     self.filename = os.path.basename(weights)

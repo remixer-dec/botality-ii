@@ -18,7 +18,7 @@ device = torch.device("cuda") if torch.cuda.is_available() \
 class LlamaHuggingface(AbstractLLM):
   submodel = None
   assistant_mode = False
-  def __init__(self, model_paths, init_config={}):
+  def __init__(self, model_paths, init_config):
     tokenizer = model_paths['path_to_hf_llama']
     weights = model_paths['path_to_hf_llama']
     self.tokenizer = LlamaTokenizerFast.from_pretrained(tokenizer)

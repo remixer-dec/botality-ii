@@ -7,7 +7,7 @@ from providers.llm.abstract_llm import AbstractLLM
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class AutoHF(AbstractLLM):
-  def __init__(self, model_paths, init_config={}):
+  def __init__(self, model_paths, init_config):
     from transformers import AutoTokenizer, AutoModelForCausalLM
     weights = model_paths['path_to_autohf_weights']
     self.tokenizer = AutoTokenizer.from_pretrained(weights)

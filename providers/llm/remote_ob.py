@@ -33,7 +33,7 @@ class RemoteLLM(AbstractLLM):
       except Exception:
         return 'Unknown error', None
 
-  def __init__(self, model_paths, init_config={}):
+  def __init__(self, model_paths, init_config):
     if config.llm_remote_launch_process_automatically and \
     config.mm_preload_models_on_start:
       asyncio.run(self.run_llm_service())

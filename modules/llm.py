@@ -70,17 +70,20 @@ class LargeLanguageModel:
     self.chatter = chroniclers['chat'](config.llm_character, False, config.llm_max_history_items)
     self.assistant = chroniclers[config.llm_assistant_chronicler](config.llm_character)
     self.replier = chroniclers['reply'](config.llm_character)
-    self.model = active_model.init(config.llm_paths, self.chatter.init_cfg()) 
+    self.model = active_model.init(config.llm_paths, self.chatter.init_cfg() or {}) 
     self.chat_cfg_override = config.llm_generation_cfg_override
     self.assistant_cfg_override = config.llm_assistant_cfg_override
     
     @dp.message((F.text[0] if F.text else '') != '/', flags={"long_operation": "typing"})
     async def handle_messages(message: Message):
-      parse_reply = self.should_use_reply_chronicler(message, bot)
+      # ignore deep replies to other users
+      if message.reply_to_message and message.reply_to_message.from_user.id != bot._me.id:
+        return
+      should_parse_reply = self.should_use_reply_chronicler(message, bot)
       # if should be handled in assistant mode
       if (config.llm_assistant_use_in_chat_mode and assistant_model_available(self.model))\
-      or (visual_mode_available(self.model) and parse_photo(message)) or parse_reply:
-        command = SimpleNamespace(args=message.text, parse_reply=parse_reply)
+      or (visual_mode_available(self.model) and parse_photo(message)) or should_parse_reply:
+        command = SimpleNamespace(args=message.text, parse_reply=should_parse_reply)
         return await assist_message(message=message, command=command)
       with self.queue.for_user(message.from_user.id) as available:
         if available:

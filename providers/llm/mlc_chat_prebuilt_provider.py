@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 class MLCChatPrebuilt(AbstractLLM):
   assistant_mode = True
-  def __init__(self, model_paths, init_config={}):
+  def __init__(self, model_paths, init_config):
     sys.path.append(model_paths['path_to_mlc_chatbot_code'])
     try:
       from mlc_chatbot.bot import ChatBot    
