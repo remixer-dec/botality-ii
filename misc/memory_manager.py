@@ -3,6 +3,9 @@ import sys
 import psutil
 from config_reader import config
 from time import time 
+import logging
+
+logger = logging.getLogger(__name__)
 
 process = psutil.Process()
 SHARED_MEMORY = sys.platform == "darwin"
@@ -24,10 +27,10 @@ def get_vram_info():
     return 0.0, 0.0
 
 def get_system_ram_info():
-    virtual_memory = psutil.virtual_memory()
-    avail_gb = virtual_memory.available / (1024**3)
-    total_gb = virtual_memory.total / (1024**3)
-    return avail_gb, total_gb
+  virtual_memory = psutil.virtual_memory()
+  free_gb = virtual_memory.available / (1024**3)
+  total_gb = virtual_memory.total / (1024**3)
+  return free_gb, total_gb
 
 class MModel:
   def __init__(self, name, load, unload):
@@ -74,7 +77,7 @@ class MemoryManager:
     if self.mm_management_policy == 'COUNT' or self.mm_management_policy == 'BOTH':
       cache_count = len(alive_keys)
       if cache_count > 0 and cache_count > self.cached_model_count:
-        unloaded_key = self.unload_by_policy(model_name, alive_values)
+        unloaded_key = self.unload_by_policy(model_name, alive_values, f'management policy {self.mm_management_policy}')
         if self.mm_management_policy == 'BOTH':
           alive_keys.remove(unloaded_key)
           alive_values.remove(self.cache[unloaded_key])
@@ -83,10 +86,12 @@ class MemoryManager:
       items_memory = list(item.memory for item in alive_values)
       total_memory_used = sum(items_memory)
       memory_available, memory_total = self.get_memory()
-      if memory_available < max(items_memory) * 1.3 \
-      or memory_available < self.starting_memory/3 \
-      or total_memory_used * 1.3 > self.starting_memory:
-        self.unload_by_policy(model_name, alive_values)
+      # TODO: find optimal value for mm_unload_memory_ratio on low-end devices and make it configurable
+      mm_unload_memory_ratio = 3
+      # if memory_available < max(items_memory) * 1.3 \
+      if memory_available < self.starting_memory/mm_unload_memory_ratio \
+      or total_memory_used * (1+1/mm_unload_memory_ratio) > self.starting_memory:
+        self.unload_by_policy(model_name, alive_values, f'management policy {self.mm_management_policy}')
     return self.cache[model_name].model
 
   def unload(self, name, reason):
@@ -94,9 +99,9 @@ class MemoryManager:
     if target.unload is not None:
       target.unload(target.model)
     self.cache[name].model = None
-    print('removed', name, 'from model cache by', reason)
+    logger.info('removed', name, 'from model cache by memory manager due to', reason)
 
-  def unload_by_policy(self, model_name, items):
+  def unload_by_policy(self, model_name, items, reason):
     if config.mm_unload_order_policy == 'LEAST_USED':
       items = sorted(items, key=lambda x: x.use_count)
     if config.mm_unload_order_policy == 'OLDEST_USE_TIME':
@@ -108,7 +113,7 @@ class MemoryManager:
     to_unload = items[0].name
     if to_unload == model_name and len(items) > 1:
       to_unload = items[1].name
-    self.unload(to_unload, config.mm_unload_order_policy)
+    self.unload(to_unload, config.mm_unload_order_policy, reason)
     return to_unload
 
   def stats(self):
