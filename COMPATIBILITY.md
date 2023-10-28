@@ -33,7 +33,7 @@
   <tr>
     <td>llama.cpp<br>remote-lcpp<br></td>
     <td>any llama-based<br></td>
-    <td>- quantized GGML model support<br>- lora support<br>- built-in GPU acceleration<br>- memory manager support</td>
+    <td>- quantized GGML model support<br>- lora support<br>- built-in GPU acceleration<br>- memory manager support <br> - visual input (currently only in llama.cpp server)</td>
     <td>CPU<br>CUDA<br>Metal<br><br></td>
     <td>instruct</td>
   </tr>

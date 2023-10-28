@@ -22,7 +22,7 @@ def visual_mode_available(model):
 
 class LargeLanguageModel:
   async def assist(self, text, context):
-    params = {**self.assistant.gen_cfg(self.assistant_cfg_override), **context.get('img_input',{})}
+    params = {**self.assistant.gen_cfg(self.assistant_cfg_override), **context.get('img_input', {})}
     return await self.complete_with_chronicler(text, self.assistant, context, params, config.llm_max_assistant_tokens)
 
   async def chat(self, text, context):
@@ -56,12 +56,12 @@ class LargeLanguageModel:
     always_assist = config.llm_assistant_use_in_chat_mode and assistant_model_available(self.model)
     return is_reply_from_bot and (is_qa_format or always_assist) and config.llm_assistant_add_reply_context
 
-  def get_common_chat_attributes(self, message, additional={}):
+  def get_common_chat_attributes(self, message, additional=None):
     return {
       'author': message.from_user.first_name.replace(' ', '') or 'User',
       'chat_id': get_chat_id(message),
       'user_id': message.from_user.id,
-      **additional
+      **(additional or {})
     }
 
   def __init__(self, dp, bot):
@@ -114,7 +114,7 @@ class LargeLanguageModel:
           )
         else:
           output = await self.assist(msg, 
-            self.get_common_chat_attributes(message, {'img_imput': img_input})
+            self.get_common_chat_attributes(message, {'img_input': img_input})
           )
       if config.llm_assistant_use_in_chat_mode and not hasattr(command, 'command'):
         reply = html.quote(output)
