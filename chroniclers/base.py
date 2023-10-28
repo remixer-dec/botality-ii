@@ -62,7 +62,7 @@ class ConversationChronicler(AbstractChronicler):
     super().__init__(chronicler_filename)
     self.history = defaultdict(lambda: [])
     self.max_length = max_length
-    self.multiline_re = re.compile("[^\n:]+\:[^\n]+\n")
+    self.multiline_re = re.compile("[^\n:]+\:[^\n]+\n?")
 
   def get_author(self, vars, item):
     r_username = vars.get('replace_username', False)
