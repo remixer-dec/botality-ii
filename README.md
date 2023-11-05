@@ -16,6 +16,10 @@ Shipped with an easy-to-use webui, you can run commands and talk with the bot ri
 
 <img src="https://i.imgur.com/cnLXvTa.png" alt="preview" height="500">
 
+### Documentation
+
+You can find it [here](https://github.com/remixer-dec/botality-ii/wiki/Getting-started) (coming soon)
+
 ### Changelog
 Some versions have breaking changes, see [Changelog file](CHANGELOG.md) for more information
 
@@ -68,19 +72,18 @@ python3.10+ is recommended, due to aiogram compatibility, if you are experiencin
 #### Python/Pytorch backend  
 - [original llama](https://github.com/facebookresearch/llama/blob/main/example.py) (7b version was tested on [llama-mps fork](https://github.com/remixer-dec/llama-mps/tree/multimodal-adapter) for macs), requires running the bot with `python3.10 -m torch.distributed.launch --use_env bot.py`  
 assistant mode for original llama is available with [LLaMa-Adapter](https://github.com/ZrrSkywalker/LLaMA-Adapter), to use both chat and assistant mode, some changes[[1]](https://github.com/remixer-dec/llama-mps/commit/a9b319a927461e4d9b5d74789b3b4a079cb90620)[[2]](https://github.com/remixer-dec/llama-mps/commit/74e9734eefaba721d03974924d0a43175237f32c) are necessary for non-mac users.
-- [hf llama](https://huggingface.co/decapoda-research/llama-7b-hf/tree/main) by decapoda-research (outputs are way worse than original llama on mac) + [alpaca-lora](https://github.com/tloen/alpaca-lora) (outputs are ok) / [gpt4all-lora](https://github.com/nomic-ai/gpt4all#reproducibility) (outputs are ok) / [ru-turbo-alpaca-lora](https://huggingface.co/IlyaGusev/llama_7b_ru_turbo_alpaca_lora)
+- [hf llama](https://huggingface.co/decapoda-research/llama-7b-hf/tree/main) (tests outdated) + [alpaca-lora](https://github.com/tloen/alpaca-lora) / [ru-turbo-alpaca-lora](https://huggingface.co/IlyaGusev/llama_7b_ru_turbo_alpaca_lora)
 - [gpt-2](https://huggingface.co/gpt2) (tested on [ru-gpt3](https://github.com/ai-forever/ru-gpts)), nanoGPT (tested on [minChatGPT](https://github.com/ethanyanjiali/minChatGPT) [[weights](https://huggingface.co/ethanyanjiali/minChatGPT/blob/main/final_ppo_model_gpt2medium.pt)])
 - [gpt-j](https://github.com/kingoflolz/mesh-transformer-jax#gpt-j-6b) (tested on a custom model)
-- [Cerebras-GPT](https://github.com/Cerebras/modelzoo) (tested on 1.3B model)
   
 #### C++ / TVM backend  
-- [llama.cpp](https://github.com/abetlen/llama-cpp-python) (tested on vicuna-7b-1.1-q4_2, WizardLM-7B-uncensored.ggml.q5_1, Pygmalion-7b-4bit-Q5_1-GGML-V2, saiga13b-q4_1, Wizard-Vicuna-30B-Uncensored-GGML, Samantha-7B.ggmlv3.q5_0, airoboros-13b-ggml-q4_0, guanaco-13B.ggmlv3.q5_1)[[models](https://github.com/nomic-ai/gpt4all-chat#manual-download-of-models)] [[more models](https://huggingface.co/models?sort=downloads&search=ggml)]
+- [llama.cpp](https://github.com/abetlen/llama-cpp-python) (tested on a lot of models)[[models]](https://huggingface.co/models?sort=downloads&search=GGUF)]
 - [mlc-llm-chat](https://mlc.ai/mlc-llm/#windows-linux-mac) (tested using prebuilt binaries on demo-vicuna-v1-7b-int3 model, M1 GPU acceleration confirmed, integrated via [mlc-chatbot](https://github.com/XinyuSun/mlc-chatbot))
   
 #### Remote api backend  
 - [oobabooga webui](https://github.com/oobabooga/text-generation-webui/) 
 - [kobold.cpp](https://github.com/LostRuins/koboldcpp/) with the same `remote_ob` backend
-- [llama.cpp server](https://github.com/ggerganov/llama.cpp/tree/master/examples/server) with `remote_lcpp` llm backend option  
+- [llama.cpp server](https://github.com/ggerganov/llama.cpp/tree/master/examples/server) with `remote_lcpp` llm backend option (Obsidian model w/ multimodality tested)
 
 
 ### LLM Setup
@@ -98,7 +101,7 @@ assistant mode for original llama is available with [LLaMa-Adapter](https://gith
 - For llama.cpp: make sure that you have a c++ compiler, then put all necessary flags to enable GPU support, and install it `pip install llama-cpp-python`, download model weights and change the path in `llm_paths`.
 - For mlc-llm, follow the installation instructions from the docs, then clone [mlc-chatbot](https://github.com/XinyuSun/mlc-chatbot), and put 3 paths in `llm_paths`. Use with `llm_assistant_use_in_chat_mode=True` and with `raw` chronicler.  
 - For oobabooga webui and kobold.cpp, instead of specifying `llm_paths`, set `llm_host`, set `llm_active_model_type` to `remote_ob` and set the `llm_character` to one that has the same prompt format / preset as your model. Run the server with --api flag.
-- For llama.cpp c-server, start the server, set its URL in `llm_host` and set `llm_active_model_type` to `remote_lcpp`
+- For llama.cpp c-server, start the `./server`, set its URL in `llm_host` and set `llm_active_model_type` to `remote_lcpp`, for multimodality please refer to this [thread](https://www.reddit.com/r/LocalLLaMA/comments/17jus3h/obsidian_worlds_first_3b_multimodal_opensource_llm/)
   
   
 ### Bot commands
