@@ -19,6 +19,11 @@ class CoquiTTS(AbstractTTS):
     self.name = 'coqui_tts'
     self.voices = list(map(lambda item: item if isinstance(item, str) else item.get('voice'), config.tts_voices))
     self.authors = list(map(lambda item: None if isinstance(item, str) else item.get('author'), config.tts_voices))
+    self.voice_metamap = {
+      (item['voice'] if isinstance(item, dict) else item): 
+      ((item.get('lang', '**'), item.get('tone', '*'),) if isinstance(item, dict) else ('**', '*',)) 
+        for item in config.tts_voices
+    }
     self.system = False
     self.is_available = False
     if is_remote:

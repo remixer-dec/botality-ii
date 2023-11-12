@@ -14,6 +14,7 @@ class TextToSpeechModule:
     init_tts(allowRemote=config.tts_mode != 'local', threaded=config.threaded_initialization)
     self.sts_voices = list(sts_voicemap.keys())
     self.all_voices = list(tts_voicemap.keys())
+    self.voicemap = tts_voicemap
     non_system_voices = [v for v in self.all_voices if v not in system_voicemap]
     self.voices = self.all_voices if config.tts_list_system_voices else non_system_voices
 

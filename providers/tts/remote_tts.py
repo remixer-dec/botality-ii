@@ -10,6 +10,7 @@ class RemoteTTS(AbstractTTS):
     self.name = 'remote'
     self.voices = []
     self.authors = []
+    self.voice_metamap = {}
     self.system = False
   
   async def speak(self, voice, text):

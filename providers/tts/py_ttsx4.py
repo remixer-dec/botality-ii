@@ -22,6 +22,11 @@ class TTSx4(AbstractTTS):
       self.prefix = 'com.apple.speech.synthesis.voice.' if sys.platform == "darwin" else ''
       self.voices = [v.name for v in self.engine.getProperty('voices')]
       self.is_available = True
+      self.voice_metamap = {
+        v.name: 
+        (v.languages[0][:2], 'f' if v.gender == 'VoiceGenderFemale' else 'm' if v.gender == 'VoiceGenderMale' else '*',)
+          for v in self.engine.getProperty('voices')
+      }
     except Exception as e:
       logger.error(e)
 

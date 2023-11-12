@@ -16,17 +16,22 @@ logger = Logger('model_manager')
 bg_id = 0
 bg_cache = {}
 
+def transfer_kvs(source, allowed_keys, default_values):
+  transferred = {}
+  defaults = dict(enumerate(default_values))
+  for index, key in enumerate(allowed_keys):
+    value = source.get(key, defaults.get(index, None))
+    if value is not None:
+      transferred[key] = value
+  return transferred
+
 def get_models():
   models = {'TTS': {}}
   models['TTS']['SO_VITS_SVC'] = []
   for model in config.tts_so_vits_svc_voices:
     if os.path.exists(model.get('path', False)):
       models['TTS']['SO_VITS_SVC'].append({
-        "voice": model.get('voice'),
-        "model": model.get('weights'),
-        "author": model.get('author'),
-        "repo": model.get('repo'),
-        "path": model.get('path'),
+        **transfer_kvs(model, ['voice', 'weights', 'author', 'repo', 'path'], []),
         "size": round(os.path.getsize(os.path.join(model.get('path'), model.get("weights"))) / 1024**3,3)
       })
   models['TTS']['VITS'] = []
@@ -38,11 +43,7 @@ def get_models():
     path = os.path.join(model.get('path', config.tts_path), model.get('voice', v) + '.pth')
     if os.path.exists(path):
       models['TTS']['VITS'].append({
-        "voice": model.get('voice', v),
-        "model": model.get('model', v),
-        "path":  model.get('path', config.tts_path),
-        "author": model.get('author'),
-        "repo": model.get('repo'),
+        **transfer_kvs(model, ['voice', 'model', 'path', 'author', 'repo'], [v, v, config.tts_path]),
         "size": round(os.path.getsize(path) / 1024**3,3)
       }) 
   models['LLM'] = {}

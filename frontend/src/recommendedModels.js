@@ -7,7 +7,8 @@ const bajTTS = ['david', 'forsen', 'juice-wrld', 'obiwan', 'trump', 'xqc'].map((
     path: 'models/',
     size: 0.9,
     rename: false,
-    language: 'en'
+    lang: 'en',
+    tone: 'm'
   }
 })
 
@@ -29,9 +30,11 @@ const ymbbTTS = [
     path: '',
     size: 0.9,
     rename: true,
-    language: 'en'
+    lang: 'en',
+    tone: 'm'
   }
 })
+
 const prTTSModels = ['G_20000', 'G_157', 'G_480', 'G_449', 'G_50000', 'G_18500.pth']
 const prTTS = ['Biden20k', 'BillClinton', 'BorisJohnson', 'GeorgeBush', 'Obama50k', 'Trump18.5k'].map((x, i) => {
   return {
@@ -40,11 +43,14 @@ const prTTS = ['Biden20k', 'BillClinton', 'BorisJohnson', 'GeorgeBush', 'Obama50
     author: 'Nardicality',
     repo: 'Nardicality/so-vits-svc-4.0-models',
     path: `${x}/`,
-    size: 0.5
+    size: 0.5,
+    train_lang: 'en',
+    tone: 'm'
   }
 })
 
 const amoTTSModels = ['G_50000', 'G_100000', 'G_85000']
+const amoTones = ['f', 'f', 'm']
 const amoTTS = ['Glados_50k', 'Star-Trek-Computer', 'Boss_MGS_80k'].map((x, i) => {
   return {
     voice: x.replace(/_[0-9]+k|-/g, ''),
@@ -52,7 +58,9 @@ const amoTTS = ['Glados_50k', 'Star-Trek-Computer', 'Boss_MGS_80k'].map((x, i) =
     author: 'Amo',
     repo: 'Amo/so-vits-svc-4.0_GA',
     path: `ModelsFolder/${x}/`,
-    size: 0.5
+    size: 0.5,
+    train_lang: 'en',
+    tone: amoTones[i]
   }
 })
 
@@ -62,7 +70,9 @@ const tim = [{
   author: 'Sucial',
   repo: 'Sucial/so-vits-svc4.1-Tim_Cook',
   path: '',
-  size: 0.2
+  size: 0.2,
+  train_lang: 'en',
+  tone: 'm'
 }]
 
 const standardQuants = ['2_K', '3_K_L', '3_K_M', '3_K_S', '4_0', '4_K_M', '4_K_S', '5_0', '5_K_M', '5_K_S', '6_K', '8_0']
