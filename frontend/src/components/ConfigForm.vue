@@ -23,7 +23,7 @@ FvlSlider.mounted = [function () {
     <FvlForm :data="configObj" url="#/select " class="relative">
       <div v-for="option, idx in configObj" :key="idx" :class="`${idx} ${option.type}`">
         <span :aria-disabled="option.depends ? !option.depends(configObj) : false" class="relative inline-block w-full confbox">
-          <div class=" absolute top-0 right-2 text-gray-100 z-30 hint" :hint-content="locale.get(idx)">
+          <div class=" absolute top-0 right-2 text-gray-100 z-30 hover:z-40 hint" :hint-content="locale.get(idx)">
             <hi-bulb-off />
           </div>
           <FvlSwitch

@@ -15,6 +15,9 @@ const notification = ref(null)
 
 <style>
 @import '%/formvuelar/dist/formvuelar.css';
+html {
+  touch-action: manipulation;
+}
 svg {
   display: inline-block !important;
 }

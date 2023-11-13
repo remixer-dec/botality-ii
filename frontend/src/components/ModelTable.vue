@@ -41,7 +41,7 @@ function selectModel(modelConfig) {
   <table class=" w-full">
     <thead>
       <tr class="cursor-default">
-        <th v-for="header, index of props.headers" :key="index" class="text-left underline">
+        <th v-for="header, index of props.headers" :key="index" class="text-left underline text-xs align-top md:text-base">
           {{ header }}
         </th>
       </tr>
@@ -58,14 +58,14 @@ function selectModel(modelConfig) {
           <td v-if="model.selected" class=" cursor-default">
             <hi-check-circle />
           </td>
-          <td v-else class=" cursor-pointer" @click="selectModel(model)">
+          <td v-else class=" cursor-pointer text-center" @click="selectModel(model)">
             <hi-circle />
           </td>
         </div>
-        <td v-if="canBeInstalled" class=" cursor-pointer" @click="showInstallWindow(model)">
+        <td v-if="canBeInstalled" class=" cursor-pointer text-center" @click="showInstallWindow(model)">
           <hi-download-alt />
         </td>
-        <td v-else class=" cursor-pointer" @click="deleteModel(model)">
+        <td v-else class=" cursor-pointer text-center" @click="deleteModel(model)">
           <hi-trash />
         </td>
       </tr>
@@ -76,5 +76,11 @@ function selectModel(modelConfig) {
 <style scoped>
 tr:nth-child(even) {
   @apply bg-slate-100
+}
+th:last-child {
+  @apply text-center
+}
+td {
+  @apply text-xs md:text-base
 }
 </style>

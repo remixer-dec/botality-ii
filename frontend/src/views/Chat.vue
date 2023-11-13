@@ -125,8 +125,8 @@ const msgIterator = messageIterator()
           </div>
         </div>
       </div>
-      <div class="fixed bottom-4 left-0 w-full flex px-0 2xl:px-40">
-        <div class="w-full h-10 p-2 bg-white mx-8 rounded-lg flex items-center">
+      <div class="fixed bottom-1 sm:bottom-4 left-0 w-full flex px-0 2xl:px-40">
+        <div class="w-full h-10 p-2 bg-white mx-1 sm:mx-8 rounded-lg flex items-center">
           <div v-if="isProcessing" class="absolute text-gray-400 pointer-events-none">
             <div class="relative -top-10 animate-pulse">
               <span class="animate-spin inline-flex justify-center align-middle"><hi-spinner-earring /></span>
@@ -141,7 +141,7 @@ const msgIterator = messageIterator()
             @keydown.up="msg = msgIterator.next('up').value || msg"
             @keydown.down="msg = msgIterator.next('down').value || msg"
           >
-          <span class="button bg-main text-white text-2xl rounded-[50%] w-8 h-8 cursor-pointer hover:bg-cyan-600" @click="sendMessage">
+          <span class="button bg-main text-white text-2xl rounded-[50%] ml-2 w-8 h-8 cursor-pointer hover:bg-cyan-600 flex-shrink-0" @click="sendMessage">
             <hi-navigation />
           </span>
         </div>

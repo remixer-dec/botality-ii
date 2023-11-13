@@ -90,7 +90,7 @@ function showInstallWindow() {
 <template>
   <div class="w-full flex box-border flex-wrap justify-evenly flex-col">
     <div v-if="globalState.botIsRunning" class=" w-full flex flex-col">
-      <div class=" m-2 flex w-auto bg-white p-2 rounded-md relative">
+      <div class="m-2 flex w-auto bg-white p-2 rounded-md relative mt-16 sm:mt-0">
         <div>
           <div class="mb-2">
             {{ locale.model_manager_header }}

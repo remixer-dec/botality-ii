@@ -81,7 +81,7 @@ onUnmounted(() => {
       </div>
       <div>{{ locale.total_messages }}:</div><div>{{ stats?.counters?.msg }}</div>
     </div>
-    <div v-if="stats.memory_manager && globalState.botIsRunning" class="bg-white table p-2 mx-auto rounded-md w-full lg:w-1/2 ">
+    <div v-if="stats.memory_manager && globalState.botIsRunning" class="bg-white table p-2 mx-auto rounded-md w-full lg:w-1/2">
       <div v-for="item, name in stats.memory_manager" v-show="item" :key="name">
         <div class="w-full text-center p-1">
           {{ name }}
@@ -103,7 +103,7 @@ onUnmounted(() => {
             </span>
           </div>
         </div>
-        <div v-if="item && item.process" class="grid grid-cols-3 w-full my-2">
+        <div v-if="item && item.process" class="grid grid-cols-3 w-full my-2 legend">
           <div class=" border-l-20 border-gray-500 pl-2">
             {{ locale.total }}
           </div>
@@ -129,3 +129,9 @@ onUnmounted(() => {
     </small>
   </div>
 </template>
+
+<style scoped>
+.legend > div {
+  @apply break-words text-xs sm:text-base
+}
+</style>

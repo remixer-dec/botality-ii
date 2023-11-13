@@ -219,6 +219,12 @@ const envs = reactive({ value: 'Loading...', options: ['Loading...'] })
             :selected.sync="envs.value"
           />
         </FvlForm>
+        <span
+          v-show="globalState.botIsRunning"
+          class="text-gray-300 absolute right-0 text-sm max-w-[50px] sm:max-w-none sm:text-base break-words"
+        >
+          {{ envs.value }}
+        </span>
       </div>
       <ConfigForm slot="content" :config-obj="botConfig" />
     </FormWrapper>
