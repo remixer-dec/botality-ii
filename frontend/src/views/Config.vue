@@ -20,7 +20,7 @@ class ConfigItem {
     this.item = reactive({ value: null, options: null })
     switch (schema.type) {
       case 'boolean':
-        this.item.type = Boolean
+        this.item.type = 'bool'
         break
       case 'string':
         this.item.type = 'text'
@@ -51,6 +51,7 @@ class ConfigItem {
   }
 }
 
+const should_convert_to_string = new Set(['integer', 'number'])
 function syncConfigOption(target, option, config, schema) {
   const item = target[option]
   target[option] = item === undefined ? new ConfigItem(schema[option]).item : item
@@ -58,7 +59,7 @@ function syncConfigOption(target, option, config, schema) {
   const options = schema[option].enum || schema[option]?.items?.enum || target[option].options
   if (options)
     target[option].options = options.reduce(reductor, schema[option].type === 'array' ? [] : {})
-  target[option].value = schema[option].type === 'integer' ? String(config[option]) : config[option]
+  target[option].value = should_convert_to_string.has(schema[option].type) ? String(config[option]) : config[option]
 }
 
 function syncConfigOptions(options, target, config, schema) {
@@ -97,15 +98,15 @@ async function refreshData() {
 
 const botConfig = reactive({
   active_modules: { value: [], type: 'tags', options: [] },
-  threaded_initialization: { value: false, type: Boolean },
-  ignore_mode: { value: 'both', type: 'select', options: [] },
+  threaded_initialization: { value: false, type: 'bool' },
+  ignore_mode: { value: 'both', type: 'select', options: {} },
   adminlist: { value: [], type: 'freetags', subtype: 'number' },
   blacklist: { value: [], type: 'freetags', subtype: 'number', depends: o => o.ignore_mode.value !== 'whitelist' },
   whitelist: { value: [], type: 'freetags', subtype: 'number', depends: o => o.ignore_mode.value !== 'blacklist' }
 })
 
 const mmConfig = reactive({
-  mm_management_policy: { value: [], type: 'select', options: '' },
+  mm_management_policy: { value: [], type: 'select', options: {} },
   mm_autounload_after_seconds: { value: '0', step: 60, type: 'slider', min: 0, max: 3600 },
   mm_ram_cached_model_count_limit: { value: '10', type: 'slider', min: 0, max: 30 },
   mm_vram_cached_model_count_limit: { value: '10', type: 'slider', min: 0, max: 30 }
@@ -115,14 +116,14 @@ const isLLMBackendRemote = o => o.llm_backend.value.startsWith('remote')
 const isLLMRemoteAndAutoLaunchOn = o => isLLMBackendRemote(o) && o.llm_remote_launch_process_automatically.value
 const isLLMBackendLlamaCpp = o => o.llm_backend.value === 'llama_cpp'
 const llmConfig = reactive({
-  llm_backend: { value: '', type: 'select', options: [] },
-  llm_python_model_type: { value: '', type: 'select', options: [], depends: o => o.llm_backend.value.startsWith('py') },
+  llm_backend: { value: '', type: 'select', options: {} },
+  llm_python_model_type: { value: '', type: 'select', options: {}, depends: o => o.llm_backend.value.startsWith('py') },
   llm_character: { value: '', type: 'search-select', okey: 'full', ovalue: 'name', search: 'name', link: '/api/characters' },
   llm_max_tokens: { value: '0', type: 'slider', min: 2, max: 32768, step: 2, depends: isLLMBackendLlamaCpp },
   llm_max_assistant_tokens: { value: '0', type: 'slider', min: 2, max: 32768, step: 2, depends: isLLMBackendLlamaCpp },
   llm_host: { value: '', type: 'text', depends: isLLMBackendRemote },
   llm_remote_model_name: { value: '', type: 'text', depends: isLLMBackendRemote },
-  llm_remote_launch_process_automatically: { value: '', type: Boolean, depends: isLLMBackendRemote },
+  llm_remote_launch_process_automatically: { value: false, type: 'bool', depends: isLLMBackendRemote },
   llm_remote_launch_dir: { value: '', type: 'text', depends: isLLMRemoteAndAutoLaunchOn },
   llm_remote_launch_command: { value: '', type: 'text', depends: isLLMRemoteAndAutoLaunchOn },
   llm_remote_launch_waittime: { value: '', type: 'text', depends: isLLMRemoteAndAutoLaunchOn },
@@ -134,18 +135,18 @@ const llmConfig = reactive({
 const isSDAutoLaunchOn = o => o.sd_launch_process_automatically.value
 const sdConfig = reactive({
   sd_host: { value: '', type: 'text' },
-  sd_launch_process_automatically: { value: false, type: Boolean },
+  sd_launch_process_automatically: { value: false, type: 'bool' },
   sd_launch_command: { value: '', type: 'text', depends: isSDAutoLaunchOn },
   sd_launch_dir: { value: '', type: 'text', depends: isSDAutoLaunchOn },
-  sd_launch_waittime: { value: '', type: 'slider', depends: isSDAutoLaunchOn },
-  sd_default_width: { value: 512, type: 'slider', min: 128, max: 2048, step: 64 },
-  sd_default_height: { value: 512, type: 'slider', min: 128, max: 2048, step: 64 },
-  sd_max_resolution: { value: 1280, type: 'slider', min: 128, max: 2048, step: 64 },
-  sd_default_iti_denoising_strength: { value: 0.5, type: 'floatslider', min: 0.01, max: 1.01, step: 0.01 }
+  sd_launch_waittime: { value: '0', type: 'slider', depends: isSDAutoLaunchOn },
+  sd_default_width: { value: '512', type: 'slider', min: 128, max: 2048, step: 64 },
+  sd_default_height: { value: '512', type: 'slider', min: 128, max: 2048, step: 64 },
+  sd_max_resolution: { value: '1280', type: 'slider', min: 128, max: 2048, step: 64 },
+  sd_default_iti_denoising_strength: { value: '0.5', type: 'floatslider', min: 0.01, max: 1.01, step: 0.01 }
 })
 
 const ttsConfig = reactive({
-  tts_mode: { value: '', type: 'select', options: [] },
+  tts_mode: { value: '', type: 'select', options: {} },
   tts_enable_backends: { value: [], type: 'tags', options: [] },
   tts_host: { value: '', type: 'text', depends: o => o.tts_mode.value !== 'local' },
   tts_voices: { value: [], type: 'custom', link: '/models/TTS/VITS' },
@@ -153,11 +154,11 @@ const ttsConfig = reactive({
 })
 
 const sttConfig = reactive({
-  stt_backend: { value: '', type: 'select', options: [] }
+  stt_backend: { value: '', type: 'select', options: {} }
 })
 
 const ttaConfig = reactive({
-  tta_duration: { value: 3, type: 'slider' }
+  tta_duration: { value: '3', type: 'slider' }
 })
 
 function reportError(text) {
@@ -199,7 +200,7 @@ function itemChanged(name, value, meta) {
     })
     .catch(reportError)
 }
-const envs = reactive({ value: 'Loading...', options: ['Loading...'] })
+const envs = reactive({ value: 'Loading...', options: { loading: 'Loading...' } })
 </script>
 
 <template>

@@ -13,7 +13,7 @@ FvlSlider.mounted = [function () {
   if (this.$props.labelClass.startsWith('step:')) {
     const step = this.$props.labelClass.split(':')[1]
     this.$el.getElementsByTagName('input')[0].setAttribute('step', step)
-    this.$props.labelClass = ''
+    // this.$props.labelClass = ''
   }
 }]
 </script>
@@ -27,7 +27,7 @@ FvlSlider.mounted = [function () {
             <hi-bulb-off />
           </div>
           <FvlSwitch
-            v-if="option.type === Boolean"
+            v-if="option.type === 'bool'"
             class="relative"
             :label="idx"
             :name="idx"
@@ -57,6 +57,7 @@ FvlSlider.mounted = [function () {
           />
           <FvlSlider
             v-if="String(option.type).endsWith('slider')"
+            :title="option.value"
             :value.sync="option.value"
             :name="idx"
             :label="idx"
@@ -67,7 +68,6 @@ FvlSlider.mounted = [function () {
           <FvlTagSelect
             v-if="option.type === 'freetags'"
             :selected.sync="option.value"
-            options=""
             :search-keys="['value']"
             :allow-new="true"
             option-key="value"
