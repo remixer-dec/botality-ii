@@ -19,6 +19,7 @@ const processingPromises = ref([])
 const isProcessing = ref(false)
 const scrollable = ref(null)
 const proxyRef = ref(null)
+
 function getBotReply(text) {
   const msg = { text }
   isProcessing.value = true
@@ -83,6 +84,7 @@ function sendMessage() {
   )
   getBotReply(msg.value)
   msg.value = ''
+  shoudResetIteratorIndex.value = true
   scrollToBottom()
 }
 
@@ -99,6 +101,7 @@ function* messageIterator() {
   while (true) {
     const direction = yield (index >= 0 && index < history.value.length ? history.value[index].text : '')
     if (history.value.length === 0) continue
+    index = shoudResetIteratorIndex.value ? history.value.length - 1 : index
     if (direction === 'down')
       index = (index + 1) % history.value.length
 
@@ -107,23 +110,31 @@ function* messageIterator() {
   }
 }
 const msgIterator = messageIterator()
+const shoudResetIteratorIndex = ref(false)
+
+function smoothScroll(e) {
+  e.parentElement.scrollIntoView({
+    behavior: 'smooth',
+    block: 'end'
+  })
+}
 </script>
 
 <template>
   <div>
     <div v-if="globalState.botIsRunning" class="flex flex-col relative h-screen p-8 w-full pb-12 2xl:px-48">
       <div ref="scrollable" class="w-full mb-10 h-full box-border overflow-y-auto">
-        <div class="flex flex-col justify-end">
+        <transition-group name="new_message" tag="div" class="flex flex-col justify-end" @after-enter="smoothScroll">
           <div v-for="message, index in formattedHistory" :key="index" class="message" :class="{ 'message-bot': message.fromBot }">
             <div v-if="message.photos">
-              <img v-for="photo, index in message.photos" :key="index" :src="photo">
+              <img v-for="photo, idx in message.photos" :key="idx" :src="photo">
             </div>
             <div v-if="message.text" @click="messageClickHandler" v-html="message.text" />
             <div v-if="message.voice">
               <audio controls :src="message.voice" />
             </div>
           </div>
-        </div>
+        </transition-group>
       </div>
       <div class="fixed bottom-1 sm:bottom-4 left-0 w-full flex px-0 2xl:px-40">
         <div class="w-full h-10 p-2 bg-white mx-1 sm:mx-8 rounded-lg flex items-center">
@@ -168,6 +179,35 @@ const msgIterator = messageIterator()
 }
 audio {
   -webkit-filter: brightness(2)
+}
+
+.new_message-enter-active, .new_message-leave-active {
+  transition: all .4s, margin-left .3s, padding-right .2s;
+}
+.new_message-enter-active.message.message-bot, .new_message-leave-active.message.message-bot,
+.new_message-enter-active.message.message-bot div, .new_message-leave-active.message.message-bot div {
+  transition-delay: .2s;
+}
+.new_message-enter, .new_message-leave-to {
+  opacity: 0;
+  transform: translateY(4px);
+  padding-right: 0;
+  position: relative;
+}
+
+.new_message-enter.message.message-bot, .new_message-leave-to.message.message-bot {
+  margin-left: -4px;
+  padding-right: auto;
+}
+
+.new_message-enter-active div, .new_message-leave-active div {
+  transition: all .5s;
+  overflow: hidden;
+  position: relative;
+}
+.new_message-enter div,.new_message-leave-to div {
+  opacity: 0;
+  transform: translateY(-4px);
 }
 </style>
 
