@@ -12,7 +12,7 @@ import locale from '../locale'
         alt="hero"
         src="@/assets/not-found.svg"
       >
-      <div class="w-full text-center lg:w-2/3">
+      <div v-once class="w-full text-center lg:w-2/3">
         <h2>404</h2>
         <p class="mb-8 leading-relaxed dark:text-gray-300">
           {{ locale.page404 }}

@@ -38,8 +38,10 @@ onUnmounted(() => {
         :class="{ 'text-glow': textGlow, 'selected-route': isCurrentPathSelected(item) }"
         :to="item.basePath"
       >
-        <component :is="item.icon" class="align-text-bottom mr-4 text-xl" />
-        {{ item.name }}
+        <span v-once>
+          <component :is="item.icon" class="align-text-bottom mr-4 text-xl" />
+          {{ item.name }}
+        </span>
       </RouterLink>
     </span>
     <div class="absolute w-full bottom-0 left-0 bg-main bg-opacity-20" @click="toggleBot">

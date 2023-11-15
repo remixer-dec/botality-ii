@@ -126,11 +126,11 @@ function smoothScroll(e) {
       <div ref="scrollable" class="w-full mb-10 h-full box-border overflow-y-auto">
         <transition-group name="new_message" tag="div" class="flex flex-col justify-end" @after-enter="smoothScroll">
           <div v-for="message, index in formattedHistory" :key="index" class="message" :class="{ 'message-bot': message.fromBot }">
-            <div v-if="message.photos">
+            <div v-if="message.photos" v-once>
               <img v-for="photo, idx in message.photos" :key="idx" :src="photo">
             </div>
-            <div v-if="message.text" @click="messageClickHandler" v-html="message.text" />
-            <div v-if="message.voice">
+            <div v-if="message.text" v-once @click="messageClickHandler" v-html="message.text" />
+            <div v-if="message.voice" v-once>
               <audio controls :src="message.voice" />
             </div>
           </div>
@@ -139,7 +139,7 @@ function smoothScroll(e) {
       <div class="fixed bottom-1 sm:bottom-4 left-0 w-full flex px-0 2xl:px-40">
         <div class="w-full h-10 p-2 bg-white mx-1 sm:mx-8 rounded-lg flex items-center">
           <div v-if="isProcessing" class="absolute text-gray-400 pointer-events-none">
-            <div class="relative -top-10 animate-pulse">
+            <div v-once class="relative -top-10 animate-pulse">
               <span class="animate-spin inline-flex justify-center align-middle"><hi-spinner-earring /></span>
               {{ locale.processing }}
             </div>

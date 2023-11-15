@@ -92,7 +92,7 @@ function showInstallWindow() {
     <div v-if="globalState.botIsRunning" class=" w-full flex flex-col">
       <div class="m-2 flex w-auto bg-white p-2 rounded-md relative mt-16 sm:mt-0">
         <div>
-          <div class="mb-2">
+          <div v-once class="mb-2">
             {{ locale.model_manager_header }}
             <div class="bg-main p-2 text-white rounded-md absolute right-2 top-2 cursor-pointer" @click="showInstallWindow">
               {{ locale.install_model }}
@@ -107,7 +107,7 @@ function showInstallWindow() {
       </div>
 
       <div class=" m-2 flex flex-col bg-white w-auto p-2 rounded-md">
-        <div class="mb-2">
+        <div v-once class="mb-2">
           {{ locale.installed_models }}
         </div>
         <ModelTable
@@ -120,7 +120,7 @@ function showInstallWindow() {
           :can-be-selected="subMenuSelectedItem === 'GGUF'"
           :model-type="subMenuSelectedItem"
         />
-        <div class="mt-8 mb-2">
+        <div v-once class="mt-8 mb-2">
           {{ locale.recommended_models }}
         </div>
         <ModelTable

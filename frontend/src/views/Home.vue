@@ -39,16 +39,22 @@ onUnmounted(() => {
 <template>
   <div class="w-full flex box-border flex-wrap justify-evenly flex-col min-h-screen">
     <div class="bg-white w-full p-2 grid grid-cols-2 mx-auto mb-4 rounded-md lg:w-1/2">
-      <div>{{ locale.bot }}: </div>
+      <div v-once>
+        {{ locale.bot }}:
+      </div>
       <div v-if="stats.bot">
         <a :href="`tg://resolve?domain=${stats.bot.username}`">{{ stats.bot.name }} (@{{ stats.bot.username }})</a>
       </div>
       <div v-else>
         -
       </div>
-      <div>{{ locale.status }}:</div>
+      <div v-once>
+        {{ locale.status }}:
+      </div>
       <div>{{ locale.get(globalState.botIsRunning ? 'started' : 'stopped') }}</div>
-      <div>{{ locale.flags }}: </div>
+      <div v-once>
+        {{ locale.flags }}:
+      </div>
       <div v-if="stats.bot">
         <span v-if="stats.bot.can_join_groups" :title="locale.get('can_join_groups')">[G]</span>
         <span v-else :title="locale.get('cannot_join_groups')" class="text-orange">[G]</span>
@@ -58,7 +64,9 @@ onUnmounted(() => {
       <div v-else>
         -
       </div>
-      <div>{{ locale.access_mode }}:</div>
+      <div v-once>
+        {{ locale.access_mode }}:
+      </div>
       <div v-if="stats.access_mode">
         <span v-if="stats.access_mode !== 'whitelist'">blacklist</span>
         <span v-if="stats.access_mode === 'both'">+</span>
@@ -67,23 +75,29 @@ onUnmounted(() => {
       <div v-else>
         -
       </div>
-      <div>{{ locale.main_active_modules }}:</div>
+      <div v-once>
+        {{ locale.main_active_modules }}:
+      </div>
       <div>
         <div v-for="module, index in stats.modules" :key="index" class="pr-4">
           {{ module }} ({{ stats.timings[module] }}s)
         </div>
       </div>
-      <div>{{ locale.uptime }}:</div>
+      <div v-once>
+        {{ locale.uptime }}:
+      </div>
       <div>
         <span v-show="stats.timings.start">
           {{ uptime }} {{ locale.seconds }}
         </span>
       </div>
-      <div>{{ locale.total_messages }}:</div><div>{{ stats?.counters?.msg }}</div>
+      <div v-once>
+        {{ locale.total_messages }}:
+      </div><div>{{ stats?.counters?.msg }}</div>
     </div>
     <div v-if="stats.memory_manager && globalState.botIsRunning" class="bg-white table p-2 mx-auto rounded-md w-full lg:w-1/2">
       <div v-for="item, name in stats.memory_manager" v-show="item" :key="name">
-        <div class="w-full text-center p-1">
+        <div v-once class="w-full text-center p-1">
           {{ name }}
         </div>
         <div class=" bg-gray-500 w-full h-10">
@@ -104,10 +118,10 @@ onUnmounted(() => {
           </div>
         </div>
         <div v-if="item && item.process" class="grid grid-cols-3 w-full my-2 legend">
-          <div class=" border-l-20 border-gray-500 pl-2">
+          <div v-once class=" border-l-20 border-gray-500 pl-2">
             {{ locale.total }}
           </div>
-          <div class=" border-l-20 border-main pl-2">
+          <div v-once class=" border-l-20 border-main pl-2">
             {{ locale.consumed }}
           </div>
           <div v-if="item.process" class=" border-l-20 border-cyan-600 pl-2">
@@ -115,7 +129,7 @@ onUnmounted(() => {
           </div>
         </div>
         <div v-if="item && item.cache && item.cache.length > 0" class="mt-4 ">
-          <span class="p-2 mr-4">
+          <span v-once class="p-2 mr-4">
             {{ locale.cache }}:
           </span>
           <span v-for="cached, idx in item.cache" :key="idx" class=" bg-main p-2 m-1 ml-0 text-white inline-block cursor-default">

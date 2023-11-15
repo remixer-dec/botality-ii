@@ -1,5 +1,6 @@
 <script setup>
 import { globalState } from '../state'
+import locale from '../locale'
 
 const props = defineProps(['message'])
 </script>
@@ -15,6 +16,8 @@ const props = defineProps(['message'])
     <div v-else class="animate-ping">
       <hi-wifi />
     </div>
-    {{ props.message || '' }}
+    <span class="mt-2">
+      {{ globalState.botStateLocked ? locale.initializing : props.message || '' }}
+    </span>
   </div>
 </template>
