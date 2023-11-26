@@ -7,6 +7,7 @@ __pycache__/
 frontend/*.zip
 frontend/*.env
 frontend/package-lock.json
+extensions/private*
 
 # C extensions
 *.so

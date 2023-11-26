@@ -1,4 +1,4 @@
-from pydantic import SecretStr, validator
+from pydantic import SecretStr, validator, constr
 try:
   from pydantic_settings import BaseSettings
 except ImportError:
@@ -99,6 +99,8 @@ class Settings(BaseSettings):
   sys_api_host: str
   sys_request_timeout: int
   sys_api_log_level: str
+  lang: constr(min_length=2, max_length=2, to_lower=True)
+  extensions_config: Dict
   
   @validator('sd_max_resolution', 'sd_default_width', 'sd_default_height', allow_reuse=True)
   def resolution_in_correct_ranges(cls, v):

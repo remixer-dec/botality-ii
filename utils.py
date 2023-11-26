@@ -98,3 +98,9 @@ def update_env(path, key, value):
 async def download_audio(bot, file_id, dl_path):
   file_path = (await bot.get_file(file_id=file_id)).file_path
   await bot.download_file(file_path, dl_path)
+
+def raise_rail_exceptions(error, data):
+  if error:
+    raise Exception(error)
+  else:
+    return data

@@ -1,4 +1,4 @@
-from dotenv import dotenv_values
+from dotenv import dotenv_values, load_dotenv
 from utils import cprint
 import os
 import sys
@@ -35,7 +35,10 @@ def verify_environment():
     'sd_available_loras', 
     'tts_so_vits_svc_code_path',
     'tts_enable_so_vits_svc',
-    'tts_so_vits_svc_base_tts_provider'
+    'tts_so_vits_svc_base_tts_provider',
+    'lang_main',
+    'stt_autoreply_mode',
+    'stt_autoreply_voice'
   ]
   DEPRECATED_KVS = {
     'llm_assistant_chronicler': ['gpt4all', 'minchatgpt', 'alpaca'],
@@ -58,3 +61,4 @@ def verify_environment():
   
   check_new_keys_in_example_env()
   check_deprecated_keys_in_dotenv()
+  load_dotenv(env_filename, override=True)

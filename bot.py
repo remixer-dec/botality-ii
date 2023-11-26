@@ -13,6 +13,7 @@ from modules.admin import AdminModule
 from modules.llm import LargeLanguageModel
 from modules.tta import TextToAudioModule
 from modules.stt import SpeechToTextModule
+from modules.extensions import ExtensionsModule
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +32,8 @@ available_modules = {
   "tta": TextToAudioModule,
   "stt": SpeechToTextModule,
   "admin": AdminModule,
-  "llm": LargeLanguageModel
+  "llm": LargeLanguageModel,
+  "extensions": ExtensionsModule
 }
 
 def load_module(dp, bot, module):
@@ -56,6 +58,9 @@ def initialize(dp, bot, threaded=True):
       threads.append(thread)
   for thread in threads:
     thread.join(config.sys_request_timeout)
+  # initialize extensions after all the other modules
+  dp.timings['last'] = time.time()
+  load_module(dp, bot, 'extensions')
 
 def main(api=False):
   bot = Bot(token=config.bot_token.get_secret_value(), parse_mode="HTML")
