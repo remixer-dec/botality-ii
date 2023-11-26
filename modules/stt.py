@@ -53,14 +53,16 @@ class SpeechToTextModule:
 
   async def recognize_voice_message(self, message):
     with tempfile.NamedTemporaryFile(suffix='.ogg', delete=False) as temp_file:
+      if not message.voice and (not (message.reply_to_message or message.reply_to_message.voice)):
+        return 'Source audio not found', None
       voice = message.reply_to_message.voice if not message.voice else message.voice
       await download_audio(self.bot, voice.file_id, temp_file.name)
-      wrapped_runner = semaphore_wrapper(self.semaphore, self.recognize)
-      error, data = await wrapped_runner(temp_file.name)
+      error, data = await self.recognize(temp_file.name)
       return error, data
 
   async def recognize(self, audio_path):
-    return await self.model.recognize(audio_path)
+    wrapped_runner = semaphore_wrapper(self.semaphore, self.model.recognize)
+    return await wrapped_runner(audio_path)
 
   def help(self, dp, bot):
     return f"<b>[Speech-to-text]</b> Usage: /stt@{bot._me.username} *voice_message*"

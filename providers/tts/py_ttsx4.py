@@ -24,8 +24,11 @@ class TTSx4(AbstractTTS):
       self.is_available = True
       self.voice_metamap = {
         v.name: 
-        (v.languages[0][:2], 'f' if v.gender == 'VoiceGenderFemale' else 'm' if v.gender == 'VoiceGenderMale' else '*',)
-          for v in self.engine.getProperty('voices')
+        {
+          "lang": v.languages[0][:2], 
+          "tone": 'f' if v.gender == 'VoiceGenderFemale' else 'm' if v.gender == 'VoiceGenderMale' else '*'
+        }
+        for v in self.engine.getProperty('voices')
       }
     except Exception as e:
       logger.error(e)

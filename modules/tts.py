@@ -15,8 +15,8 @@ class TextToSpeechModule:
     self.sts_voices = list(sts_voicemap.keys())
     self.all_voices = list(tts_voicemap.keys())
     self.voicemap = tts_voicemap
-    non_system_voices = [v for v in self.all_voices if v not in system_voicemap]
-    self.voices = self.all_voices if config.tts_list_system_voices else non_system_voices
+    self.non_system_voices = [v for v in self.all_voices if v not in system_voicemap]
+    self.voices = self.all_voices if config.tts_list_system_voices else self.non_system_voices
 
     @dp.message(Command(commands=["tts", *self.all_voices]), flags={"long_operation": "record_audio"})
     async def command_tts_handler(message: Message, command: CommandObject) -> None:
@@ -28,12 +28,10 @@ class TextToSpeechModule:
 
           voice = command.command
           text = str(command.args)
-          wrapped_runner = semaphore_wrapper(self.semaphore, tts)
-          error, data = await wrapped_runner(voice, text)
+          error, audio = await self.speak(voice, text)
           if error:
             return await message.answer(f"Error, <b>{error}</b>")
           else:
-            audio = BufferedInputFile(convert_to_ogg(data), 'tts.ogg')
             return await message.answer_voice(voice=audio)
     
     if 'so_vits_svc' in config.tts_enable_backends:
@@ -58,6 +56,26 @@ class TextToSpeechModule:
         return await message.answer("No audio found. Use this command replying to voice messages")
 
     bot.reply_tts = command_tts_handler
+
+  async def speak(self, voice, text):
+    wrapped_runner = semaphore_wrapper(self.semaphore, tts)
+    error, data = await wrapped_runner(voice, text)
+    if data:
+      #TODO: async conversion
+      audio = BufferedInputFile(convert_to_ogg(data), 'tts.ogg')
+      return None, audio
+    return error, None
+  
+  def get_specific_voices(self, language='**', tone='*', allow_system=False):
+    return [
+        voice
+        for voice, voice_info in self.voicemap.items()
+        if (
+            (allow_system or voice in self.non_system_voices)
+            and (language == '**' or voice_info.voice_metamap[voice].get('lang', '**') in ('**', language))
+            and (tone == '*' or voice_info.voice_metamap[voice].get('tone', '*') in ('*', tone))
+        )
+    ]
   
   def should_print_help(self, command, message):
     if command.command == "tts" \

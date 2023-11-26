@@ -23,14 +23,14 @@ class Say(AbstractTTS):
     ]
     self.voice_metamap = dict(zip(
       self.voices,
-      [
+      [{"lang": lang, "tone": tone} for lang, tone in [
         ('en','m'), ('it','f'), ('sv','f'), ('fr','f'), ('de','f'), ('he','f'), ('id','f'), ('en','m'), ('es','m'),
         ('nl','f'), ('en','f'), ('en','m'), ('ro','f'), ('pt','f'), ('es','m'), ('es','m'), ('th','f'), ('en','f'),
         ('ja','f'), ('sk','f'), ('hi','f'), ('it','m'), ('pt','f'), ('ar','m'), ('hu','f'), ('zh','f'),
         ('el','f'), ('ru','f'), ('en','f'), ('es','f'), ('nb','f'), ('es','f'), ('en','m'), ('en','f'),
         ('da','f'), ('fi','f'), ('zh','f'), ('en','m'), ('fr','m'), ('zh','f'), ('en','f'), ('en','f'), 
         ('nl','m'), ('tr','f'), ('ko','f'), ('ru','m'), ('pl','f'), ('cs','f')
-      ]
+      ]]
     ))
 
   def _speak(self, voice, text):

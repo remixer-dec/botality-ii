@@ -21,8 +21,8 @@ class CoquiTTS(AbstractTTS):
     self.authors = list(map(lambda item: None if isinstance(item, str) else item.get('author'), config.tts_voices))
     self.voice_metamap = {
       (item['voice'] if isinstance(item, dict) else item): 
-      ((item.get('lang', '**'), item.get('tone', '*'),) if isinstance(item, dict) else ('**', '*',)) 
-        for item in config.tts_voices
+      item if isinstance(item, dict) else {}
+      for item in config.tts_voices
     }
     self.system = False
     self.is_available = False
@@ -57,7 +57,7 @@ class CoquiTTS(AbstractTTS):
   async def speak(self, voice, text):
     try:
       with ThreadPoolExecutor():
-        wav_file_path = await asyncio.to_thread(self._speak, voice, text + '.')
+        wav_file_path = await asyncio.to_thread(self._speak, voice, text.rstrip('.') + '.')
       return False, wav_file_path
     except Exception as e:
       return str(e), None 
