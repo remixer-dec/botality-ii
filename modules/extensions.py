@@ -8,13 +8,23 @@ logger = logging.getLogger(__name__)
 class ExtensionsModule:
   def __init__(self, dp, bot):
     dp.extensions = {}
-    if not (os.path.exists('extensions')):
-      os.makedirs('extensions')
-    extension_files = [f for f in os.listdir('extensions') if not f.startswith('_')]
+    self.dir = 'extensions'
+    if not (os.path.exists(self.dir)):
+      os.makedirs(self.dir)
+    self.load_from_dir(self.dir, dp, bot)
+  
+  def load_from_dir(self, exdir, dp, bot):
+    extension_files = [f for f in os.listdir(exdir) if not f.startswith('_') and f.endswith('.py')]
+    extension_dirs = [f for f in os.listdir(exdir) if os.path.isdir(os.path.join(exdir, f))]
+    for dir in extension_dirs:
+      dir_ext_path = os.path.join(dir, 'extension.py')
+      if os.path.exists(os.path.join(exdir, dir_ext_path)):
+        extension_files.append(dir_ext_path)
+    
     active_module_set = set(config.active_modules)
     try:
       for filename in extension_files:
-        imported_extension = importlib.import_module('extensions.' + filename.replace('.py', ''))
+        imported_extension = importlib.import_module(exdir + '.' + filename.replace(os.path.sep, '.').replace('.py', ''))
         ext = imported_extension.extension
         if set(ext.dependencies).issubset(active_module_set):
           dp.extensions[ext.name] = ext(dp, bot)

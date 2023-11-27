@@ -1,5 +1,6 @@
 <script setup>
-import { watchThrottled } from '@vueuse/core'
+import { watchDebounced } from '@vueuse/core'
+import { set } from 'vue'
 import { api } from '../tools'
 import { globalState } from '../state'
 import { FvlSelect, FvlForm } from '@/libs/formvuelar'
@@ -17,7 +18,7 @@ const reductor = (pr, cur) => {
 
 class ConfigItem {
   constructor(schema) {
-    this.item = reactive({ value: null, options: null })
+    this.item = reactive({ value: null, options: null, toJSON: () => this.item.value })
     switch (schema.type) {
       case 'boolean':
         this.item.type = 'bool'
@@ -52,9 +53,10 @@ class ConfigItem {
 }
 
 const should_convert_to_string = new Set(['integer', 'number'])
+
 function syncConfigOption(target, option, config, schema) {
   const item = target[option]
-  target[option] = item === undefined ? new ConfigItem(schema[option]).item : item
+  set(target, option, item === undefined ? new ConfigItem(schema[option]).item : item)
 
   const options = schema[option].enum || schema[option]?.items?.enum || target[option].options
   if (options)
@@ -89,6 +91,10 @@ async function refreshData() {
   syncConfigOptions('tts_', ttsConfig, config, schema.properties)
   syncConfigOptions('stt_', sttConfig, config, schema.properties)
   syncConfigOptions('tta_', ttaConfig, config, schema.properties)
+  syncConfigOptions('', extensionsConfig, config.extensions_config,
+    new Proxy(config.extensions_config, { get: (_, key) => ({ type: 'object' }) })
+  )
+
   envs.options = env.response.all.reduce(reductor, {})
   envs.value = env.response.active
   setTimeout(() => {
@@ -161,6 +167,8 @@ const ttaConfig = reactive({
   tta_duration: { value: '3', type: 'slider' }
 })
 
+const extensionsConfig = reactive({})
+
 function reportError(text) {
   proxy.$root.$emit('showNotification', { message: text, type: 'error' })
 }
@@ -170,7 +178,12 @@ refreshData().then(() => {
   const allConfigs = { ...mmConfig, ...llmConfig, ...botConfig, ...sdConfig, ...ttsConfig, ...ttaConfig, ...sttConfig }
 
   for (const item in allConfigs)
-    watchThrottled(() => allConfigs[item].value, v => itemChanged(item, v, allConfigs[item]), { deep: true, throttle: 1000 })
+    watchDebounced(() => allConfigs[item].value, v => itemChanged(item, v, allConfigs[item]), { deep: true, debounce: 600 })
+
+  for (const item in extensionsConfig) {
+    watchDebounced(() => extensionsConfig[item].value,
+      () => itemChanged('extensions_config', extensionsConfig, {}), { deep: true, debounce: 600 })
+  }
 
   watch(envs, (e) => {
     if (!isRefreshing) {
@@ -270,6 +283,13 @@ const envs = reactive({ value: 'Loading...', options: { loading: 'Loading...' } 
         Text-to-Speech
       </div>
       <ConfigForm slot="content" :config-obj="ttsConfig" />
+    </FormWrapper>
+    <FormWrapper>
+      <div slot="header">
+        <hi-package class=" align-sub" />
+        Extensions
+      </div>
+      <ConfigForm slot="content" :config-obj="extensionsConfig" />
     </FormWrapper>
   </div>
 </template>

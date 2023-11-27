@@ -10,13 +10,10 @@ const itemsHidden = ref(true)
 const editableItemName = ref('')
 const editableKey = ref('')
 const editableValue = ref('')
-const editableType = ref('String')
-const typeOptions = {
-  String: 'string',
-  Boolean: 'bool',
-  parseInt: 'int',
-  parseFloat: 'float'
-}
+const editableType = ref('string')
+// eslint-disable-next-line no-sequences
+const typeOptions = ['string', 'boolean', 'number'].reduce((acc, type) => (acc[type] = type, acc), {})
+const typeParsers = { string: String, boolean: v => v === 'true', number: v => v % 1 === 0 ? parseInt(v) : parseFloat(v) }
 
 function openEditor(key) {
   editableKey.value = ''
@@ -28,10 +25,10 @@ function saveKV(key, obj) {
   if (key !== editableKey.value)
     delete obj[key]
 
-  Vue.set(obj, editableKey.value, editableValue.value)
+  Vue.set(obj, editableKey.value, typeParsers[editableType.value](editableValue.value))
   editableItemName.value = ''
   editableKey.value = ''
-  editableType.value = 'String'
+  editableType.value = 'string'
   emit('change', props.name, obj)
 }
 function addNewItem(obj) {
@@ -65,15 +62,18 @@ function deleteItem(key, obj) {
     </div>
     <div v-else class="bg-slate-200 bg-opacity-20 rounded-md m-2 overflow-hidden">
       <div v-for="value, key in props.obj" :key="key" class="relative grid overflow-hidden">
-        <span class="px-2 bg-slate-300 text-white">{{ key }}
+        <span class="px-2 bg-slate-300 text-white" :class="{ 'bg-[#6cb5b3]': key === editableItemName }">{{ key }}
           <span class="float-right">
-            <span class="cursor-pointer" @click="openEditor(key)"><hi-pencil /></span>
+            <span class="cursor-pointer" @click="openEditor(key)">
+              <span v-if="!editableItemName || editableItemName !== key"><hi-pencil /></span>
+              <span v-else><hi-ban /></span>
+            </span>
             <span class="cursor-pointer" @click="deleteItem(key, props.obj)"><hi-trash /></span>
           </span>
         </span>
         <pre v-if="key !== editableItemName" class="p-2 overflow-x-auto text-gray-600">{{ value }}</pre>
         <span v-else>
-          <div v-if="editableKey === ''" :set="[editableKey, editableValue] = [key, value]" />
+          <div v-if="editableKey === ''" :set="[editableKey, editableValue, editableType] = [key, String(value), typeof value]" />
           <FvlInput
             label="key"
             name="key"
@@ -86,7 +86,7 @@ function deleteItem(key, obj) {
             name="value"
             type="text"
             :value.sync="editableValue"
-            :placeholder="value"
+            :placeholder="String(value)"
           />
           <FvlSelect
             label="type"
@@ -96,10 +96,10 @@ function deleteItem(key, obj) {
             :selected.sync="editableType"
             class="w-full"
           />
-          <div class="fvl-submit-button bg-slate-300 cursor-pointer rounded-none mb-2" @click="saveKV(key, props.obj)">OK</div>
+          <div class="fvl-submit-button bg-opacity-70 cursor-pointer rounded-none mb-2" @click="saveKV(key, props.obj)">OK</div>
         </span>
       </div>
-      <div v-if="editableItemName !== '<NEW_ITEM_NAME>'" class="min-h-6">
+      <div v-if="editableItemName === ''" class="min-h-6">
         <span class="px-2 bg-slate-300 text-white float-right cursor-pointer" @click="addNewItem(props.obj)">{{ locale.add_new_config_item }}</span>
       </div>
     </div>
