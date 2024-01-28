@@ -1,3 +1,4 @@
+# reference: https://github.com/ggerganov/llama.cpp/blob/master/examples/server/README.md
 import logging
 from config_reader import config
 from providers.llm.remote_ob import RemoteLLM

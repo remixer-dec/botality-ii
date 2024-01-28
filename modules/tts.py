@@ -6,6 +6,7 @@ from config_reader import config
 from utils import download_audio
 import asyncio
 import tempfile
+import re
 
 class TextToSpeechModule:
   def __init__(self, dp, bot):
@@ -58,6 +59,7 @@ class TextToSpeechModule:
     bot.reply_tts = command_tts_handler
 
   async def speak(self, voice, text):
+    text = self.correctPronunciation(text)
     wrapped_runner = semaphore_wrapper(self.semaphore, tts)
     error, data = await wrapped_runner(voice, text)
     if data:
@@ -92,3 +94,10 @@ Use the commands like /command@{bot._me.username}
 [Speech-to-speech] /revoice %voice% *voice_message*
 {config.tts_credits} {', '.join(list(tts_authors))}
 '''
+
+  def correctPronunciation(self, text):
+    '''replaces unnecessary and poorly pronounced text for better tts experience'''
+    for key in config.tts_replacements:
+      text = text.replace(key, config.tts_replacements[key])
+    text = re.sub(r'http\S+|www\.\S+', '', text)
+    return text

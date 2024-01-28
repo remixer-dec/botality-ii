@@ -22,11 +22,14 @@ class ExtensionsModule:
         extension_files.append(dir_ext_path)
     
     active_module_set = set(config.active_modules)
-    try:
-      for filename in extension_files:
+    for filename in extension_files:
+      try:
+        logger.info("loading extension: " + filename)
         imported_extension = importlib.import_module(exdir + '.' + filename.replace(os.path.sep, '.').replace('.py', ''))
+        assert hasattr(imported_extension, "extension"), "Extension must have 'extension' variable"
+        assert hasattr(imported_extension.extension, "name"), "Extension must have a name"
         ext = imported_extension.extension
         if set(ext.dependencies).issubset(active_module_set):
           dp.extensions[ext.name] = ext(dp, bot)
-    except Exception as e:
-      logger.error(type(e).__name__ +  ': ' + str(e) + '\n' + traceback.format_exc())
+      except Exception as e:
+        logger.error(f"error loading extension {filename}\n{type(e).__name__}:{str(e)}\n{traceback.format_exc()}")

@@ -37,12 +37,12 @@ class Say(AbstractTTS):
     tmp_path_aiff = tempfile.TemporaryDirectory().name + 'record.aif'
     tmp_path_wav = tmp_path_aiff.replace('.aif', '.wav')
     subprocess.run(
-      ['say','-v', voice,  '-o', tmp_path_aiff, text],
+      ['say','-v', voice,  '-o', tmp_path_aiff, text], 
+      timeout=30
     )
     subprocess.run([
       config.tts_ffmpeg_path, '-y', '-i', tmp_path_aiff, tmp_path_wav],
-      stdout=subprocess.DEVNULL,
-      stderr=subprocess.STDOUT
+      timeout=30
     )
     os.unlink(tmp_path_aiff)
     return tmp_path_wav

@@ -73,7 +73,8 @@ def convert_to_ogg(wav_path):
     config.tts_ffmpeg_path, '-i', wav_path, 
     '-acodec', 'libopus', '-b:a', '128k', '-vbr', 'off', ogg_path, '-y'],
     stdout=subprocess.DEVNULL,
-    stderr=subprocess.STDOUT
+    stderr=subprocess.STDOUT,
+    timeout=60
   )
   with open(ogg_path, 'rb') as f:
     data = f.read()  

@@ -22,7 +22,8 @@ class BaseExtension(metaclass=ABCMeta):
     saved_confg = config.extensions_config.get(self.name, {})
     self.config = ext_config(self.name, **saved_confg)
     if not saved_confg:
-      config.extensions_config[self.name] = self.config.dict()
+      config.extensions_config[self.name] = self.config.dict(exclude={'__name': True})
       # trigger config setter to save changes in file
-      config.extensions_config = config.extensions_config
+      if config.extensions_config[self.name]:
+        config.extensions_config = config.extensions_config
 

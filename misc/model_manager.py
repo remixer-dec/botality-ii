@@ -57,7 +57,7 @@ def get_models():
         'name': x,
         'model': x,
         'size': round(os.path.getsize(os.path.join(GGUF_DIR, x)) / 1024**3,3),
-        'selected': os.path.samefile(os.path.join(GGUF_DIR, x), active_model),
+        'selected': os.path.samefile(os.path.join(GGUF_DIR, x), active_model) if os.path.exists(active_model) else False,
         'path': GGUF_DIR
       } for x in gguf_list]
   return models
