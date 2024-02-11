@@ -99,7 +99,7 @@ class MemoryManager:
     if target.unload is not None:
       target.unload(target.model)
     self.cache[name].model = None
-    logger.info('removed', name, 'from model cache by memory manager due to', reason)
+    logger.info(f'removed {name} from model cache by memory manager due to {reason}')
 
   def unload_by_policy(self, model_name, items, reason):
     if config.mm_unload_order_policy == 'LEAST_USED':

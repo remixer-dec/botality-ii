@@ -29,10 +29,11 @@ def get_models():
   models = {'TTS': {}}
   models['TTS']['SO_VITS_SVC'] = []
   for model in config.tts_so_vits_svc_voices:
-    if os.path.exists(model.get('path', False)):
+    weights_path = os.path.join(model.get('path', ''), model.get("weights", ''))
+    if os.path.isfile(weights_path):
       models['TTS']['SO_VITS_SVC'].append({
         **transfer_kvs(model, ['voice', 'weights', 'author', 'repo', 'path'], []),
-        "size": round(os.path.getsize(os.path.join(model.get('path'), model.get("weights"))) / 1024**3,3)
+        "size": round(os.path.getsize(weights_path) / 1024**3,3)
       })
   models['TTS']['VITS'] = []
   for v in config.tts_voices:
@@ -41,7 +42,7 @@ def get_models():
     else:
       model = {}
     path = os.path.join(model.get('path', config.tts_path), model.get('voice', v) + '.pth')
-    if os.path.exists(path):
+    if os.path.isfile(path):
       models['TTS']['VITS'].append({
         **transfer_kvs(model, ['voice', 'model', 'path', 'author', 'repo'], [v, v, config.tts_path]),
         "size": round(os.path.getsize(path) / 1024**3,3)
