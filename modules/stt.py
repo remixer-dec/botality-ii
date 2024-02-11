@@ -23,7 +23,7 @@ class SpeechToTextModule:
       with self.queue.for_user(message.from_user.id) as available:
         if not available:
           return
-        if command.command == "stt" and ('-h' in str(command.args) or not (message.reply_to_message and message.reply_to_message.voice)):
+        if (command.command == "stt" and ('-h' in str(command.args)) or not (message.reply_to_message and message.reply_to_message.voice)):
           return await message.answer(self.help(dp, bot))
         else:
           error, text = await self.recognize_voice_message(message)

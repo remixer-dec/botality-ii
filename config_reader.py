@@ -78,7 +78,7 @@ class Settings(BaseSettings):
   llm_remote_launch_dir: str
   llm_remote_launch_waittime: int
   llm_remote_model_name: str
-  stt_backend: Literal['whisper', 'silero', 'wav2vec2']
+  stt_backend: Literal['whisper', 'silero', 'wav2vec2', 'whisperS2T_CTranslate2', 'whisperS2T_TensorRT-LLM']
   stt_model_path_or_name: str
   stt_autoreply_mode: Literal['none', 'assistant', 'chat']
   stt_autoreply_voice: str
