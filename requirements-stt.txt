@@ -1,3 +1,4 @@
 git+https://github.com/stlukey/whispercpp.py
+git+https://github.com/shashikg/WhisperS2T.git
 transformers
 numpy>=1.24.4
