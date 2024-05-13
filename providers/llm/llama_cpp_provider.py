@@ -23,6 +23,7 @@ class LlamaCPP(AbstractLLM):
     override = init_config.get('llama_cpp_init', {})
     lora_path = model_paths.get('path_to_llama_cpp_lora', '') 
     lora_path = lora_path if os.path.exists(lora_path) else None
+    self.init_config = init_config
     self.load_model = partial(
       Llama,
       n_ctx=min(init_config.get('context_size', 512), config.llm_lcpp_max_context_size),
@@ -54,7 +55,7 @@ class LlamaCPP(AbstractLLM):
         output = await asyncio.to_thread(
           self.model, 
           prompt=prompt,
-          stop=["</s>"],
+          stop=["</s>", *self.init_config.get('stop_tokens', [])],
           max_tokens=length,
            **model_params
         )

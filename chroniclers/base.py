@@ -20,17 +20,17 @@ class AbstractChronicler(metaclass=ABCMeta):
     pass
   
   @staticmethod
-  def prepare_hook(func):
+  def prepare_hook(func, override_name='custom_input_formatter'):
     def wrapper(self, *args, **kwargs):
-      formatter = getattr(self.chronicler_script, 'custom_input_formatter', func)
+      formatter = getattr(self.chronicler_script, override_name, func)
       return formatter(self, *args, **kwargs)
     return wrapper
 
   @staticmethod
-  def parse_hook(func):
+  def parse_hook(func, override_name='custom_output_parser'):
     def wrapper(self, *args, **kwargs):
       print(args[0])
-      parser = getattr(self.chronicler_script, 'custom_output_parser', func)
+      parser = getattr(self.chronicler_script, override_name, func)
       return parser(self, *args, **kwargs)
     return wrapper
 
@@ -68,6 +68,7 @@ class ConversationChronicler(AbstractChronicler):
     r_username = vars.get('replace_username', False)
     return r_username if r_username and item['author'] != vars['name'] else item['author']
 
+  @lambda f: AbstractChronicler.prepare_hook(f, 'custom_chat_input_formatter')
   def prepare(self, details, fresh=False):
     if fresh:
       self.history[details['chat_id']] = []
@@ -90,6 +91,7 @@ class ConversationChronicler(AbstractChronicler):
     .format(conversation=conversation, **char_vars)
     return dialog
 
+  @lambda f: AbstractChronicler.parse_hook(f, 'custom_chat_output_parser')
   def parse(self, output, chat_id, skip=0):
     output = output.strip()[skip:]
     print(output)

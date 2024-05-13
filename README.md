@@ -4,7 +4,7 @@ This project is an implementation of a modular **telegram bot** based on [aiogra
 -  **Stable Diffusion** (using [stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) API),
 -  **TTS** text-to-speech engine (using [TTS (VITS)](https://github.com/coqui-ai/TTS) and [so-vits-SVC](https://github.com/svc-develop-team/so-vits-svc/tree/4.0)) as well as OS voices.  
 -  **STT** integrated with multiple speech recognition engines, including [whisper.cpp](https://github.com/ggerganov/whisper.cpp)[<sup>1</sup>](https://github.com/stlukey/whispercpp.py), [whisperS2T](https://github.com/shashikg/WhisperS2T), [silero](https://github.com/snakers4/silero-models), [wav2vec2](https://ai.meta.com/blog/wav2vec-20-learning-the-structure-of-speech-from-raw-audio/)  
--  **LLMs** such as [llama](https://github.com/facebookresearch/llama), [gpt-j](https://github.com/kingoflolz/mesh-transformer-jax#gpt-j-6b), [gpt-2](https://huggingface.co/gpt2) with support for assistant mode via instruct-tuned lora models and multimodality via [adapter-model](https://github.com/OpenGVLab/LLaMA-Adapter) 
+-  **LLMs** such as [llama (1-3)](https://github.com/facebookresearch/llama), [gpt-j](https://github.com/kingoflolz/mesh-transformer-jax#gpt-j-6b), [gpt-2](https://huggingface.co/gpt2) with support for assistant mode via instruct-tuned lora models and multimodality via [adapter-model](https://github.com/OpenGVLab/LLaMA-Adapter) 
 - **TTA** experimental text-to-audio support via [audiocraft](https://github.com/facebookresearch/audiocraft)  
 
 Accelerated LLM inference support: [llama.cpp](https://github.com/ggerganov/llama.cpp), [mlc-llm](https://github.com/mlc-ai/mlc-llm) and [llama-mps](https://github.com/remixer-dec/llama-mps/)  
